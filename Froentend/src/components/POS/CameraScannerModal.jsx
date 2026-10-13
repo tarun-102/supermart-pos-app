@@ -59,11 +59,10 @@ export default function CameraScannerModal({ isOpen, onClose, onDetected }) {
                     Html5QrcodeSupportedFormats.UPC_A,
                     Html5QrcodeSupportedFormats.UPC_E,
                     Html5QrcodeSupportedFormats.ITF,
-                    Html5QrcodeSupportedFormats.QR_CODE,
-                    Html5QrcodeSupportedFormats.DATA_MATRIX
+                    Html5QrcodeSupportedFormats.QR_CODE
                 ],
                 experimentalFeatures: {
-                    useBarCodeDetectorIfSupported: true
+                    useBarCodeDetectorIfSupported: false
                 },
                 verbose: false
             });
@@ -81,7 +80,11 @@ export default function CameraScannerModal({ isOpen, onClose, onDetected }) {
             const cameraTarget = specificCameraId ? specificCameraId : { facingMode: 'environment' };
 
             const config = {
-                fps: 24,
+                fps: 12,
+                qrbox: (viewfinderWidth, viewfinderHeight) => ({
+                    width: Math.max(220, Math.floor(viewfinderWidth * 0.88)),
+                    height: Math.max(120, Math.floor(viewfinderHeight * 0.80))
+                }),
                 videoConstraints: {
                     facingMode: { ideal: 'environment' },
                     width: { ideal: 1280 },
@@ -93,7 +96,7 @@ export default function CameraScannerModal({ isOpen, onClose, onDetected }) {
                 await html5QrCode.start(cameraTarget, config, onScanSuccess, onScanFailure);
             } catch (err1) {
                 console.warn('Modal standard start failed, trying minimal...', err1);
-                await html5QrCode.start(cameraTarget, { fps: 15 }, onScanSuccess, onScanFailure);
+                await html5QrCode.start(cameraTarget, { fps: 10, videoConstraints: { facingMode: 'environment' } }, onScanSuccess, onScanFailure);
             }
 
             if (!isMountedRef.current) return;
@@ -106,6 +109,9 @@ export default function CameraScannerModal({ isOpen, onClose, onDetected }) {
                     videoElem.setAttribute('webkit-playsinline', 'true');
                     videoElem.setAttribute('muted', 'true');
                     videoElem.setAttribute('autoplay', 'true');
+                    videoElem.muted = true;
+                    const p = videoElem.play();
+                    if (p !== undefined) p.catch(() => {});
                 }
             } catch (e) {}
 
