@@ -85,7 +85,11 @@ export default function LoginPage({ onLoginSuccess }) {
                 onLoginSuccess(res.user);
             }
         } catch (err) {
-            setLoginError(err.message || 'Login failed.');
+            const rawMsg = err.message || '';
+            const friendlyMsg = rawMsg.toLowerCase().includes('fetch')
+                ? 'Unable to connect to server. Retrying connection to cloud backend...'
+                : (rawMsg || 'Login failed.');
+            setLoginError(friendlyMsg);
         } finally {
             setLoginLoading(false);
         }
