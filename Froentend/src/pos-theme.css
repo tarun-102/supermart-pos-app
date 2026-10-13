@@ -1,0 +1,329 @@
+:root {
+  --dmart-green: #00843D;
+  --dmart-green-hover: #006b31;
+  --dmart-green-light: #e6f4ea;
+  --dmart-yellow: #f59e0b;
+  --dmart-gold: #fbbf24;
+  --dmart-dark: #0f172a;
+  --dmart-slate: #334155;
+  --dmart-light: #f8fafc;
+  --dmart-border: #e2e8f0;
+  --dmart-red: #ef4444;
+  --dmart-blue: #2563eb;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #f1f5f9;
+  color: #1e293b;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Header & Brand */
+.navbar-dmart {
+  background: linear-gradient(135deg, #00843D 0%, #005a28 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(0, 132, 61, 0.25);
+  border-bottom: 2px solid #ffcc00;
+}
+
+.brand-badge {
+  background-color: #ffcc00;
+  color: #005a28;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+
+/* Nav Pills */
+.nav-pills-pos .nav-link {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 8px 16px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-pills-pos .nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: white;
+}
+
+.nav-pills-pos .nav-link.active {
+  background-color: white;
+  color: #00843D;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+/* POS Barcode Scanner Input Box */
+.barcode-scan-box {
+  background: white;
+  border: 2px solid #00843D;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 132, 61, 0.1);
+  transition: all 0.2s;
+}
+
+.barcode-scan-box:focus-within {
+  border-color: #006b31;
+  box-shadow: 0 0 0 4px rgba(0, 132, 61, 0.2);
+}
+
+.scan-pulse {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #22c55e;
+  box-shadow: 0 0 0 rgba(34, 197, 94, 0.4);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+
+/* POS Cart Table */
+.pos-table-card {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid var(--dmart-border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.pos-table th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.pos-table td {
+  vertical-align: middle;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+}
+
+.cart-item-row:hover {
+  background-color: #f1f9f4;
+}
+
+.price-strike {
+  text-decoration: line-through;
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+.price-sp {
+  color: #00843D;
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.savings-pill {
+  background-color: #dcfce7;
+  color: #15803d;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+/* POS Summary Card */
+.pos-summary-card {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #cbd5e1;
+  border-radius: 14px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.grand-total-banner {
+  background: linear-gradient(135deg, #00843D 0%, #00602c 100%);
+  color: white;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0, 132, 61, 0.3);
+}
+
+/* Thermal Receipt Styling */
+.thermal-receipt {
+  width: 320px;
+  margin: 0 auto;
+  background: #ffffff;
+  padding: 16px;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 12px;
+  color: #000;
+  border: 1px dashed #cbd5e1;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  line-height: 1.4;
+}
+
+.thermal-receipt-divider {
+  border-top: 1px dashed #475569;
+  margin: 8px 0;
+}
+
+.border-dashed {
+  border-style: dashed !important;
+}
+
+.thermal-receipt-header {
+  text-align: center;
+}
+
+.thermal-receipt-barcode {
+  font-family: 'Libre Barcode 128', monospace;
+  font-size: 40px;
+  text-align: center;
+  line-height: 1;
+  margin: 10px 0 2px 0;
+}
+
+/* Print Only Styles */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-area, .print-area * {
+    visibility: visible;
+  }
+  .print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 10px;
+    box-shadow: none;
+    border: none;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Scanner Viewfinder Box - Compact Single Viewfinder & Zero Double-Screen */
+.scanner-viewport-box {
+  position: relative;
+  width: 100%;
+  height: 145px;
+  min-height: 145px;
+  max-height: 145px;
+  background-color: #0b0f19;
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scanner-viewport-box video {
+  width: 100% !important;
+  height: 145px !important;
+  max-height: 145px !important;
+  object-fit: cover !important;
+  border-radius: 8px;
+  display: block;
+}
+
+/* Hard guarantee: If a second video is ever injected by browser, hide it immediately */
+.scanner-viewport-box video ~ video,
+.scanner-viewport-box video:not(:first-of-type),
+.scanner-viewport-box div:not(:first-child) video,
+.scanner-viewport-box #camera-barcode-viewfinder > div ~ div,
+.scanner-viewport-box #camera-barcode-viewfinder-admin > div ~ div {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  width: 0 !important;
+  opacity: 0 !important;
+  position: absolute !important;
+}
+
+.scanner-viewport-box canvas {
+  display: none !important;
+}
+
+/* Compact laser line animation */
+.scanner-laser-line {
+  position: absolute;
+  top: 50%;
+  left: 6%;
+  right: 6%;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 1) 50%, rgba(239, 68, 68, 0.1) 100%);
+  box-shadow: 0 0 8px #ef4444;
+  animation: laserSweepCompact 1.8s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 10;
+}
+
+@keyframes laserSweepCompact {
+  0% { transform: translateY(-42px); opacity: 0.85; }
+  100% { transform: translateY(42px); opacity: 0.85; }
+}
+
+/* Mobile-First App Styling for Smartphone Displays */
+@media (max-width: 768px) {
+  body {
+    padding-bottom: 75px; /* Leave room for sticky bottom checkout bar */
+  }
+
+  .pos-mobile-full {
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+  }
+
+  .pos-table-card {
+    border-radius: 8px;
+  }
+
+  .mobile-pos-bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.12);
+    padding: 10px 14px;
+    z-index: 1040;
+    border-top: 2px solid #00843D;
+  }
+}
+
+
+
