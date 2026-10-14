@@ -199,14 +199,14 @@ export default function LoginPage({ onLoginSuccess }) {
 
     return (
         <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light py-4 px-2">
-            <div className="card border-0 shadow-lg" style={{ maxWidth: '580px', width: '100%', borderRadius: '20px', overflow: 'hidden' }}>
+            <div className="card border-0 shadow-sm" style={{ maxWidth: '580px', width: '100%', borderRadius: '16px', overflow: 'hidden' }}>
                 {/* Header with Multi-Store Branding */}
-                <div className="text-white p-4 text-center" style={{ background: 'linear-gradient(135deg, #064e3b 0%, #047857 55%, #059669 100%)' }}>
+                <div className="text-white p-4 text-center" style={{ background: '#0f172a', borderBottom: '2px solid #2563eb' }}>
                     <div className="d-flex justify-content-center align-items-center gap-2 mb-2">
                         <span className="fs-1">🏬</span>
                         <div className="text-start">
                             <h3 className="fw-bolder mb-0 tracking-wide">ShiftFlow POS</h3>
-                            <span className="badge bg-warning text-dark fw-bold text-uppercase" style={{ fontSize: '0.75rem' }}>
+                            <span className="badge bg-primary text-white fw-bold text-uppercase" style={{ fontSize: '0.75rem' }}>
                                 Multi-Store Supermarket &amp; Retail Cloud ERP
                             </span>
                         </div>
@@ -221,7 +221,7 @@ export default function LoginPage({ onLoginSuccess }) {
                     <ul className="nav nav-tabs nav-fill border-0">
                         <li className="nav-item">
                             <button
-                                className={`nav-link py-3 fw-bold border-0 ${activeTab === 'login' ? 'active text-success border-bottom border-success border-3' : 'text-muted'}`}
+                                className={`nav-link py-3 fw-bold border-0 ${activeTab === 'login' ? 'active text-primary border-bottom border-primary border-3' : 'text-muted'}`}
                                 onClick={() => { setActiveTab('login'); setLoginError(null); }}
                             >
                                 <i className="bi bi-box-arrow-in-right me-1"></i> Sign In
@@ -229,7 +229,7 @@ export default function LoginPage({ onLoginSuccess }) {
                         </li>
                         <li className="nav-item">
                             <button
-                                className={`nav-link py-3 fw-bold border-0 ${activeTab === 'register_store' ? 'active text-success border-bottom border-success border-3' : 'text-muted'}`}
+                                className={`nav-link py-3 fw-bold border-0 ${activeTab === 'register_store' ? 'active text-primary border-bottom border-primary border-3' : 'text-muted'}`}
                                 onClick={() => { setActiveTab('register_store'); setStoreRegError(null); }}
                             >
                                 <i className="bi bi-shop me-1"></i> Register Shop
@@ -237,7 +237,7 @@ export default function LoginPage({ onLoginSuccess }) {
                         </li>
                         <li className="nav-item">
                             <button
-                                className={`nav-link py-3 fw-bold border-0 ${activeTab === 'register_staff' ? 'active text-success border-bottom border-success border-3' : 'text-muted'}`}
+                                className={`nav-link py-3 fw-bold border-0 ${activeTab === 'register_staff' ? 'active text-primary border-bottom border-primary border-3' : 'text-muted'}`}
                                 onClick={() => { setActiveTab('register_staff'); setRegError(null); }}
                             >
                                 <i className="bi bi-person-plus me-1"></i> Staff Join
@@ -306,7 +306,7 @@ export default function LoginPage({ onLoginSuccess }) {
 
                                 <button
                                     type="submit"
-                                    className="btn btn-success btn-lg w-100 fw-bold py-3 shadow d-flex align-items-center justify-content-center gap-2 mb-3"
+                                    className="btn btn-primary btn-lg w-100 fw-bold py-3 shadow-sm d-flex align-items-center justify-content-center gap-2 mb-3"
                                     disabled={loginLoading}
                                 >
                                     {loginLoading ? (
@@ -594,7 +594,7 @@ export default function LoginPage({ onLoginSuccess }) {
 
                                 <button
                                     type="submit"
-                                    className="btn btn-success btn-lg w-100 fw-bold py-3 shadow d-flex align-items-center justify-content-center gap-2"
+                                    className="btn btn-primary btn-lg w-100 fw-bold py-3 shadow-sm d-flex align-items-center justify-content-center gap-2"
                                     disabled={storeRegLoading}
                                 >
                                     {storeRegLoading ? (

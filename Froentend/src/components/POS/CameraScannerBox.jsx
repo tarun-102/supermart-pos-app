@@ -542,7 +542,7 @@ export default function CameraScannerBox({
                                     </p>
                                     <button
                                         type="button"
-                                        className="btn btn-success btn-sm fw-bold px-3 py-1 shadow"
+                                        className="btn btn-primary btn-sm fw-bold px-3 py-1 shadow-sm"
                                         onClick={() => fileInputRef.current?.click()}
                                     >
                                         <i className="bi bi-camera-fill me-1"></i> Snap Barcode Now
@@ -553,7 +553,7 @@ export default function CameraScannerBox({
                             {/* Loading state indicator */}
                             {isStarting && !scannerError && (
                                 <div className="position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-75 d-flex flex-column justify-content-center align-items-center text-white" style={{ zIndex: 15 }}>
-                                    <div className="spinner-border spinner-border-sm text-success mb-1" role="status"></div>
+                                    <div className="spinner-border spinner-border-sm text-primary mb-1" role="status"></div>
                                     <span className="small" style={{ fontSize: '0.75rem' }}>Opening high-resolution lens...</span>
                                 </div>
                             )}
@@ -568,7 +568,7 @@ export default function CameraScannerBox({
                                 <div className="btn-group btn-group-sm" role="group">
                                     <button
                                         type="button"
-                                        className={`btn btn-sm px-2 py-1 fw-bold ${zoomLevel === 1 ? 'btn-success text-white' : 'btn-outline-secondary'}`}
+                                        className={`btn btn-sm px-2 py-1 fw-bold ${zoomLevel === 1 ? 'btn-primary text-white' : 'btn-outline-secondary'}`}
                                         style={{ fontSize: '0.72rem' }}
                                         onClick={() => handleApplyZoom(1)}
                                     >
@@ -576,7 +576,7 @@ export default function CameraScannerBox({
                                     </button>
                                     <button
                                         type="button"
-                                        className={`btn btn-sm px-2 py-1 fw-bold ${zoomLevel === 2 ? 'btn-success text-white' : 'btn-outline-secondary'}`}
+                                        className={`btn btn-sm px-2 py-1 fw-bold ${zoomLevel === 2 ? 'btn-primary text-white' : 'btn-outline-secondary'}`}
                                         style={{ fontSize: '0.72rem' }}
                                         onClick={() => handleApplyZoom(2)}
                                         title="2x Hardware Distance Zoom"
@@ -585,7 +585,7 @@ export default function CameraScannerBox({
                                     </button>
                                     <button
                                         type="button"
-                                        className={`btn btn-sm px-2 py-1 fw-bold ${zoomLevel === 3 ? 'btn-success text-white' : 'btn-outline-secondary'}`}
+                                        className={`btn btn-sm px-2 py-1 fw-bold ${zoomLevel === 3 ? 'btn-primary text-white' : 'btn-outline-secondary'}`}
                                         style={{ fontSize: '0.72rem' }}
                                         onClick={() => handleApplyZoom(3)}
                                     >
@@ -610,7 +610,7 @@ export default function CameraScannerBox({
 
                                 <button
                                     type="button"
-                                    className="btn btn-outline-success btn-sm fw-bold px-2 py-1 shadow-sm d-flex align-items-center gap-1"
+                                    className="btn btn-outline-primary btn-sm fw-bold px-2 py-1 shadow-sm d-flex align-items-center gap-1"
                                     style={{ fontSize: '0.72rem' }}
                                     onClick={() => fileInputRef.current?.click()}
                                     title="Open phone camera to snap barcode directly"

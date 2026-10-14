@@ -1,10 +1,15 @@
 import React from 'react';
+import { printThermalReceipt, shareBillOnWhatsApp } from '../../utils/printHelper';
 
 export default function ReceiptModal({ isOpen, onClose, bill, storeConfig }) {
     if (!isOpen || !bill) return null;
 
     const handlePrint = () => {
-        window.print();
+        printThermalReceipt(bill, storeConfig);
+    };
+
+    const handleWhatsApp = () => {
+        shareBillOnWhatsApp(bill, storeConfig);
     };
 
     const dateFormatted = new Date(bill.createdAt || Date.now()).toLocaleString('en-IN', {
@@ -132,7 +137,19 @@ export default function ReceiptModal({ isOpen, onClose, bill, storeConfig }) {
                                     <span>-₹{(bill.totalSavings || 0).toFixed(2)}</span>
                                 </div>
                                 <div className="d-flex justify-content-between small text-muted">
-                                    <span>Estimated GST (CGST+SGST):</span>
+                                    <span>Taxable Net Turnover:</span>
+                                    <span>₹{(bill.taxableAmount || (bill.netPayable - (bill.taxAmount || 0))).toFixed(2)}</span>
+                                </div>
+                                <div className="d-flex justify-content-between small text-muted">
+                                    <span>Central GST (CGST):</span>
+                                    <span>₹{((bill.taxAmount || 0) / 2).toFixed(2)}</span>
+                                </div>
+                                <div className="d-flex justify-content-between small text-muted">
+                                    <span>State GST (SGST):</span>
+                                    <span>₹{((bill.taxAmount || 0) / 2).toFixed(2)}</span>
+                                </div>
+                                <div className="d-flex justify-content-between small text-dark fw-bold">
+                                    <span>Total GST Tax:</span>
                                     <span>₹{(bill.taxAmount || 0).toFixed(2)}</span>
                                 </div>
 
@@ -211,11 +228,20 @@ export default function ReceiptModal({ isOpen, onClose, bill, storeConfig }) {
                     </div>
 
                     {/* Modal Footer (No Print) */}
-                    <div className="modal-footer bg-white border-top p-3 d-flex justify-content-between no-print">
+                    <div className="modal-footer bg-white border-top p-3 d-flex flex-wrap justify-content-between gap-2 no-print">
                         <button type="button" className="btn btn-outline-secondary px-3" onClick={onClose}>
                             Close (Esc)
                         </button>
-                        <div className="d-flex gap-2">
+                        <div className="d-flex gap-2 flex-wrap">
+                            <button
+                                type="button"
+                                className="btn btn-outline-success px-3 fw-bold d-flex align-items-center gap-2"
+                                onClick={handleWhatsApp}
+                                title="Send e-bill directly to customer's WhatsApp"
+                            >
+                                <i className="bi bi-whatsapp fs-6 text-success"></i>
+                                <span>WhatsApp Bill</span>
+                            </button>
                             <button
                                 type="button"
                                 className="btn btn-primary px-4 fw-bold d-flex align-items-center gap-2 shadow-sm"
@@ -226,7 +252,7 @@ export default function ReceiptModal({ isOpen, onClose, bill, storeConfig }) {
                             </button>
                             <button
                                 type="button"
-                                className="btn btn-success px-4 fw-bold"
+                                className="btn btn-dark px-4 fw-bold"
                                 onClick={onClose}
                             >
                                 <i className="bi bi-cart-plus me-1"></i>

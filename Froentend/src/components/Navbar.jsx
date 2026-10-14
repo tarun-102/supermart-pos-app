@@ -31,20 +31,20 @@ export default function Navbar({
         <header className="navbar-dmart sticky-top px-2 px-md-3 py-2">
             <div className="container-fluid p-0">
                 {/* Top Row: Brand & Quick Action Controls */}
-                <div className="d-flex align-items-center justify-content-between gap-2 pb-2 pb-md-0 border-bottom border-white border-opacity-10 mb-md-0 border-md-0">
+                <div className="d-flex align-items-center justify-content-between gap-1 gap-sm-2 pb-2 pb-md-0 border-bottom border-white border-opacity-10 mb-md-0 border-md-0">
                     {/* Brand & Store Info */}
-                    <div className="d-flex align-items-center gap-2 text-truncate">
-                        <span className="fs-3">🏬</span>
+                    <div className="d-flex align-items-center gap-1 gap-sm-2 text-truncate" style={{ maxWidth: '62%' }}>
+                        <span className="fs-4 fs-sm-3 flex-shrink-0">🏬</span>
                         <div className="text-truncate">
-                            <div className="d-flex align-items-center gap-2">
-                                <span className="fw-bolder fs-5 text-white text-truncate" style={{ maxWidth: '180px' }}>
+                            <div className="d-flex align-items-center gap-1 text-truncate">
+                                <span className="fw-bolder fs-6 fs-sm-5 text-white text-truncate">
                                     {storeConfig?.storeName || 'SuperStore POS'}
                                 </span>
                                 <span className="brand-badge text-uppercase d-none d-sm-inline">
                                     {storeConfig?.storeType || 'POS System'}
                                 </span>
-                                <span className="badge bg-warning text-dark fw-bold px-2 py-0 d-inline-block d-md-none" style={{ fontSize: '0.68rem' }}>
-                                    {currentCounter}
+                                <span className="badge bg-warning text-dark fw-bold px-1 py-0 d-inline-block d-md-none flex-shrink-0" style={{ fontSize: '0.65rem' }}>
+                                    {currentCounter ? currentCounter.split(' ')[0] : 'Counter-01'}
                                 </span>
                             </div>
                             <small className="text-white-50 d-none d-sm-block text-truncate" style={{ fontSize: '0.7rem', maxWidth: '280px' }}>

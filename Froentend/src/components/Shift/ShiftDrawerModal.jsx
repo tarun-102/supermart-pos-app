@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiFetch } from '../../utils/api';
+import { printHtmlViaIframe } from '../../utils/printHelper';
 
 export default function ShiftDrawerModal({
     isOpen,
@@ -203,7 +204,57 @@ export default function ShiftDrawerModal({
     };
 
     const handlePrintVoucher = () => {
-        window.print();
+        const v = submittedVoucher || activeShift;
+        if (!v) {
+            window.print();
+            return;
+        }
+        const html = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8">
+                <title>Shift Voucher - ${v.shiftNumber || 'Shift'}</title>
+                <style>
+                    @page { size: 80mm auto; margin: 0; }
+                    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace; color: #000; }
+                    body { width: 76mm; margin: 0 auto; padding: 5mm 3mm; font-size: 11px; line-height: 1.35; }
+                    .text-center { text-align: center; }
+                    .flex-between { display: flex; justify-content: space-between; }
+                    .divider { border-bottom: 1px dashed #000; margin: 6px 0; }
+                    .double-divider { border-bottom: 2px solid #000; margin: 6px 0; }
+                </style>
+            </head>
+            <body>
+                <div class="text-center">
+                    <div style="font-size: 16px; font-weight: bold;">${storeConfig?.storeName?.toUpperCase() || 'SUPERSTORE POS'}</div>
+                    <div style="font-size: 11px; font-weight: bold;">SHIFT SETTLEMENT &amp; HANDOVER VOUCHER</div>
+                    <div style="font-size: 9px;">${new Date().toLocaleString('en-IN')}</div>
+                </div>
+                <div class="divider"></div>
+                <div class="flex-between"><span>Shift Number:</span><span><strong>${v.shiftNumber || 'Current'}</strong></span></div>
+                <div class="flex-between"><span>Cashier:</span><span>${v.cashierName || currentUser.name} (${v.counterNo || counterNo})</span></div>
+                ${v.handoverToOfficerName ? `<div class="flex-between"><span>Handover Officer:</span><span>${v.handoverToOfficerName}</span></div>` : ''}
+                <div class="divider"></div>
+                <div class="flex-between"><span>Opening Float:</span><span>₹${v.openingFloat || openingFloat}</span></div>
+                <div class="flex-between"><span>Total Bills:</span><span>${v.billsCount || 0} bills</span></div>
+                <div class="flex-between"><span>Net Sales:</span><span>₹${v.netSales || 0}</span></div>
+                <div class="flex-between"><span>• Cash:</span><span>₹${v.paymentSummary?.cash || 0}</span></div>
+                <div class="flex-between"><span>• UPI:</span><span>₹${v.paymentSummary?.upi || 0}</span></div>
+                <div class="flex-between"><span>• Card:</span><span>₹${v.paymentSummary?.card || 0}</span></div>
+                <div class="divider"></div>
+                <div class="flex-between"><span>Expected Cash:</span><span>₹${v.expectedCashInDrawer || 0}</span></div>
+                ${v.physicalCashHandedOver !== undefined ? `<div class="flex-between"><span>Physical Handed Over:</span><span>₹${v.physicalCashHandedOver}</span></div>` : ''}
+                ${v.cashDifference !== undefined ? `<div class="flex-between" style="font-weight: bold;"><span>Cash Variance:</span><span>₹${v.cashDifference} (${v.tallyStatus || 'PENDING'})</span></div>` : ''}
+                <div class="double-divider"></div>
+                <div class="flex-between text-center" style="margin-top: 25px;">
+                    <div><div style="border-top: 1px solid #000; width: 85px; margin-bottom: 3px;"></div>Cashier Sign</div>
+                    <div><div style="border-top: 1px solid #000; width: 85px; margin-bottom: 3px;"></div>Officer Sign</div>
+                </div>
+            </body>
+            </html>
+        `;
+        printHtmlViaIframe(html, `ShiftVoucher_${v.shiftNumber || Date.now()}`);
     };
 
     const handleOfficerSelectChange = (e) => {

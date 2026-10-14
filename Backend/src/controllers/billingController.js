@@ -39,6 +39,8 @@ const checkout = async (req, res) => {
         let grossMrpTotal = 0;
         let totalSavings = 0;
         let taxAmount = 0;
+        let taxableAmount = 0;
+        const gstBreakdown = {};
 
         const processedItems = items.map(item => {
             const qty = Number(item.quantity) || 1;
@@ -49,11 +51,25 @@ const checkout = async (req, res) => {
             const discount = Math.max(0, itemGross - itemTotal);
             const taxPct = Number(item.taxPercent) || 0;
             const itemTax = (itemTotal * taxPct) / (100 + taxPct); // Tax included in MRP/Selling Price
+            const itemTaxable = itemTotal - itemTax;
+            const itemCgst = itemTax / 2;
+            const itemSgst = itemTax / 2;
 
             grossMrpTotal += itemGross;
             subtotal += itemTotal;
             totalSavings += discount;
             taxAmount += itemTax;
+            taxableAmount += itemTaxable;
+
+            // Group by GST rate slab
+            const slabKey = `${taxPct}%`;
+            if (!gstBreakdown[slabKey]) {
+                gstBreakdown[slabKey] = { rate: taxPct, taxable: 0, cgst: 0, sgst: 0, totalTax: 0 };
+            }
+            gstBreakdown[slabKey].taxable = Number((gstBreakdown[slabKey].taxable + itemTaxable).toFixed(2));
+            gstBreakdown[slabKey].cgst = Number((gstBreakdown[slabKey].cgst + itemCgst).toFixed(2));
+            gstBreakdown[slabKey].sgst = Number((gstBreakdown[slabKey].sgst + itemSgst).toFixed(2));
+            gstBreakdown[slabKey].totalTax = Number((gstBreakdown[slabKey].totalTax + itemTax).toFixed(2));
 
             // Deduct stock in inventory ONLY for this specific store
             const prod = (store.products || []).find(
@@ -74,7 +90,10 @@ const checkout = async (req, res) => {
                 sellingPrice: sp,
                 discount: Number(discount.toFixed(2)),
                 total: Number(itemTotal.toFixed(2)),
-                taxPercent: taxPct
+                taxPercent: taxPct,
+                taxableValue: Number(itemTaxable.toFixed(2)),
+                cgstAmount: Number(itemCgst.toFixed(2)),
+                sgstAmount: Number(itemSgst.toFixed(2))
             };
         });
 
@@ -203,7 +222,11 @@ const checkout = async (req, res) => {
             grossMrpTotal: Number(grossMrpTotal.toFixed(2)),
             subtotal: Number(subtotal.toFixed(2)),
             totalSavings: Number(totalSavings.toFixed(2)),
+            taxableAmount: Number(taxableAmount.toFixed(2)),
+            cgstAmount: Number((taxAmount / 2).toFixed(2)),
+            sgstAmount: Number((taxAmount / 2).toFixed(2)),
             taxAmount: Number(taxAmount.toFixed(2)),
+            gstBreakdown: gstBreakdown,
             netPayable: netPayable,
             paymentMethod,
             splitBreakdown: finalSplit,

@@ -122,7 +122,7 @@ export default function App() {
   const currentCounter = activeShift?.counterNo || currentUser.counterAssigned || 'Counter-01';
 
   return (
-    <div className="min-vh-100 d-flex flex-column bg-light">
+    <div className="min-vh-100 d-flex flex-column bg-light w-100" style={{ maxWidth: '100vw', overflowX: 'hidden' }}>
       {/* Universal Store Navigation Bar */}
       <Navbar
         activeTab={activeTab}
@@ -139,7 +139,7 @@ export default function App() {
       />
 
       {/* Main Content Area */}
-      <main className="flex-grow-1">
+      <main className="flex-grow-1 w-100" style={{ maxWidth: '100vw', overflowX: 'hidden' }}>
         {activeTab === 'pos' && (
           <PosBilling
             currentUser={currentUser}
@@ -174,7 +174,7 @@ export default function App() {
       <footer className="bg-white border-top py-2 px-3 no-print d-none d-md-block">
         <div className="container-fluid d-flex flex-wrap justify-content-between align-items-center gap-2 small text-muted">
           <div className="d-flex align-items-center gap-3">
-            <span className="fw-bold text-success">
+            <span className="fw-bold text-primary">
               <i className="bi bi-shop me-1"></i> {storeConfig?.storeName || 'SuperStore POS'}
             </span>
             <span className="d-none d-md-inline">|</span>

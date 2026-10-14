@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiFetch } from '../../utils/api';
 import ReceiptModal from '../POS/ReceiptModal';
+import { printSalesReport, printThermalReceipt, shareBillOnWhatsApp } from '../../utils/printHelper';
 
 export default function BillsHistory({ currentUser, activeShift, onOpenShiftModal }) {
     const isCashier = currentUser?.role === 'cashier';
@@ -10,6 +11,20 @@ export default function BillsHistory({ currentUser, activeShift, onOpenShiftModa
     const [search, setSearch] = useState('');
     const [paymentFilter, setPaymentFilter] = useState('ALL');
     const [selectedBill, setSelectedBill] = useState(null);
+    const [storeConfig, setStoreConfig] = useState(null);
+
+    useEffect(() => {
+        loadStoreConfig();
+    }, []);
+
+    const loadStoreConfig = async () => {
+        try {
+            const res = await apiFetch('/store/config');
+            if (res.config) setStoreConfig(res.config);
+        } catch (e) {
+            console.warn('Could not load store config:', e);
+        }
+    };
 
     useEffect(() => {
         loadBills();
@@ -47,9 +62,18 @@ export default function BillsHistory({ currentUser, activeShift, onOpenShiftModa
         loadBills();
     };
 
-    // Quick stats
+    // Quick stats & GST counts
     const totalSalesSum = bills.reduce((s, b) => s + (Number(b.netPayable) || 0), 0);
     const totalSavingsGiven = bills.reduce((s, b) => s + (Number(b.totalSavings) || 0), 0);
+    const totalTaxCollected = bills.reduce((s, b) => s + (Number(b.taxAmount) || 0), 0);
+    const totalTaxableSum = totalSalesSum - totalTaxCollected;
+
+    const handlePrintReport = () => {
+        printSalesReport(bills, storeConfig, {
+            scope: scopeFilter === 'CURRENT_SHIFT' ? 'Current Shift Invoices' : 'All Invoices',
+            payment: paymentFilter
+        });
+    };
 
     return (
         <div className="container-fluid py-4 px-3">
@@ -58,13 +82,22 @@ export default function BillsHistory({ currentUser, activeShift, onOpenShiftModa
                 <div>
                     <div className="d-flex align-items-center gap-2">
                         <span className="fs-3">📑</span>
-                        <h4 className="fw-bolder mb-0 text-dark">Customer Invoices &amp; Billing History</h4>
+                        <h4 className="fw-bolder mb-0 text-dark">Customer Invoices &amp; GST Sales Register</h4>
                     </div>
                     <p className="text-muted small mb-0">
-                        View past customer transactions, inspect split payment breakdowns, and re-print receipts.
+                        View customer transactions, inspect GST (CGST+SGST) tax breakdown, print official reports &amp; receipts.
                     </p>
                 </div>
                 <div className="d-flex gap-2 align-items-center flex-wrap">
+                    <button
+                        className="btn btn-primary btn-sm fw-bold d-flex align-items-center gap-2 shadow-sm"
+                        onClick={handlePrintReport}
+                        title="Print official GST tax report (never blank)"
+                    >
+                        <i className="bi bi-printer-fill fs-6"></i>
+                        <span>Print GST Sales Report</span>
+                    </button>
+
                     <div className="btn-group btn-group-sm" role="group">
                         <button
                             type="button"
@@ -83,34 +116,47 @@ export default function BillsHistory({ currentUser, activeShift, onOpenShiftModa
                         </button>
                     </div>
 
-                    <button className="btn btn-outline-success btn-sm fw-bold" onClick={loadBills}>
+                    <button className="btn btn-outline-secondary btn-sm fw-bold" onClick={loadBills}>
                         <i className="bi bi-arrow-clockwise me-1"></i> Refresh
                     </button>
                 </div>
             </div>
 
-            {/* Quick Metrics */}
+            {/* Quick Metrics & GST Tax Counters */}
             <div className="row g-3 mb-4">
-                <div className="col-md-4">
-                    <div className="card border-0 shadow-sm p-3 rounded-3 bg-white border-start border-success border-4">
-                        <small className="text-muted fw-bold text-uppercase">
-                            {scopeFilter === 'CURRENT_SHIFT' ? 'Current Shift Invoiced' : 'Total Invoiced Amount'}
+                <div className="col-md-3 col-6">
+                    <div className="card border-0 shadow-sm p-3 rounded-3 bg-white border-start border-primary border-4 h-100">
+                        <small className="text-muted fw-bold text-uppercase" style={{ fontSize: '0.72rem' }}>
+                            {scopeFilter === 'CURRENT_SHIFT' ? 'Shift Gross Sales' : 'Total Gross Turnover'}
                         </small>
-                        <div className="fs-3 fw-bold font-mono text-success">₹{totalSalesSum.toLocaleString('en-IN')}</div>
+                        <div className="fs-4 fw-bold font-mono text-primary mt-1">₹{totalSalesSum.toLocaleString('en-IN')}</div>
+                        <small className="text-muted" style={{ fontSize: '0.75rem' }}>{bills.length} Invoices Issued</small>
                     </div>
                 </div>
-                <div className="col-md-4">
-                    <div className="card border-0 shadow-sm p-3 rounded-3 bg-white border-start border-warning border-4">
-                        <small className="text-muted fw-bold text-uppercase">Total Savings Delivered</small>
-                        <div className="fs-3 fw-bold font-mono text-warning">₹{totalSavingsGiven.toFixed(2)}</div>
+
+                <div className="col-md-3 col-6">
+                    <div className="card border-0 shadow-sm p-3 rounded-3 bg-white border-start border-secondary border-4 h-100">
+                        <small className="text-muted fw-bold text-uppercase" style={{ fontSize: '0.72rem' }}>Net Taxable Turnover</small>
+                        <div className="fs-4 fw-bold font-mono text-dark mt-1">₹{totalTaxableSum.toFixed(2)}</div>
+                        <small className="text-muted" style={{ fontSize: '0.75rem' }}>Excl. all GST taxes</small>
                     </div>
                 </div>
-                <div className="col-md-4">
-                    <div className="card border-0 shadow-sm p-3 rounded-3 bg-white border-start border-primary border-4">
-                        <small className="text-muted fw-bold text-uppercase">
-                            {scopeFilter === 'CURRENT_SHIFT' ? 'Current Shift Bills' : 'Total Bills Issued'}
+
+                <div className="col-md-3 col-6">
+                    <div className="card border-0 shadow-sm p-3 rounded-3 bg-white border-start border-success border-4 h-100">
+                        <small className="text-muted fw-bold text-uppercase" style={{ fontSize: '0.72rem' }}>GST Tax Collected</small>
+                        <div className="fs-4 fw-bold font-mono text-success mt-1">₹{totalTaxCollected.toFixed(2)}</div>
+                        <small className="text-success fw-semibold" style={{ fontSize: '0.7rem' }}>
+                            CGST: ₹{(totalTaxCollected / 2).toFixed(2)} | SGST: ₹{(totalTaxCollected / 2).toFixed(2)}
                         </small>
-                        <div className="fs-3 fw-bold font-mono text-dark">{bills.length} Bills</div>
+                    </div>
+                </div>
+
+                <div className="col-md-3 col-6">
+                    <div className="card border-0 shadow-sm p-3 rounded-3 bg-white border-start border-warning border-4 h-100">
+                        <small className="text-muted fw-bold text-uppercase" style={{ fontSize: '0.72rem' }}>Customer Savings Given</small>
+                        <div className="fs-4 fw-bold font-mono text-warning mt-1">₹{totalSavingsGiven.toFixed(2)}</div>
+                        <small className="text-muted" style={{ fontSize: '0.75rem' }}>Discounts Delivered</small>
                     </div>
                 </div>
             </div>
@@ -129,16 +175,16 @@ export default function BillsHistory({ currentUser, activeShift, onOpenShiftModa
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                 />
-                                <button type="submit" className="btn btn-outline-success">Search</button>
+                                <button type="submit" className="btn btn-outline-primary">Search</button>
                             </div>
                         </form>
                     </div>
 
                     <div className="col-md-6">
-                        <div className="d-flex align-items-center justify-content-md-end gap-2">
+                        <div className="d-flex align-items-center justify-content-start justify-content-md-end gap-2 flex-wrap">
                             <label className="small text-muted fw-bold text-nowrap mb-0">Payment Method:</label>
                             <select
-                                className="form-select form-select-sm fw-semibold w-auto"
+                                className="form-select form-select-sm fw-semibold w-auto flex-grow-1 flex-md-grow-0"
                                 value={paymentFilter}
                                 onChange={(e) => setPaymentFilter(e.target.value)}
                             >
@@ -163,7 +209,8 @@ export default function BillsHistory({ currentUser, activeShift, onOpenShiftModa
                                 <th>Counter &amp; Cashier</th>
                                 <th>Customer Details</th>
                                 <th className="text-center">Items</th>
-                                <th className="text-end">Savings (₹)</th>
+                                <th className="text-end">Taxable (₹)</th>
+                                <th className="text-end">GST Tax (₹)</th>
                                 <th className="text-end">Net Amount</th>
                                 <th className="text-center">Payment Mode</th>
                                 <th className="text-center">Actions</th>
@@ -172,14 +219,14 @@ export default function BillsHistory({ currentUser, activeShift, onOpenShiftModa
                         <tbody>
                             {loading ? (
                                 <tr>
-                                    <td colSpan="8" className="text-center py-5">
+                                    <td colSpan="9" className="text-center py-5">
                                         <div className="spinner-border text-success"></div>
                                         <div className="mt-2 text-muted">Loading invoices...</div>
                                     </td>
                                 </tr>
                             ) : bills.length === 0 ? (
                                 <tr>
-                                    <td colSpan="8" className="text-center py-5 text-muted">
+                                    <td colSpan="9" className="text-center py-5 text-muted">
                                         <i className="bi bi-receipt display-4 opacity-50"></i>
                                         <div className="mt-2 fw-semibold">
                                             {scopeFilter === 'CURRENT_SHIFT' ? (
@@ -242,9 +289,14 @@ export default function BillsHistory({ currentUser, activeShift, onOpenShiftModa
                                             </span>
                                         </td>
 
-                                        {/* Savings */}
-                                        <td className="text-end font-mono text-success fw-bold">
-                                            ₹{(b.totalSavings || 0).toFixed(2)}
+                                        {/* Taxable */}
+                                        <td className="text-end font-mono text-muted">
+                                            ₹{(Number(b.taxableAmount) || (Number(b.netPayable) - Number(b.taxAmount || 0))).toFixed(2)}
+                                        </td>
+
+                                        {/* GST Tax */}
+                                        <td className="text-end font-mono text-success fw-semibold">
+                                            ₹{Number(b.taxAmount || 0).toFixed(2)}
                                         </td>
 
                                         {/* Net Amount */}
@@ -275,13 +327,30 @@ export default function BillsHistory({ currentUser, activeShift, onOpenShiftModa
 
                                         {/* Actions */}
                                         <td className="text-center">
-                                            <button
-                                                className="btn btn-sm btn-outline-success fw-semibold d-flex align-items-center gap-1 mx-auto"
-                                                onClick={() => setSelectedBill(b)}
-                                            >
-                                                <i className="bi bi-printer"></i>
-                                                <span>Receipt</span>
-                                            </button>
+                                            <div className="d-flex align-items-center justify-content-center gap-1">
+                                                <button
+                                                    className="btn btn-sm btn-outline-primary fw-semibold d-flex align-items-center gap-1"
+                                                    onClick={() => setSelectedBill(b)}
+                                                    title="View detailed tax invoice"
+                                                >
+                                                    <i className="bi bi-receipt"></i>
+                                                    <span className="d-none d-md-inline">Receipt</span>
+                                                </button>
+                                                <button
+                                                    className="btn btn-sm btn-outline-secondary fw-semibold"
+                                                    onClick={() => printThermalReceipt(b, storeConfig)}
+                                                    title="Quick print thermal slip"
+                                                >
+                                                    <i className="bi bi-printer"></i>
+                                                </button>
+                                                <button
+                                                    className="btn btn-sm btn-outline-success fw-semibold"
+                                                    onClick={() => shareBillOnWhatsApp(b, storeConfig)}
+                                                    title="Share on WhatsApp"
+                                                >
+                                                    <i className="bi bi-whatsapp"></i>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))
@@ -296,6 +365,7 @@ export default function BillsHistory({ currentUser, activeShift, onOpenShiftModa
                 isOpen={!!selectedBill}
                 onClose={() => setSelectedBill(null)}
                 bill={selectedBill}
+                storeConfig={storeConfig}
             />
         </div>
     );

@@ -410,13 +410,23 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
         }
     };
 
-    // Calculate Totals
+    // Calculate Totals & GST
     const totalItemsCount = cart.length;
     const totalQty = cart.reduce((s, i) => s + Number(i.quantity), 0);
     const grossMrpTotal = cart.reduce((s, i) => s + (Number(i.mrp) * Number(i.quantity)), 0);
     const subtotal = cart.reduce((s, i) => s + Number(i.total), 0);
     const totalSavings = Math.max(0, grossMrpTotal - subtotal);
     const netPayable = Math.round(subtotal);
+
+    // Accurate Indian GST calculations based on item taxPercent
+    const totalTaxAmount = cart.reduce((s, i) => {
+        const itemTotal = Number(i.total) || 0;
+        const taxPct = Number(i.taxPercent) || 5;
+        return s + ((itemTotal * taxPct) / (100 + taxPct));
+    }, 0);
+    const taxableAmount = Math.max(0, subtotal - totalTaxAmount);
+    const cgstAmount = totalTaxAmount / 2;
+    const sgstAmount = totalTaxAmount / 2;
 
     // Filter catalog items for the quick shelf
     const filteredCatalog = catalog.filter(p => {
@@ -427,96 +437,103 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
         return matchesCategory && matchesSearch;
     });
 
-    const categories = ['ALL', 'Staples & Flour', 'Edible Oils', 'Dairy & Refrigerated', 'Vegetables & Fruits', 'Snacks & Namkeen', 'Household & Cleaning'];
+    const categories = ['ALL', ...Array.from(new Set(catalog.map(p => p.category).filter(Boolean)))];
 
     return (
         <div className="container-fluid py-3 px-3">
             {/* Shift Status Bar / Drawer Alert */}
             {!activeShift ? (
-                <div className="alert alert-warning py-2 px-3 mb-3 d-flex flex-wrap align-items-center justify-content-between shadow-sm border-warning gap-2">
-                    <div className="d-flex align-items-center gap-2">
-                        <i className="bi bi-exclamation-triangle-fill text-warning fs-5"></i>
-                        <div>
-                            <strong className="text-dark">Cash Register Drawer is Closed</strong>
-                            <div className="small text-muted">
-                                Select your counter below and open drawer with opening float to begin billing from 0 bills.
+                <div className="card border-warning-subtle bg-warning-subtle shadow-sm mb-3">
+                    <div className="card-body p-2 p-md-3">
+                        <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-2">
+                            <div className="d-flex align-items-center gap-2">
+                                <div className="rounded-circle bg-warning text-dark p-2 d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: '36px', height: '36px' }}>
+                                    <i className="bi bi-exclamation-triangle-fill fs-6"></i>
+                                </div>
+                                <div>
+                                    <strong className="text-dark d-block">Cash Register Drawer is Closed</strong>
+                                    <div className="small text-muted" style={{ fontSize: '0.78rem' }}>
+                                        Select your counter below and open drawer to begin billing.
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2 w-100 w-md-auto">
+                                <div className="d-flex align-items-center gap-1 bg-white border border-warning rounded px-2 py-1 shadow-sm flex-grow-1 flex-sm-grow-0">
+                                    <i className="bi bi-display text-warning"></i>
+                                    <span className="small fw-bold text-muted text-uppercase" style={{ fontSize: '0.7rem' }}>Counter:</span>
+                                    <select
+                                        className="form-select form-select-sm fw-bold border-0 bg-transparent font-mono p-0 text-dark flex-grow-1"
+                                        style={{ minWidth: '110px', fontSize: '0.82rem', cursor: 'pointer' }}
+                                        value={selectedCounter}
+                                        onChange={(e) => handleCounterChange(e.target.value)}
+                                    >
+                                        {(storeConfig?.counters || ['Counter-01', 'Counter-02', 'Counter-03']).map(c => (
+                                            <option key={c} value={c}>{c}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                {onOpenShiftModal && (
+                                    <button
+                                        type="button"
+                                        className="btn btn-warning text-dark fw-bold btn-sm shadow-sm py-2 px-3 text-nowrap d-flex align-items-center justify-content-center gap-1"
+                                        onClick={onOpenShiftModal}
+                                    >
+                                        <i className="bi bi-play-circle-fill"></i>
+                                        <span>Start Shift (0 Bills)</span>
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>
-                    <div className="d-flex align-items-center gap-2">
-                        {/* Pre-select Counter Dropdown */}
-                        <div className="d-flex align-items-center gap-1 bg-light border rounded px-2 py-1">
-                            <span className="small fw-bold text-muted text-uppercase" style={{ fontSize: '0.72rem' }}>Counter:</span>
-                            <select
-                                className="form-select form-select-sm fw-bold border-0 bg-transparent font-mono p-0"
-                                style={{ width: 'auto', minWidth: '120px', fontSize: '0.82rem' }}
-                                value={selectedCounter}
-                                onChange={(e) => handleCounterChange(e.target.value)}
-                            >
-                                {(storeConfig?.counters || ['Counter-01', 'Counter-02', 'Counter-03']).map(c => (
-                                    <option key={c} value={c}>{c}</option>
-                                ))}
-                            </select>
-                        </div>
-                        {onOpenShiftModal && (
-                            <button
-                                type="button"
-                                className="btn btn-warning text-dark fw-bold btn-sm shadow-sm"
-                                onClick={onOpenShiftModal}
-                            >
-                                <i className="bi bi-play-circle-fill me-1"></i> Open Register &amp; Start Shift (0 Bills)
-                            </button>
-                        )}
-                    </div>
                 </div>
             ) : (
-                <div className="bg-white rounded-3 border p-2 mb-3 shadow-sm d-flex flex-wrap align-items-center justify-content-between gap-2">
-                    <div className="d-flex align-items-center gap-2 flex-wrap">
-                        <span className="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fw-bold">
-                            <i className="bi bi-circle-fill small me-1"></i> REGISTER ACTIVE
-                        </span>
-                        <strong className="font-mono text-dark">{activeShift.shiftNumber}</strong>
+                <div className="card border-0 shadow-sm border-start border-primary border-4 bg-white mb-3">
+                    <div className="card-body p-2 p-md-3">
+                        <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-2">
+                            <div className="d-flex align-items-center gap-2 flex-wrap">
+                                <span className="badge bg-primary text-white px-2 py-1 fw-bold">
+                                    <i className="bi bi-circle-fill small me-1"></i> ACTIVE
+                                </span>
+                                <strong className="font-mono text-dark">{activeShift.shiftNumber}</strong>
 
-                        {/* Interactive Cashier Counter Switcher */}
-                        <div className="d-flex align-items-center gap-1 bg-light border border-success-subtle rounded px-2 py-1 shadow-sm">
-                            <i className="bi bi-display-fill text-success"></i>
-                            <span className="small fw-bold text-muted text-uppercase" style={{ fontSize: '0.7rem' }}>Counter:</span>
-                            <select
-                                className="form-select form-select-sm fw-bold border-0 bg-transparent font-mono p-0 text-success"
-                                style={{ width: 'auto', minWidth: '130px', fontSize: '0.82rem', cursor: 'pointer' }}
-                                value={selectedCounter}
-                                onChange={(e) => handleCounterChange(e.target.value)}
-                                title="Change or select your current counter desk"
-                            >
-                                {(storeConfig?.counters || ['Counter-01', 'Counter-02', 'Counter-03']).map(c => (
-                                    <option key={c} value={c}>{c}</option>
-                                ))}
-                            </select>
+                                <div className="d-flex align-items-center gap-1 bg-light border rounded px-2 py-1 shadow-sm">
+                                    <i className="bi bi-display-fill text-primary"></i>
+                                    <span className="small fw-bold text-muted text-uppercase" style={{ fontSize: '0.68rem' }}>Desk:</span>
+                                    <select
+                                        className="form-select form-select-sm fw-bold border-0 bg-transparent font-mono p-0 text-primary"
+                                        style={{ minWidth: '100px', fontSize: '0.82rem', cursor: 'pointer' }}
+                                        value={selectedCounter}
+                                        onChange={(e) => handleCounterChange(e.target.value)}
+                                        title="Change current counter desk"
+                                    >
+                                        {(storeConfig?.counters || ['Counter-01', 'Counter-02', 'Counter-03']).map(c => (
+                                            <option key={c} value={c}>{c}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="d-flex align-items-center gap-1 gap-md-2 font-mono small flex-wrap w-100 w-md-auto justify-content-between justify-content-md-end">
+                                <span className="badge bg-light text-dark border">
+                                    Bills: <strong>{activeShift.billsCount || 0}</strong>
+                                </span>
+                                <span className="badge bg-light text-dark border">
+                                    Sales: <strong>₹{(activeShift.netSales || 0).toLocaleString('en-IN')}</strong>
+                                </span>
+                                <span className="badge bg-light text-primary border d-none d-sm-inline">
+                                    UPI: <strong>₹{(activeShift.paymentSummary?.upi || 0).toLocaleString('en-IN')}</strong>
+                                </span>
+                                {onOpenShiftModal && (
+                                    <button
+                                        type="button"
+                                        className="btn btn-outline-secondary btn-sm py-1 px-2 fw-semibold"
+                                        onClick={onOpenShiftModal}
+                                        title="Drawer & Shift Details"
+                                    >
+                                        <i className="bi bi-safe me-1"></i> Drawer
+                                    </button>
+                                )}
+                            </div>
                         </div>
-                    </div>
-                    <div className="d-flex align-items-center gap-2 font-mono small flex-wrap">
-                        <span className="badge bg-light text-dark border">
-                            Bills Processed: <strong>{activeShift.billsCount || 0}</strong>
-                        </span>
-                        <span className="badge bg-light text-success border">
-                            Sales: <strong>₹{(activeShift.netSales || 0).toLocaleString('en-IN')}</strong>
-                        </span>
-                        <span className="badge bg-light text-primary border">
-                            UPI: <strong>₹{(activeShift.paymentSummary?.upi || 0).toLocaleString('en-IN')}</strong> ({activeShift.paymentSummary?.upiCount || 0})
-                        </span>
-                        <span className="badge bg-light text-primary border">
-                            Card: <strong>₹{(activeShift.paymentSummary?.card || 0).toLocaleString('en-IN')}</strong> ({activeShift.paymentSummary?.cardCount || 0})
-                        </span>
-                        {onOpenShiftModal && (
-                            <button
-                                type="button"
-                                className="btn btn-outline-secondary btn-sm py-0 px-2 fw-semibold"
-                                onClick={onOpenShiftModal}
-                                title="Drawer & Shift Details"
-                            >
-                                <i className="bi bi-safe me-1"></i> Drawer
-                            </button>
-                        )}
                     </div>
                 </div>
             )}
@@ -524,26 +541,26 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
             {/* Top Bar: Barcode Scan & Quick Actions */}
             <div className="row g-2 align-items-center mb-3">
                 {/* Large Barcode Scanner Input */}
-                <div className="col-lg-6 col-md-7">
+                <div className="col-12 col-md-7">
                     <form onSubmit={handleBarcodeScan}>
                         <div className="barcode-scan-box p-1 d-flex align-items-center">
-                            <div className="px-3 d-flex align-items-center gap-2 text-success">
+                            <div className="px-2 px-sm-3 d-flex align-items-center gap-1 text-primary">
                                 <span className="scan-pulse"></span>
-                                <i className="bi bi-upc-scan fs-4"></i>
+                                <i className="bi bi-upc-scan fs-5 fs-sm-4"></i>
                             </div>
                             <input
                                 ref={barcodeInputRef}
                                 type="text"
-                                className="form-control form-control-lg border-0 shadow-none font-mono fw-bold"
-                                placeholder="Scan Barcode or Type SKU & Press Enter (F2)..."
+                                className="form-control form-control-md border-0 shadow-none font-mono fw-bold"
+                                placeholder="Scan Barcode / SKU (F2)..."
                                 value={barcodeInput}
                                 onChange={(e) => setBarcodeInput(e.target.value)}
                                 disabled={isLoadingScan}
-                                style={{ fontSize: '1.15rem' }}
+                                style={{ fontSize: '1rem' }}
                             />
                             <button
                                 type="submit"
-                                className="btn btn-success btn-lg px-4 fw-bold me-1"
+                                className="btn btn-primary btn-md px-3 fw-bold me-1 flex-shrink-0"
                                 disabled={isLoadingScan || !barcodeInput.trim()}
                             >
                                 {isLoadingScan ? (
@@ -557,46 +574,55 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
                 </div>
 
                 {/* Actions: Camera Scanner + Quick Add Loose Item + Held Bills + Clear */}
-                <div className="col-lg-6 col-md-5">
-                    <div className="d-flex gap-2 justify-content-start justify-content-md-end align-items-center flex-wrap">
-                        {/* Open / Close Camera Scanner Button */}
-                        <button
-                            type="button"
-                            className={`btn btn-sm py-2 px-3 fw-bold d-flex align-items-center gap-1 rounded-3 shadow-sm flex-grow-1 flex-md-grow-0 justify-content-center ${isCameraScannerOpen ? 'btn-danger text-white' : 'btn-success text-white'}`}
-                            onClick={() => setIsCameraScannerOpen(!isCameraScannerOpen)}
-                            title="Toggle Phone / Laptop Camera Barcode Scanner"
-                        >
-                            <i className={`bi ${isCameraScannerOpen ? 'bi-camera-video-off-fill' : 'bi-camera-fill'}`}></i>
-                            <span>{isCameraScannerOpen ? 'Close Cam' : 'Camera'}</span>
-                        </button>
+                <div className="col-12 col-md-5">
+                    <div className="row g-1 g-sm-2">
+                        <div className="col-3">
+                            <button
+                                type="button"
+                                className={`btn btn-sm w-100 py-2 px-1 fw-bold d-flex flex-column flex-sm-row align-items-center justify-content-center gap-1 rounded-3 shadow-sm ${isCameraScannerOpen ? 'btn-danger text-white' : 'btn-dark text-white'}`}
+                                onClick={() => setIsCameraScannerOpen(!isCameraScannerOpen)}
+                                title="Toggle Camera Scanner"
+                            >
+                                <i className={`bi ${isCameraScannerOpen ? 'bi-camera-video-off-fill' : 'bi-camera-fill'}`}></i>
+                                <span style={{ fontSize: '0.75rem' }}>{isCameraScannerOpen ? 'Close' : 'Camera'}</span>
+                            </button>
+                        </div>
 
-                        <button
-                            type="button"
-                            className="btn btn-sm btn-warning text-dark fw-bold d-flex align-items-center gap-1 rounded-3 shadow-sm py-2 px-3 flex-grow-1 flex-md-grow-0 justify-content-center"
-                            onClick={() => setIsQuickAddOpen(true)}
-                        >
-                            <i className="bi bi-plus-circle-fill"></i>
-                            <span>+ Loose (kg)</span>
-                        </button>
+                        <div className="col-4">
+                            <button
+                                type="button"
+                                className="btn btn-sm btn-warning text-dark fw-bold w-100 py-2 px-1 d-flex flex-column flex-sm-row align-items-center justify-content-center gap-1 rounded-3 shadow-sm"
+                                onClick={() => setIsQuickAddOpen(true)}
+                                title="Add Loose Item (by kg/gm/wt)"
+                            >
+                                <i className="bi bi-plus-circle-fill"></i>
+                                <span style={{ fontSize: '0.75rem' }}>+ Loose</span>
+                            </button>
+                        </div>
 
-                        <button
-                            type="button"
-                            className="btn btn-sm btn-outline-secondary fw-semibold d-flex align-items-center gap-1 rounded-3 py-2 px-3 justify-content-center"
-                            onClick={() => setIsHeldModalOpen(true)}
-                        >
-                            <i className="bi bi-pause-circle"></i>
-                            <span>Held ({heldBills.length})</span>
-                        </button>
+                        <div className="col-3">
+                            <button
+                                type="button"
+                                className="btn btn-sm btn-outline-secondary fw-semibold w-100 py-2 px-1 d-flex flex-column flex-sm-row align-items-center justify-content-center gap-1 rounded-3"
+                                onClick={() => setIsHeldModalOpen(true)}
+                                title="View Held Bills"
+                            >
+                                <i className="bi bi-pause-circle"></i>
+                                <span style={{ fontSize: '0.75rem' }}>Held ({heldBills.length})</span>
+                            </button>
+                        </div>
 
-                        <button
-                            type="button"
-                            className="btn btn-sm btn-outline-danger fw-semibold rounded-3 py-2 px-3 justify-content-center"
-                            onClick={handleClearCart}
-                            disabled={cart.length === 0}
-                            title="Clear Cart"
-                        >
-                            <i className="bi bi-trash"></i>
-                        </button>
+                        <div className="col-2">
+                            <button
+                                type="button"
+                                className="btn btn-sm btn-outline-danger fw-semibold w-100 py-2 px-1 d-flex align-items-center justify-content-center rounded-3"
+                                onClick={handleClearCart}
+                                disabled={cart.length === 0}
+                                title="Clear Cart"
+                            >
+                                <i className="bi bi-trash"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -633,7 +659,7 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
                         <div className="p-3 bg-white border-bottom d-flex align-items-center justify-content-between">
                             <div className="d-flex align-items-center gap-2">
                                 <span className="fs-5 fw-bold text-dark">Active Cart</span>
-                                <span className="badge bg-success-subtle text-success fw-bold px-2 py-1">
+                                <span className="badge bg-primary-subtle text-primary fw-bold px-2 py-1">
                                     {totalItemsCount} Items ({totalQty.toFixed(1)} Qty)
                                 </span>
                             </div>
@@ -642,8 +668,8 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
                             </small>
                         </div>
 
-                        {/* Cart Table */}
-                        <div className="table-responsive flex-grow-1" style={{ minHeight: '380px', maxHeight: '520px', overflowY: 'auto' }}>
+                        {/* Cart View: Desktop Data Table (d-none d-md-block) */}
+                        <div className="d-none d-md-block table-responsive flex-grow-1" style={{ minHeight: '380px', maxHeight: '520px', overflowY: 'auto' }}>
                             {cart.length === 0 ? (
                                 <div className="text-center py-5">
                                     <div className="display-4 text-muted opacity-50 mb-2">🛒</div>
@@ -655,7 +681,7 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
                                         {catalog.slice(0, 5).map(p => (
                                             <button
                                                 key={p._id}
-                                                className="btn btn-sm btn-outline-success fw-semibold shadow-sm"
+                                                className="btn btn-sm btn-outline-primary fw-semibold shadow-sm"
                                                 onClick={() => addProductToCart(p)}
                                             >
                                                 + {p.name.split(' ')[0]} ({p.unit}) ₹{p.sellingPrice}
@@ -765,6 +791,115 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
                             )}
                         </div>
 
+                        {/* Cart View: Native Mobile App Cards (d-block d-md-none) */}
+                        <div className="d-block d-md-none p-2 flex-grow-1" style={{ minHeight: '260px', maxHeight: '420px', overflowY: 'auto' }}>
+                            {cart.length === 0 ? (
+                                <div className="text-center py-4">
+                                    <div className="fs-1 text-muted opacity-50 mb-1">🛒</div>
+                                    <h6 className="fw-bold text-secondary">Billing Counter is Ready</h6>
+                                    <p className="text-muted small mb-2" style={{ fontSize: '0.78rem' }}>
+                                        Scan barcode with camera or tap any quick sample below:
+                                    </p>
+                                    <div className="d-flex justify-content-center flex-wrap gap-1 px-1">
+                                        {catalog.slice(0, 5).map(p => (
+                                            <button
+                                                key={p._id}
+                                                className="btn btn-sm btn-outline-primary fw-semibold shadow-sm py-1 px-2"
+                                                style={{ fontSize: '0.75rem' }}
+                                                onClick={() => addProductToCart(p)}
+                                            >
+                                                + {p.name.split(' ')[0]} ({p.unit}) ₹{p.sellingPrice}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="d-flex flex-column gap-2">
+                                    {cart.map((item, idx) => (
+                                        <div key={idx} className="mobile-cart-card p-2">
+                                            <div className="d-flex justify-content-between align-items-start mb-1">
+                                                <div className="pe-1 text-truncate" style={{ maxWidth: '85%' }}>
+                                                    <div className="fw-bold text-dark text-truncate" style={{ fontSize: '0.88rem' }}>
+                                                        {item.name}
+                                                    </div>
+                                                    <div className="d-flex align-items-center gap-1 mt-1 flex-wrap">
+                                                        <span className="badge bg-light text-muted border font-mono" style={{ fontSize: '0.65rem' }}>
+                                                            {item.barcode}
+                                                        </span>
+                                                        <span className="badge bg-light text-dark border" style={{ fontSize: '0.65rem' }}>
+                                                            {item.unit}
+                                                        </span>
+                                                        {item.discount > 0 && (
+                                                            <span className="savings-pill" style={{ fontSize: '0.65rem', padding: '1px 5px' }}>
+                                                                Save ₹{item.discount}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-sm btn-link text-danger p-0"
+                                                    onClick={() => handleRemoveItem(idx)}
+                                                    title="Remove Item"
+                                                >
+                                                    <i className="bi bi-trash fs-5"></i>
+                                                </button>
+                                            </div>
+
+                                            <div className="d-flex justify-content-between align-items-center pt-2 border-top mt-1">
+                                                <div>
+                                                    <span className="text-muted text-decoration-line-through small me-1 font-mono" style={{ fontSize: '0.75rem' }}>
+                                                        ₹{item.mrp}
+                                                    </span>
+                                                    <span className="fw-bold text-dark font-mono" style={{ fontSize: '0.95rem' }}>
+                                                        ₹{item.sellingPrice}
+                                                    </span>
+                                                    <span className="text-muted small" style={{ fontSize: '0.75rem' }}> / {item.unit}</span>
+                                                </div>
+
+                                                <div className="d-flex align-items-center gap-2">
+                                                    <div className="input-group input-group-sm" style={{ width: '105px' }}>
+                                                        <button
+                                                            className="btn btn-outline-secondary mobile-stepper-btn px-2"
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const cur = Number(item.quantity) || 1;
+                                                                if (cur > 1) handleUpdateQuantity(idx, cur - 1);
+                                                            }}
+                                                        >
+                                                            -
+                                                        </button>
+                                                        <input
+                                                            type="number"
+                                                            step="0.01"
+                                                            className="form-control text-center font-mono fw-bold px-1"
+                                                            value={item.quantity}
+                                                            onChange={(e) => handleUpdateQuantity(idx, e.target.value)}
+                                                            onBlur={() => handleQuantityBlur(idx)}
+                                                            style={{ fontSize: '0.85rem' }}
+                                                        />
+                                                        <button
+                                                            className="btn btn-outline-secondary mobile-stepper-btn px-2"
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const cur = Number(item.quantity) || 0;
+                                                                handleUpdateQuantity(idx, cur + 1);
+                                                            }}
+                                                        >
+                                                            +
+                                                        </button>
+                                                    </div>
+                                                    <div className="fw-bolder font-mono text-dark text-end" style={{ minWidth: '55px', fontSize: '0.95rem' }}>
+                                                        ₹{item.total}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
                         {/* Quick Visual Shelf / Fast Pick Bar */}
                         <div className="p-2 bg-light border-top">
                             <div className="d-flex align-items-center justify-content-between mb-2">
@@ -776,7 +911,7 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
                                         <button
                                             key={cat}
                                             type="button"
-                                            className={`btn btn-xs py-0 px-2 rounded-pill small ${selectedCategory === cat ? 'btn-success text-white' : 'btn-outline-secondary'}`}
+                                            className={`btn btn-xs py-0 px-2 rounded-pill small ${selectedCategory === cat ? 'btn-primary text-white' : 'btn-outline-secondary'}`}
                                             onClick={() => setSelectedCategory(cat)}
                                             style={{ fontSize: '0.72rem', whiteSpace: 'nowrap' }}
                                         >
@@ -798,7 +933,7 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
                                         <div className="text-truncate fw-bold text-dark small">{prod.name}</div>
                                         <div className="d-flex justify-content-between align-items-center mt-1">
                                             <span className="badge bg-light text-muted small">{prod.unit}</span>
-                                            <span className="text-success fw-bold font-mono small">₹{prod.sellingPrice}</span>
+                                            <span className="text-primary fw-bold font-mono small">₹{prod.sellingPrice}</span>
                                         </div>
                                     </button>
                                 ))}
@@ -856,17 +991,30 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
                                 </div>
 
                                 {/* Total Savings Banner */}
-                                <div className="d-flex justify-content-between align-items-center p-2 rounded-2 bg-success-subtle text-success fw-bold mb-2">
+                                <div className="d-flex justify-content-between align-items-center p-2 rounded-2 bg-primary-subtle text-primary fw-bold mb-2">
                                     <div className="d-flex align-items-center gap-1">
                                         <i className="bi bi-tag-fill"></i>
-                                        <span>Total DMart Savings:</span>
+                                        <span>Total Savings:</span>
                                     </div>
                                     <span className="fs-6 font-mono">-₹{totalSavings.toFixed(2)}</span>
                                 </div>
 
+                                {/* Detailed GST Tax Counts */}
                                 <div className="d-flex justify-content-between text-muted small pt-1 border-top">
-                                    <span>Taxes (CGST + SGST Included):</span>
-                                    <span className="font-mono">₹{(netPayable * 0.05).toFixed(2)}</span>
+                                    <span>Taxable Net Turnover:</span>
+                                    <span className="font-mono fw-semibold">₹{taxableAmount.toFixed(2)}</span>
+                                </div>
+                                <div className="d-flex justify-content-between text-muted small">
+                                    <span>CGST (Central Tax):</span>
+                                    <span className="font-mono">₹{cgstAmount.toFixed(2)}</span>
+                                </div>
+                                <div className="d-flex justify-content-between text-muted small">
+                                    <span>SGST (State Tax):</span>
+                                    <span className="font-mono">₹{sgstAmount.toFixed(2)}</span>
+                                </div>
+                                <div className="d-flex justify-content-between text-success small fw-bold pb-1">
+                                    <span>Total GST Included:</span>
+                                    <span className="font-mono">₹{totalTaxAmount.toFixed(2)}</span>
                                 </div>
                             </div>
 
@@ -909,7 +1057,7 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
                             {/* Big Checkout Button */}
                             <button
                                 type="button"
-                                className="btn btn-success btn-lg w-100 py-3 fw-bolder shadow-lg d-flex align-items-center justify-content-center gap-2"
+                                className="btn btn-primary btn-lg w-100 py-3 fw-bolder shadow-sm d-flex align-items-center justify-content-center gap-2"
                                 style={{ fontSize: '1.25rem', letterSpacing: '0.5px' }}
                                 onClick={() => setIsPaymentOpen(true)}
                                 disabled={cart.length === 0}
@@ -927,6 +1075,7 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
                 isOpen={isPaymentOpen}
                 onClose={() => setIsPaymentOpen(false)}
                 netPayable={netPayable}
+                storeConfig={storeConfig}
                 onCompletePayment={handleCompletePayment}
             />
 
@@ -939,20 +1088,20 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
             />
 
             {/* Sticky Mobile Bottom Checkout Bar (Optimized for Smartphone Screens) */}
-            <div className="mobile-pos-bottom-bar d-md-none shadow-lg">
+            <div className="mobile-pos-bottom-bar d-md-none shadow-sm">
                 <div className="d-flex align-items-center justify-content-between gap-2">
                     <div>
                         <div className="small text-muted" style={{ fontSize: '0.72rem' }}>
                             Cart: <strong>{totalItemsCount} items</strong> ({totalQty.toFixed(1)} qty)
                         </div>
-                        <div className="fs-5 fw-bolder text-success font-mono">
+                        <div className="fs-5 fw-bolder text-primary font-mono">
                             ₹{netPayable.toLocaleString('en-IN')}
                         </div>
                     </div>
                     <div className="d-flex gap-1">
                         <button
                             type="button"
-                            className="btn btn-outline-primary btn-sm fw-bold px-2 py-2"
+                            className="btn btn-outline-secondary btn-sm fw-bold px-2 py-2"
                             onClick={() => setIsCameraScannerOpen(!isCameraScannerOpen)}
                             title="Toggle Scanner"
                         >
@@ -960,7 +1109,7 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
                         </button>
                         <button
                             type="button"
-                            className="btn btn-success fw-bold px-3 py-2 d-flex align-items-center gap-1 shadow"
+                            className="btn btn-primary fw-bold px-3 py-2 d-flex align-items-center gap-1 shadow-sm"
                             disabled={cart.length === 0}
                             onClick={() => setIsPaymentOpen(true)}
                         >

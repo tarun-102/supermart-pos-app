@@ -4,6 +4,7 @@ export default function SplitPaymentModal({
     isOpen,
     onClose,
     netPayable = 0,
+    storeConfig = null,
     onCompletePayment
 }) {
     // Modes: 'CASH', 'UPI', 'CARD', 'SPLIT'
@@ -375,7 +376,7 @@ export default function SplitPaymentModal({
                                         <div className="col-auto">
                                             <div className="p-2 bg-white rounded-3 border shadow-sm">
                                                 <img
-                                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=upi://pay?pa=superstorepos@bank%26pn=SuperStorePOS%26am=${netPayable}%26cu=INR`}
+                                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(`upi://pay?pa=${storeConfig?.contact ? storeConfig.contact.replace(/[^0-9]/g, '') + '@upi' : 'superstorepos@bank'}&pn=${encodeURIComponent(storeConfig?.storeName || 'SuperStorePOS')}&am=${netPayable}&cu=INR`)}`}
                                                     alt="UPI Dynamic QR Code"
                                                     style={{ width: '150px', height: '150px' }}
                                                 />
@@ -388,10 +389,10 @@ export default function SplitPaymentModal({
                                                 ₹{netPayable.toLocaleString('en-IN')}
                                             </div>
                                             <p className="text-muted small mb-2">
-                                                Supports Google Pay, PhonePe, Paytm, BHIM, Cred, and mobile banking apps.
+                                                Scan using Google Pay, PhonePe, Paytm, or any UPI app.
                                             </p>
                                             <span className="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 small">
-                                                <i className="bi bi-shield-check me-1"></i> Auto-Verified
+                                                <i className="bi bi-shield-check me-1"></i> Auto-settled
                                             </span>
                                         </div>
                                     </div>

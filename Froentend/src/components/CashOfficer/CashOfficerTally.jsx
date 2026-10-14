@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiFetch } from '../../utils/api';
+import { printHtmlViaIframe } from '../../utils/printHelper';
 
 export default function CashOfficerTally({ currentUser }) {
     const [shifts, setShifts] = useState([]);
@@ -101,9 +102,51 @@ export default function CashOfficerTally({ currentUser }) {
 
     const handlePrintReceipt = (shift) => {
         setPrintingShift(shift);
-        setTimeout(() => {
-            window.print();
-        }, 150);
+        const html = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8">
+                <title>Shift Statement - ${shift.shiftNumber}</title>
+                <style>
+                    @page { size: 80mm auto; margin: 0; }
+                    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace; color: #000; }
+                    body { width: 76mm; margin: 0 auto; padding: 5mm 3mm; font-size: 11px; line-height: 1.35; }
+                    .text-center { text-align: center; }
+                    .flex-between { display: flex; justify-content: space-between; }
+                    .divider { border-bottom: 1px dashed #000; margin: 6px 0; }
+                    .double-divider { border-bottom: 2px solid #000; margin: 6px 0; }
+                </style>
+            </head>
+            <body>
+                <div class="text-center">
+                    <div style="font-size: 16px; font-weight: bold;">SUPERSTORE POS</div>
+                    <div style="font-size: 11px; font-weight: bold;">SHIFT SETTLEMENT STATEMENT (X-REPORT)</div>
+                    <div style="font-size: 9px;">${new Date().toLocaleString('en-IN')}</div>
+                </div>
+                <div class="divider"></div>
+                <div class="flex-between"><span>Shift ID:</span><span>${shift.shiftNumber}</span></div>
+                <div class="flex-between"><span>Cashier:</span><span>${shift.cashierName} (${shift.counterNo})</span></div>
+                <div class="flex-between"><span>Audit Officer:</span><span>${shift.handoverToOfficerName || 'Vault Officer'}</span></div>
+                <div class="divider"></div>
+                <div class="flex-between"><span>Opening Float:</span><span>₹${shift.openingFloat}</span></div>
+                <div class="flex-between"><span>Net Sales:</span><span>₹${shift.netSales} (${shift.billsCount} bills)</span></div>
+                <div class="flex-between"><span>• Cash Sales:</span><span>₹${shift.paymentSummary?.cash || 0}</span></div>
+                <div class="flex-between"><span>• Card Sales:</span><span>₹${shift.paymentSummary?.card || 0}</span></div>
+                <div class="flex-between"><span>• UPI Sales:</span><span>₹${shift.paymentSummary?.upi || 0}</span></div>
+                <div class="divider"></div>
+                <div class="flex-between"><span>Expected Cash:</span><span>₹${shift.expectedCashInDrawer}</span></div>
+                <div class="flex-between"><span>Physical Handed Over:</span><span>₹${shift.physicalCashHandedOver}</span></div>
+                <div class="flex-between" style="font-weight: bold; font-size: 12px;"><span>Variance / Difference:</span><span>₹${shift.cashDifference || 0} (${shift.tallyStatus})</span></div>
+                <div class="double-divider"></div>
+                <div class="flex-between text-center" style="margin-top: 25px;">
+                    <div><div style="border-top: 1px solid #000; width: 85px; margin-bottom: 3px;"></div>Cashier Sign</div>
+                    <div><div style="border-top: 1px solid #000; width: 85px; margin-bottom: 3px;"></div>Officer Sign</div>
+                </div>
+            </body>
+            </html>
+        `;
+        printHtmlViaIframe(html, `Shift_${shift.shiftNumber}`);
     };
 
     return (
@@ -135,16 +178,16 @@ export default function CashOfficerTally({ currentUser }) {
                 <div className="row g-3 mb-4 no-print">
                     {/* Vault Cash */}
                     <div className="col-xl-3 col-md-6">
-                        <div className="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-success border-4">
+                        <div className="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-primary border-4">
                             <div className="d-flex justify-content-between align-items-center">
                                 <div>
                                     <div className="text-muted small fw-bold text-uppercase">Physical Cash in Vault</div>
-                                    <div className="fs-3 fw-bolder font-mono text-success">
+                                    <div className="fs-3 fw-bolder font-mono text-primary">
                                         ₹{metrics.totalPhysicalCashInVault.toLocaleString('en-IN')}
                                     </div>
                                     <small className="text-muted">From handed-over shifts</small>
                                 </div>
-                                <div className="bg-success-subtle p-3 rounded-circle text-success fs-3">
+                                <div className="bg-primary-subtle p-3 rounded-circle text-primary fs-3">
                                     <i className="bi bi-safe-fill"></i>
                                 </div>
                             </div>
