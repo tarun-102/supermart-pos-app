@@ -1,113 +1,141 @@
 :root {
-  --dmart-green: #00843D;
-  --dmart-green-hover: #006b31;
-  --dmart-green-light: #e6f4ea;
+  /* Modern Emerald & Slate Fintech Theme */
+  --dmart-green: #059669;
+  --dmart-green-hover: #047857;
+  --dmart-green-light: #ecfdf5;
+  --brand-primary: #059669;
+  --brand-primary-hover: #047857;
+  --brand-primary-light: #ecfdf5;
+  --brand-primary-glow: rgba(16, 185, 129, 0.2);
   --dmart-yellow: #f59e0b;
-  --dmart-gold: #fbbf24;
+  --dmart-gold: #f59e0b;
   --dmart-dark: #0f172a;
-  --dmart-slate: #334155;
+  --dmart-slate: #1e293b;
   --dmart-light: #f8fafc;
   --dmart-border: #e2e8f0;
   --dmart-red: #ef4444;
-  --dmart-blue: #2563eb;
+  --dmart-blue: #3b82f6;
+  --card-radius: 14px;
 }
 
 body {
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  background-color: #f1f5f9;
+  background-color: #f8fafc;
   color: #1e293b;
   margin: 0;
   padding: 0;
   overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .font-mono {
   font-family: 'JetBrains Mono', monospace;
+  font-feature-settings: 'tnum';
 }
 
-/* Header & Brand */
+/* Header & Brand - Modern Emerald Gradient */
 .navbar-dmart {
-  background: linear-gradient(135deg, #00843D 0%, #005a28 100%);
+  background: linear-gradient(135deg, #064e3b 0%, #047857 55%, #059669 100%);
   color: white;
-  box-shadow: 0 4px 15px rgba(0, 132, 61, 0.25);
-  border-bottom: 2px solid #ffcc00;
+  box-shadow: 0 4px 20px rgba(6, 78, 59, 0.25);
+  border-bottom: 2px solid #10b981;
 }
 
 .brand-badge {
-  background-color: #ffcc00;
-  color: #005a28;
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
   font-weight: 800;
   padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.72rem;
   letter-spacing: 0.5px;
 }
 
-/* Nav Pills */
+/* Nav Pills - Mobile Horizontal Scroll & Zero Wrapping */
+.nav-pills-pos {
+  display: flex;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  gap: 6px;
+  padding: 2px 0;
+}
+
+.nav-pills-pos::-webkit-scrollbar {
+  display: none;
+}
+
 .nav-pills-pos .nav-link {
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.88);
   font-weight: 600;
-  border-radius: 8px;
-  padding: 8px 16px;
-  transition: all 0.2s ease;
+  border-radius: 10px;
+  padding: 8px 14px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  font-size: 0.85rem;
+  border: 1px solid transparent;
 }
 
 .nav-pills-pos .nav-link:hover {
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: rgba(255, 255, 255, 0.12);
   color: white;
 }
 
 .nav-pills-pos .nav-link.active {
-  background-color: white;
-  color: #00843D;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+  background-color: #ffffff;
+  color: #059669;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 /* POS Barcode Scanner Input Box */
 .barcode-scan-box {
   background: white;
-  border: 2px solid #00843D;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 132, 61, 0.1);
-  transition: all 0.2s;
+  border: 2px solid #059669;
+  border-radius: 14px;
+  box-shadow: 0 4px 16px rgba(5, 150, 105, 0.12);
+  transition: all 0.2s ease;
 }
 
 .barcode-scan-box:focus-within {
-  border-color: #006b31;
-  box-shadow: 0 0 0 4px rgba(0, 132, 61, 0.2);
+  border-color: #10b981;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.25);
 }
 
 .scan-pulse {
   display: inline-block;
-  width: 10px;
-  height: 10px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
-  background-color: #22c55e;
-  box-shadow: 0 0 0 rgba(34, 197, 94, 0.4);
+  background-color: #10b981;
+  box-shadow: 0 0 0 rgba(16, 185, 129, 0.4);
   animation: pulse 1.5s infinite;
 }
 
 @keyframes pulse {
-  0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
-  70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
 }
 
 /* POS Cart Table */
 .pos-table-card {
   background: white;
-  border-radius: 12px;
+  border-radius: 14px;
   border: 1px solid var(--dmart-border);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
 }
 
 .pos-table th {
   background-color: #f8fafc;
   color: #475569;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-weight: 700;
@@ -121,7 +149,7 @@ body {
 }
 
 .cart-item-row:hover {
-  background-color: #f1f9f4;
+  background-color: #f0fdf4;
 }
 
 .price-strike {
@@ -131,18 +159,19 @@ body {
 }
 
 .price-sp {
-  color: #00843D;
+  color: #059669;
   font-weight: 700;
   font-size: 1.05rem;
 }
 
 .savings-pill {
-  background-color: #dcfce7;
-  color: #15803d;
-  font-size: 0.75rem;
+  background-color: #ecfdf5;
+  color: #047857;
+  font-size: 0.72rem;
   font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 6px;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  border: 1px solid #a7f3d0;
   display: inline-block;
 }
 
@@ -155,11 +184,11 @@ body {
 }
 
 .grand-total-banner {
-  background: linear-gradient(135deg, #00843D 0%, #00602c 100%);
+  background: linear-gradient(135deg, #064e3b 0%, #047857 55%, #059669 100%);
   color: white;
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 16px;
-  box-shadow: 0 4px 12px rgba(0, 132, 61, 0.3);
+  box-shadow: 0 4px 16px rgba(5, 150, 105, 0.3);
 }
 
 /* Thermal Receipt Styling */
@@ -236,27 +265,29 @@ body {
   background: #94a3b8;
 }
 
-/* Scanner Viewfinder Box - Compact Single Viewfinder & Zero Double-Screen */
+/* Scanner Viewfinder Box - 220px High-Resolution Distance Viewport */
 .scanner-viewport-box {
   position: relative;
   width: 100%;
-  height: 145px;
-  min-height: 145px;
-  max-height: 145px;
-  background-color: #0b0f19;
-  border-radius: 10px;
+  height: 220px;
+  min-height: 220px;
+  max-height: 220px;
+  background-color: #030712;
+  border-radius: 12px;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 2px solid #059669;
+  box-shadow: 0 0 20px rgba(5, 150, 105, 0.15);
 }
 
 .scanner-viewport-box video {
   width: 100% !important;
-  height: 145px !important;
-  max-height: 145px !important;
+  height: 220px !important;
+  max-height: 220px !important;
   object-fit: cover !important;
-  border-radius: 8px;
+  border-radius: 10px;
   display: block;
 }
 
@@ -265,7 +296,9 @@ body {
 .scanner-viewport-box video:not(:first-of-type),
 .scanner-viewport-box div:not(:first-child) video,
 .scanner-viewport-box #camera-barcode-viewfinder > div ~ div,
-.scanner-viewport-box #camera-barcode-viewfinder-admin > div ~ div {
+.scanner-viewport-box #camera-barcode-viewfinder-admin > div ~ div,
+.scanner-viewport-box #admin-camera-scanner-viewfinder > div ~ div,
+.scanner-viewport-box #pos-camera-scanner-viewfinder > div ~ div {
   display: none !important;
   visibility: hidden !important;
   height: 0 !important;
@@ -278,29 +311,73 @@ body {
   display: none !important;
 }
 
-/* Compact laser line animation */
+/* Targeting Reticle Overlay */
+.scanner-reticle-box {
+  position: absolute;
+  width: 78%;
+  height: 66%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 12;
+  border: 2px dashed rgba(16, 185, 129, 0.65);
+  border-radius: 12px;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.28);
+}
+
+.scanner-corner {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-color: #10b981;
+  border-style: solid;
+}
+.scanner-corner.top-left {
+  top: -2px; left: -2px;
+  border-width: 3px 0 0 3px;
+  border-top-left-radius: 10px;
+}
+.scanner-corner.top-right {
+  top: -2px; right: -2px;
+  border-width: 3px 3px 0 0;
+  border-top-right-radius: 10px;
+}
+.scanner-corner.bottom-left {
+  bottom: -2px; left: -2px;
+  border-width: 0 0 3px 3px;
+  border-bottom-left-radius: 10px;
+}
+.scanner-corner.bottom-right {
+  bottom: -2px; right: -2px;
+  border-width: 0 3px 3px 0;
+  border-bottom-right-radius: 10px;
+}
+
+/* Laser sweep line animation */
 .scanner-laser-line {
   position: absolute;
   top: 50%;
-  left: 6%;
-  right: 6%;
+  left: 12%;
+  right: 12%;
   height: 2px;
-  background: linear-gradient(90deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 1) 50%, rgba(239, 68, 68, 0.1) 100%);
-  box-shadow: 0 0 8px #ef4444;
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 1) 50%, rgba(16, 185, 129, 0.1) 100%);
+  box-shadow: 0 0 10px #10b981;
   animation: laserSweepCompact 1.8s ease-in-out infinite alternate;
   pointer-events: none;
   z-index: 10;
 }
 
 @keyframes laserSweepCompact {
-  0% { transform: translateY(-42px); opacity: 0.85; }
-  100% { transform: translateY(42px); opacity: 0.85; }
+  0% { transform: translateY(-55px); opacity: 0.85; }
+  100% { transform: translateY(55px); opacity: 0.85; }
 }
 
 /* Mobile-First App Styling for Smartphone Displays */
 @media (max-width: 768px) {
   body {
-    padding-bottom: 75px; /* Leave room for sticky bottom checkout bar */
+    padding-bottom: 85px; /* Leave room for sticky bottom checkout bar */
+    font-size: 14px;
   }
 
   .pos-mobile-full {
@@ -309,7 +386,7 @@ body {
   }
 
   .pos-table-card {
-    border-radius: 8px;
+    border-radius: 10px;
   }
 
   .mobile-pos-bottom-bar {
@@ -318,12 +395,21 @@ body {
     left: 0;
     right: 0;
     background: #ffffff;
-    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.14);
     padding: 10px 14px;
     z-index: 1040;
-    border-top: 2px solid #00843D;
+    border-top: 2px solid #059669;
+  }
+
+  /* Prevent button truncation */
+  .btn {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  /* Form modal full width on mobile */
+  .modal-dialog {
+    margin: 8px auto !important;
+    max-width: 98% !important;
   }
 }
-
-
-

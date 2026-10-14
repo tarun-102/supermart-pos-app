@@ -28,163 +28,202 @@ export default function Navbar({
     const currentCounter = activeShift?.counterNo || currentUser.counterAssigned || 'Counter-01';
 
     return (
-        <header className="navbar-dmart sticky-top px-3 py-2">
-            <div className="container-fluid d-flex flex-wrap align-items-center justify-content-between gap-2">
-                {/* Brand & Store Info */}
-                <div className="d-flex align-items-center gap-3">
-                    <div className="d-flex align-items-center gap-2">
+        <header className="navbar-dmart sticky-top px-2 px-md-3 py-2">
+            <div className="container-fluid p-0">
+                {/* Top Row: Brand & Quick Action Controls */}
+                <div className="d-flex align-items-center justify-content-between gap-2 pb-2 pb-md-0 border-bottom border-white border-opacity-10 mb-md-0 border-md-0">
+                    {/* Brand & Store Info */}
+                    <div className="d-flex align-items-center gap-2 text-truncate">
                         <span className="fs-3">🏬</span>
-                        <div>
+                        <div className="text-truncate">
                             <div className="d-flex align-items-center gap-2">
-                                <span className="fw-bolder fs-5 tracking-wide text-white text-truncate" style={{ maxWidth: '240px' }}>
+                                <span className="fw-bolder fs-5 text-white text-truncate" style={{ maxWidth: '180px' }}>
                                     {storeConfig?.storeName || 'SuperStore POS'}
                                 </span>
-                                <span className="brand-badge text-uppercase d-none d-sm-inline" style={{ fontSize: '0.72rem' }}>
+                                <span className="brand-badge text-uppercase d-none d-sm-inline">
                                     {storeConfig?.storeType || 'POS System'}
                                 </span>
+                                <span className="badge bg-warning text-dark fw-bold px-2 py-0 d-inline-block d-md-none" style={{ fontSize: '0.68rem' }}>
+                                    {currentCounter}
+                                </span>
                             </div>
-                            <small className="text-white-50 d-none d-sm-block" style={{ fontSize: '0.72rem' }}>
+                            <small className="text-white-50 d-none d-sm-block text-truncate" style={{ fontSize: '0.7rem', maxWidth: '280px' }}>
                                 {storeConfig?.address || 'Universal Retail Billing & Cash Office ERP'}
                             </small>
                         </div>
+
+                        <div className="vr bg-white opacity-25 mx-1 d-none d-lg-block" style={{ height: '32px' }}></div>
+
+                        {/* Counter & Clock badge for Desktop */}
+                        <div className="d-none d-lg-flex flex-column text-white">
+                            <div className="d-flex align-items-center gap-2">
+                                <span className="badge bg-warning text-dark fw-bold px-2 py-1">
+                                    <i className="bi bi-display me-1"></i>
+                                    {currentCounter}
+                                </span>
+                                <span className="font-mono text-warning fw-semibold small">
+                                    <i className="bi bi-clock me-1"></i>{currentTime}
+                                </span>
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="vr bg-white opacity-25 mx-1 d-none d-md-block" style={{ height: '35px' }}></div>
+                    {/* Navigation Pills (Integrated for Desktop >= md) */}
+                    <nav className="nav nav-pills nav-pills-pos d-none d-md-flex align-items-center">
+                        {isCashier && (
+                            <button
+                                className={`nav-link ${activeTab === 'pos' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('pos')}
+                            >
+                                <i className="bi bi-upc-scan"></i>
+                                <span>POS Billing</span>
+                                {heldCount > 0 && (
+                                    <span className="badge rounded-pill bg-danger ms-1" style={{ fontSize: '0.65rem' }}>
+                                        {heldCount}
+                                    </span>
+                                )}
+                            </button>
+                        )}
 
-                    {/* Counter & Clock badge */}
-                    <div className="d-none d-md-flex flex-column text-white">
-                        <div className="d-flex align-items-center gap-2">
-                            <span className="badge bg-warning text-dark fw-bold px-2 py-1">
-                                <i className="bi bi-display me-1"></i>
-                                {currentCounter}
-                            </span>
-                            <span className="font-mono text-warning fw-semibold small">
-                                <i className="bi bi-clock me-1"></i>{currentTime}
+                        {isAdmin && (
+                            <button
+                                className={`nav-link ${activeTab === 'inventory' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('inventory')}
+                            >
+                                <i className="bi bi-boxes"></i>
+                                <span>Stock &amp; Inventory</span>
+                                <span className="badge bg-dark text-warning ms-1" style={{ fontSize: '0.65rem' }}>Admin</span>
+                            </button>
+                        )}
+
+                        {isOfficer && (
+                            <button
+                                className={`nav-link ${activeTab === 'cash_officer' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('cash_officer')}
+                            >
+                                <i className="bi bi-cash-coin"></i>
+                                <span>Cash Officer &amp; Tally</span>
+                            </button>
+                        )}
+
+                        <button
+                            className={`nav-link ${activeTab === 'bills' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('bills')}
+                        >
+                            <i className="bi bi-receipt"></i>
+                            <span>Bills</span>
+                        </button>
+                    </nav>
+
+                    {/* Right Area: Action Buttons (Shop Setup, Staff, Drawer, User, Logout) */}
+                    <div className="d-flex align-items-center gap-1 gap-sm-2 flex-shrink-0">
+                        {isAdmin && (
+                            <button
+                                className="btn btn-sm btn-outline-warning text-white fw-bold d-flex align-items-center gap-1 shadow-sm px-2 py-1"
+                                onClick={onOpenStoreSettings}
+                                title="Setup Store Profile & Counters"
+                                style={{ fontSize: '0.75rem' }}
+                            >
+                                <i className="bi bi-gear-fill text-warning"></i>
+                                <span className="d-none d-xl-inline">Shop Setup</span>
+                            </button>
+                        )}
+
+                        {isAdmin && (
+                            <button
+                                className="btn btn-sm btn-warning text-dark fw-bold d-flex align-items-center gap-1 shadow-sm position-relative px-2 py-1"
+                                onClick={onOpenStaffApprovals}
+                                title="Manage & Approve Cashier / Officer Registration Requests"
+                                style={{ fontSize: '0.75rem' }}
+                            >
+                                <i className="bi bi-person-check-fill"></i>
+                                <span className="d-none d-xl-inline">Staff</span>
+                                {pendingStaffCount > 0 && (
+                                    <span className="badge bg-danger text-white rounded-pill ms-1">
+                                        {pendingStaffCount}
+                                    </span>
+                                )}
+                            </button>
+                        )}
+
+                        {isCashier && (
+                            <button
+                                className="btn btn-sm btn-outline-light d-flex align-items-center gap-1 fw-semibold px-2 py-1"
+                                onClick={onOpenShiftModal}
+                                title="Open or Close Register Shift & View Cash Drawer"
+                                style={{ fontSize: '0.75rem' }}
+                            >
+                                <i className="bi bi-safe"></i>
+                                <span className="d-none d-xl-inline">Drawer</span>
+                            </button>
+                        )}
+
+                        {/* User Pill */}
+                        <div className="d-flex align-items-center gap-1 bg-white bg-opacity-10 px-2 py-1 rounded text-white border border-white border-opacity-25" style={{ fontSize: '0.75rem' }}>
+                            <i className="bi bi-person-circle text-warning"></i>
+                            <span className="fw-bold d-none d-sm-inline text-truncate" style={{ maxWidth: '90px' }}>
+                                {currentUser.name}
                             </span>
                         </div>
-                        <small className="text-white-50" style={{ fontSize: '0.7rem' }}>
-                            {activeShift ? `Shift: ${activeShift.shiftNumber}` : 'Drawer: Not Opened'}
-                        </small>
+
+                        {/* Logout */}
+                        <button
+                            className="btn btn-sm btn-outline-danger text-white border-white border-opacity-50 d-flex align-items-center gap-1 fw-bold px-2 py-1"
+                            onClick={onLogout}
+                            title="Sign Out"
+                            style={{ fontSize: '0.75rem' }}
+                        >
+                            <i className="bi bi-box-arrow-right"></i>
+                        </button>
                     </div>
                 </div>
 
-                {/* Navigation Pills */}
-                <nav className="nav nav-pills nav-pills-pos">
-                    {/* POS Billing: Available to Cashier & Admin */}
-                    {isCashier && (
+                {/* Bottom Row on Mobile (< md): Full Horizontal Scrollable Tab Bar */}
+                <div className="d-block d-md-none pt-2">
+                    <nav className="nav nav-pills nav-pills-pos w-100">
+                        {isCashier && (
+                            <button
+                                className={`nav-link ${activeTab === 'pos' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('pos')}
+                            >
+                                <i className="bi bi-upc-scan"></i>
+                                <span>POS Billing</span>
+                                {heldCount > 0 && (
+                                    <span className="badge rounded-pill bg-danger ms-1" style={{ fontSize: '0.62rem' }}>
+                                        {heldCount}
+                                    </span>
+                                )}
+                            </button>
+                        )}
+
+                        {isAdmin && (
+                            <button
+                                className={`nav-link ${activeTab === 'inventory' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('inventory')}
+                            >
+                                <i className="bi bi-boxes"></i>
+                                <span>Stock Master</span>
+                            </button>
+                        )}
+
+                        {isOfficer && (
+                            <button
+                                className={`nav-link ${activeTab === 'cash_officer' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('cash_officer')}
+                            >
+                                <i className="bi bi-cash-coin"></i>
+                                <span>Cash Tally</span>
+                            </button>
+                        )}
+
                         <button
-                            className={`nav-link ${activeTab === 'pos' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('pos')}
+                            className={`nav-link ${activeTab === 'bills' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('bills')}
                         >
-                            <i className="bi bi-upc-scan"></i>
-                            <span>POS Billing</span>
-                            {heldCount > 0 && (
-                                <span className="badge rounded-pill bg-danger ms-1" style={{ fontSize: '0.65rem' }}>
-                                    {heldCount} Hold
-                                </span>
-                            )}
+                            <i className="bi bi-receipt"></i>
+                            <span>Bills</span>
                         </button>
-                    )}
-
-                    {/* Inventory: ONLY Available to Admin (Restricted from Cashier & Officer) */}
-                    {isAdmin && (
-                        <button
-                            className={`nav-link ${activeTab === 'inventory' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('inventory')}
-                        >
-                            <i className="bi bi-boxes"></i>
-                            <span>Stock &amp; Inventory</span>
-                            <span className="badge bg-dark text-warning ms-1" style={{ fontSize: '0.65rem' }}>Admin</span>
-                        </button>
-                    )}
-
-                    {/* Cash Officer & Tally: Available to Cash Officer & Admin */}
-                    {isOfficer && (
-                        <button
-                            className={`nav-link ${activeTab === 'cash_officer' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('cash_officer')}
-                        >
-                            <i className="bi bi-cash-coin"></i>
-                            <span>Cash Officer &amp; Tally</span>
-                            <span className="badge bg-light text-success ms-1 small fw-bold">Report</span>
-                        </button>
-                    )}
-
-                    {/* Bills History */}
-                    <button
-                        className={`nav-link ${activeTab === 'bills' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('bills')}
-                    >
-                        <i className="bi bi-receipt"></i>
-                        <span>Bills</span>
-                    </button>
-                </nav>
-
-                {/* Right Area: Store Settings (Admin), Staff Approvals, Shift Drawer, User badge, and Logout */}
-                <div className="d-flex align-items-center gap-2">
-                    {/* Store Settings Button (Admin / Store Owner) */}
-                    {isAdmin && (
-                        <button
-                            className="btn btn-sm btn-outline-warning text-white fw-bold d-flex align-items-center gap-1 shadow-sm"
-                            onClick={onOpenStoreSettings}
-                            title="Setup Store Profile & Counters"
-                        >
-                            <i className="bi bi-gear-fill text-warning"></i>
-                            <span className="d-none d-lg-inline">Shop Setup</span>
-                        </button>
-                    )}
-
-                    {/* Admin Staff Approvals Button */}
-                    {isAdmin && (
-                        <button
-                            className="btn btn-sm btn-warning text-dark fw-bold d-flex align-items-center gap-1 shadow-sm position-relative"
-                            onClick={onOpenStaffApprovals}
-                            title="Manage & Approve Cashier / Officer Registration Requests"
-                        >
-                            <i className="bi bi-person-check-fill"></i>
-                            <span className="d-none d-lg-inline">Staff Requests</span>
-                            {pendingStaffCount > 0 && (
-                                <span className="badge bg-danger text-white rounded-pill ms-1 animate__animated animate__pulse">
-                                    {pendingStaffCount} New
-                                </span>
-                            )}
-                        </button>
-                    )}
-
-                    {/* Shift Register Button (for Cashiers) */}
-                    {isCashier && (
-                        <button
-                            className="btn btn-sm btn-outline-light d-flex align-items-center gap-1 fw-semibold"
-                            onClick={onOpenShiftModal}
-                            title="Open or Close Register Shift & View Cash Drawer"
-                        >
-                            <i className="bi bi-safe"></i>
-                            <span className="d-none d-lg-inline">Drawer Tally</span>
-                        </button>
-                    )}
-
-                    {/* Logged-in User Badge */}
-                    <div className="d-flex align-items-center gap-2 bg-white bg-opacity-10 px-2 py-1 rounded text-white border border-white border-opacity-25">
-                        <i className="bi bi-person-circle fs-5 text-warning"></i>
-                        <div className="d-none d-sm-block text-start leading-tight">
-                            <div className="fw-bold small text-truncate" style={{ maxWidth: '120px' }}>
-                                {currentUser.name}
-                            </div>
-                            <small className="badge bg-secondary text-uppercase" style={{ fontSize: '0.6rem' }}>
-                                {currentUser.role}
-                            </small>
-                        </div>
-                    </div>
-
-                    {/* Logout Button */}
-                    <button
-                        className="btn btn-sm btn-outline-light d-flex align-items-center gap-1 fw-bold"
-                        onClick={onLogout}
-                        title="Sign Out / Logout"
-                    >
-                        <i className="bi bi-box-arrow-right"></i>
-                        <span className="d-none d-md-inline">Logout</span>
-                    </button>
+                    </nav>
                 </div>
             </div>
         </header>

@@ -557,45 +557,47 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
                 </div>
 
                 {/* Actions: Camera Scanner + Quick Add Loose Item + Held Bills + Clear */}
-                <div className="col-lg-6 col-md-5 d-flex gap-2 justify-content-md-end flex-wrap align-items-center">
-                    {/* Open / Close Camera Scanner Button */}
-                    <button
-                        type="button"
-                        className={`btn fw-bold d-flex align-items-center gap-1 shadow-sm px-3 ${isCameraScannerOpen ? 'btn-danger text-white' : 'btn-primary text-white'}`}
-                        onClick={() => setIsCameraScannerOpen(!isCameraScannerOpen)}
-                        title="Toggle Phone / Laptop Camera Barcode Scanner"
-                    >
-                        <i className={`bi ${isCameraScannerOpen ? 'bi-camera-video-off-fill' : 'bi-camera-fill'} fs-5`}></i>
-                        <span>{isCameraScannerOpen ? '🔴 Turn OFF Camera' : '📷 Open Camera Scanner'}</span>
-                    </button>
+                <div className="col-lg-6 col-md-5">
+                    <div className="d-flex gap-2 justify-content-start justify-content-md-end align-items-center flex-wrap">
+                        {/* Open / Close Camera Scanner Button */}
+                        <button
+                            type="button"
+                            className={`btn btn-sm py-2 px-3 fw-bold d-flex align-items-center gap-1 rounded-3 shadow-sm flex-grow-1 flex-md-grow-0 justify-content-center ${isCameraScannerOpen ? 'btn-danger text-white' : 'btn-success text-white'}`}
+                            onClick={() => setIsCameraScannerOpen(!isCameraScannerOpen)}
+                            title="Toggle Phone / Laptop Camera Barcode Scanner"
+                        >
+                            <i className={`bi ${isCameraScannerOpen ? 'bi-camera-video-off-fill' : 'bi-camera-fill'}`}></i>
+                            <span>{isCameraScannerOpen ? 'Close Cam' : 'Camera'}</span>
+                        </button>
 
-                    <button
-                        type="button"
-                        className="btn btn-warning text-dark fw-bold d-flex align-items-center gap-1 shadow-sm"
-                        onClick={() => setIsQuickAddOpen(true)}
-                    >
-                        <i className="bi bi-plus-circle-fill fs-5"></i>
-                        <span>+ Add Loose Item (kg)</span>
-                    </button>
+                        <button
+                            type="button"
+                            className="btn btn-sm btn-warning text-dark fw-bold d-flex align-items-center gap-1 rounded-3 shadow-sm py-2 px-3 flex-grow-1 flex-md-grow-0 justify-content-center"
+                            onClick={() => setIsQuickAddOpen(true)}
+                        >
+                            <i className="bi bi-plus-circle-fill"></i>
+                            <span>+ Loose (kg)</span>
+                        </button>
 
-                    <button
-                        type="button"
-                        className="btn btn-outline-dark fw-semibold d-flex align-items-center gap-1"
-                        onClick={() => setIsHeldModalOpen(true)}
-                    >
-                        <i className="bi bi-pause-circle"></i>
-                        <span>Held ({heldBills.length})</span>
-                    </button>
+                        <button
+                            type="button"
+                            className="btn btn-sm btn-outline-secondary fw-semibold d-flex align-items-center gap-1 rounded-3 py-2 px-3 justify-content-center"
+                            onClick={() => setIsHeldModalOpen(true)}
+                        >
+                            <i className="bi bi-pause-circle"></i>
+                            <span>Held ({heldBills.length})</span>
+                        </button>
 
-                    <button
-                        type="button"
-                        className="btn btn-outline-secondary fw-semibold"
-                        onClick={handleClearCart}
-                        disabled={cart.length === 0}
-                        title="Clear Cart"
-                    >
-                        <i className="bi bi-trash"></i>
-                    </button>
+                        <button
+                            type="button"
+                            className="btn btn-sm btn-outline-danger fw-semibold rounded-3 py-2 px-3 justify-content-center"
+                            onClick={handleClearCart}
+                            disabled={cart.length === 0}
+                            title="Clear Cart"
+                        >
+                            <i className="bi bi-trash"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
 

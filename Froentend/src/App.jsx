@@ -170,8 +170,8 @@ export default function App() {
         )}
       </main>
 
-      {/* Quick POS Shortcut Ribbon at bottom */}
-      <footer className="bg-white border-top py-2 px-3 no-print">
+      {/* Quick POS Shortcut Ribbon at bottom (Desktop only) */}
+      <footer className="bg-white border-top py-2 px-3 no-print d-none d-md-block">
         <div className="container-fluid d-flex flex-wrap justify-content-between align-items-center gap-2 small text-muted">
           <div className="d-flex align-items-center gap-3">
             <span className="fw-bold text-success">

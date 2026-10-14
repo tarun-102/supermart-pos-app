@@ -188,16 +188,16 @@ export default function InventoryManager() {
                     </p>
                 </div>
 
-                <div className="d-flex gap-2">
+                <div className="d-flex gap-2 w-100 w-sm-auto justify-content-between justify-content-sm-end flex-wrap">
                     <button
-                        className="btn btn-outline-secondary btn-sm fw-semibold"
+                        className="btn btn-outline-secondary btn-sm fw-semibold flex-grow-1 flex-sm-grow-0"
                         onClick={handleResetCatalog}
                         title="Restore initial supermarket demo products"
                     >
                         <i className="bi bi-arrow-counterclockwise me-1"></i> Reset Catalog
                     </button>
                     <button
-                        className="btn btn-success fw-bold d-flex align-items-center gap-2 shadow-sm"
+                        className="btn btn-success fw-bold d-flex align-items-center gap-2 shadow-sm flex-grow-1 flex-sm-grow-0 justify-content-center"
                         onClick={handleOpenAdd}
                     >
                         <i className="bi bi-plus-lg fs-5"></i>
@@ -307,8 +307,8 @@ export default function InventoryManager() {
                     <table className="table table-hover align-middle mb-0">
                         <thead className="table-light">
                             <tr>
-                                <th>Barcode / SKU</th>
-                                <th>Product Name</th>
+                                <th style={{ minWidth: '135px' }}>Barcode / SKU</th>
+                                <th style={{ minWidth: '180px' }}>Product Name</th>
                                 <th>Category</th>
                                 <th>Unit</th>
                                 <th className="text-end">Cost Price</th>
@@ -316,7 +316,7 @@ export default function InventoryManager() {
                                 <th className="text-end">DMart Rate</th>
                                 <th className="text-center">Savings / Discount</th>
                                 <th className="text-center">Stock</th>
-                                <th className="text-center">Actions</th>
+                                <th className="text-center" style={{ minWidth: '130px' }}>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -411,7 +411,7 @@ export default function InventoryManager() {
                                             </td>
 
                                             {/* Actions */}
-                                            <td className="text-center">
+                                            <td className="text-center" style={{ minWidth: '130px' }}>
                                                 <div className="d-flex justify-content-center gap-1">
                                                     <button
                                                         className="btn btn-sm btn-outline-success"

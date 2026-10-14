@@ -177,40 +177,52 @@ export default function SplitPaymentModal({
                                 </div>
                             </div>
 
-                            {/* Payment Mode Selector Tabs */}
+                            {/* Payment Mode Selector Tabs - Responsive Grid */}
                             <div className="mb-3">
                                 <label className="form-label fw-bold small text-muted text-uppercase mb-2">
                                     Select Payment Method:
                                 </label>
-                                <div className="btn-group w-100" role="group">
-                                    <button
-                                        type="button"
-                                        className={`btn py-2 fw-bold ${mode === 'CASH' ? 'btn-success text-white shadow-sm' : 'btn-outline-secondary'}`}
-                                        onClick={() => handleSelectMode('CASH')}
-                                    >
-                                        <i className="bi bi-cash-stack me-1"></i> Cash Only
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className={`btn py-2 fw-bold ${mode === 'CARD' ? 'btn-success text-white shadow-sm' : 'btn-outline-secondary'}`}
-                                        onClick={() => handleSelectMode('CARD')}
-                                    >
-                                        <i className="bi bi-credit-card me-1"></i> Card Only
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className={`btn py-2 fw-bold ${mode === 'UPI' ? 'btn-success text-white shadow-sm' : 'btn-outline-secondary'}`}
-                                        onClick={() => handleSelectMode('UPI')}
-                                    >
-                                        <i className="bi bi-qr-code-scan me-1"></i> UPI QR Only
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className={`btn py-2 fw-bold ${mode === 'SPLIT' ? 'btn-success text-white shadow-sm' : 'btn-outline-secondary'}`}
-                                        onClick={() => handleSelectMode('SPLIT')}
-                                    >
-                                        <i className="bi bi-pie-chart me-1"></i> Split (Multi-Mode)
-                                    </button>
+                                <div className="row g-2">
+                                    <div className="col-6 col-sm-3">
+                                        <button
+                                            type="button"
+                                            className={`btn w-100 py-2 fw-bold rounded-3 ${mode === 'CASH' ? 'btn-success text-white shadow-sm' : 'btn-outline-secondary'}`}
+                                            onClick={() => handleSelectMode('CASH')}
+                                            style={{ fontSize: '0.85rem' }}
+                                        >
+                                            <i className="bi bi-cash-stack me-1"></i> Cash
+                                        </button>
+                                    </div>
+                                    <div className="col-6 col-sm-3">
+                                        <button
+                                            type="button"
+                                            className={`btn w-100 py-2 fw-bold rounded-3 ${mode === 'CARD' ? 'btn-success text-white shadow-sm' : 'btn-outline-secondary'}`}
+                                            onClick={() => handleSelectMode('CARD')}
+                                            style={{ fontSize: '0.85rem' }}
+                                        >
+                                            <i className="bi bi-credit-card me-1"></i> Card
+                                        </button>
+                                    </div>
+                                    <div className="col-6 col-sm-3">
+                                        <button
+                                            type="button"
+                                            className={`btn w-100 py-2 fw-bold rounded-3 ${mode === 'UPI' ? 'btn-success text-white shadow-sm' : 'btn-outline-secondary'}`}
+                                            onClick={() => handleSelectMode('UPI')}
+                                            style={{ fontSize: '0.85rem' }}
+                                        >
+                                            <i className="bi bi-qr-code-scan me-1"></i> UPI QR
+                                        </button>
+                                    </div>
+                                    <div className="col-6 col-sm-3">
+                                        <button
+                                            type="button"
+                                            className={`btn w-100 py-2 fw-bold rounded-3 ${mode === 'SPLIT' ? 'btn-success text-white shadow-sm' : 'btn-outline-secondary'}`}
+                                            onClick={() => handleSelectMode('SPLIT')}
+                                            style={{ fontSize: '0.85rem' }}
+                                        >
+                                            <i className="bi bi-pie-chart me-1"></i> Split
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 

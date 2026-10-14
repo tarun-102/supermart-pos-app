@@ -53,12 +53,10 @@ export default function CameraScannerModal({ isOpen, onClose, onDetected }) {
                 formatsToSupport: [
                     Html5QrcodeSupportedFormats.EAN_13,
                     Html5QrcodeSupportedFormats.EAN_8,
-                    Html5QrcodeSupportedFormats.CODE_128,
-                    Html5QrcodeSupportedFormats.CODE_39,
-                    Html5QrcodeSupportedFormats.CODE_93,
                     Html5QrcodeSupportedFormats.UPC_A,
                     Html5QrcodeSupportedFormats.UPC_E,
-                    Html5QrcodeSupportedFormats.ITF,
+                    Html5QrcodeSupportedFormats.CODE_128,
+                    Html5QrcodeSupportedFormats.CODE_39,
                     Html5QrcodeSupportedFormats.QR_CODE
                 ],
                 experimentalFeatures: {
@@ -70,9 +68,11 @@ export default function CameraScannerModal({ isOpen, onClose, onDetected }) {
             html5QrCodeRef.current = html5QrCode;
 
             const onScanSuccess = (decodedText) => {
+                const clean = decodedText ? decodedText.trim() : '';
+                if (!clean || clean.length < 4) return;
                 playBarcodeBeep();
                 if (navigator.vibrate) navigator.vibrate(100);
-                onDetected(decodedText.trim());
+                onDetected(clean);
             };
 
             const onScanFailure = () => {};
@@ -80,15 +80,16 @@ export default function CameraScannerModal({ isOpen, onClose, onDetected }) {
             const cameraTarget = specificCameraId ? specificCameraId : { facingMode: 'environment' };
 
             const config = {
-                fps: 12,
+                fps: 15,
                 qrbox: (viewfinderWidth, viewfinderHeight) => ({
-                    width: Math.max(220, Math.floor(viewfinderWidth * 0.88)),
-                    height: Math.max(120, Math.floor(viewfinderHeight * 0.80))
+                    width: Math.max(240, Math.floor(viewfinderWidth * 0.88)),
+                    height: Math.max(130, Math.floor(viewfinderHeight * 0.75))
                 }),
                 videoConstraints: {
                     facingMode: { ideal: 'environment' },
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 }
+                    width: { ideal: 1920, min: 1280 },
+                    height: { ideal: 1080, min: 720 },
+                    focusMode: { ideal: 'continuous' }
                 }
             };
 

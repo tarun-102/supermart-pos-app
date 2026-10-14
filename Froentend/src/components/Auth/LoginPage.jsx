@@ -201,7 +201,7 @@ export default function LoginPage({ onLoginSuccess }) {
         <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light py-4 px-2">
             <div className="card border-0 shadow-lg" style={{ maxWidth: '580px', width: '100%', borderRadius: '20px', overflow: 'hidden' }}>
                 {/* Header with Multi-Store Branding */}
-                <div className="bg-success text-white p-4 text-center" style={{ background: 'linear-gradient(135deg, #00843D 0%, #005a28 100%)' }}>
+                <div className="text-white p-4 text-center" style={{ background: 'linear-gradient(135deg, #064e3b 0%, #047857 55%, #059669 100%)' }}>
                     <div className="d-flex justify-content-center align-items-center gap-2 mb-2">
                         <span className="fs-1">🏬</span>
                         <div className="text-start">

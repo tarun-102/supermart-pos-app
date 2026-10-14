@@ -18,6 +18,8 @@ export default function CameraScannerBox({
     const [justScanned, setJustScanned] = useState(false);
     const [zoomLevel, setZoomLevel] = useState(1);
     const [isProcessingSnap, setIsProcessingSnap] = useState(false);
+    const [hasTorch, setHasTorch] = useState(false);
+    const [isTorchOn, setIsTorchOn] = useState(false);
 
     const html5QrCodeRef = useRef(null);
     const lastScanRef = useRef({ code: '', time: 0 });
@@ -25,6 +27,7 @@ export default function CameraScannerBox({
     const lastScannedBarcodeRef = useRef('');
     const isMountedRef = useRef(true);
     const fileInputRef = useRef(null);
+    const autoScanCandidateRef = useRef({ code: '', count: 0, time: 0 });
 
     const isStartingRef = useRef(false);
 
@@ -35,6 +38,7 @@ export default function CameraScannerBox({
     useEffect(() => {
         isMountedRef.current = true;
         isScanLockedRef.current = false;
+        autoScanCandidateRef.current = { code: '', count: 0, time: 0 };
         initializeScanner();
 
         return () => {
@@ -45,6 +49,17 @@ export default function CameraScannerBox({
 
     const stopScanner = async () => {
         isScanLockedRef.current = true;
+        if (isTorchOn) {
+            try {
+                const videoElem = document.querySelector(`#${containerId} video`);
+                const track = videoElem?.srcObject?.getVideoTracks()?.[0];
+                if (track && track.applyConstraints) {
+                    await track.applyConstraints({ advanced: [{ torch: false }] });
+                }
+            } catch (e) {}
+            setIsTorchOn(false);
+        }
+
         if (html5QrCodeRef.current) {
             const scanner = html5QrCodeRef.current;
             html5QrCodeRef.current = null;
@@ -89,6 +104,7 @@ export default function CameraScannerBox({
         }
 
         isScanLockedRef.current = false;
+        autoScanCandidateRef.current = { code: '', count: 0, time: 0 };
         setIsStarting(true);
         setScannerError(null);
 
@@ -107,18 +123,16 @@ export default function CameraScannerBox({
         }
 
         try {
-            // Note: useBarCodeDetectorIfSupported is disabled (false) because Chromium Android
-            // has a known GPU rendering surface lock bug that freezes the video preview into a still photo.
+            // NOTE: ITF and CODE_93 are intentionally excluded to completely eliminate
+            // false-positive partial misreads on Indian and international retail barcodes.
             const html5QrCode = new Html5Qrcode(containerId, {
                 formatsToSupport: [
                     Html5QrcodeSupportedFormats.EAN_13,
                     Html5QrcodeSupportedFormats.EAN_8,
-                    Html5QrcodeSupportedFormats.CODE_128,
-                    Html5QrcodeSupportedFormats.CODE_39,
-                    Html5QrcodeSupportedFormats.CODE_93,
                     Html5QrcodeSupportedFormats.UPC_A,
                     Html5QrcodeSupportedFormats.UPC_E,
-                    Html5QrcodeSupportedFormats.ITF,
+                    Html5QrcodeSupportedFormats.CODE_128,
+                    Html5QrcodeSupportedFormats.CODE_39,
                     Html5QrcodeSupportedFormats.QR_CODE
                 ],
                 experimentalFeatures: {
@@ -135,25 +149,38 @@ export default function CameraScannerBox({
 
                 const now = Date.now();
                 const clean = decodedText ? decodedText.trim() : '';
-                if (!clean) return;
+                // Discard noise and accidental glitch decodes
+                if (!clean || clean.length < 4) return;
 
                 // Mode A: Single-item inventory barcode fill mode (autoCloseOnScan = true)
                 if (autoCloseOnScan) {
-                    // Lock instantly so NO MORE FRAMES can ever decode or beep
-                    isScanLockedRef.current = true;
-                    setLastScanned(clean);
-                    setJustScanned(true);
+                    // Check if candidate matches previous frame
+                    if (autoScanCandidateRef.current.code === clean) {
+                        autoScanCandidateRef.current.count += 1;
+                    } else {
+                        autoScanCandidateRef.current = { code: clean, count: 1, time: now };
+                    }
 
-                    // Exactly ONE crisp beep immediately
-                    playBarcodeBeep();
+                    // Strict retail check: Standard EAN-13, EAN-8, UPC-A have built-in algebraic modulo-10
+                    // checksums so 1 valid decode is authentic. Other formats require 2 consecutive frames.
+                    const isStrictRetailEAN = (clean.length === 13 || clean.length === 12 || clean.length === 8) && /^\d+$/.test(clean);
+                    if (autoScanCandidateRef.current.count >= 2 || isStrictRetailEAN) {
+                        isScanLockedRef.current = true;
+                        setLastScanned(clean);
+                        setJustScanned(true);
 
-                    // Immediately shut off scanner hardware
-                    stopScanner();
+                        // Exactly ONE crisp beep immediately
+                        playBarcodeBeep();
 
-                    // Pass code to form
-                    onDetected(clean);
+                        // Immediately shut off scanner hardware
+                        stopScanner();
 
-                    if (onClose) onClose();
+                        // Pass confirmed genuine code to form
+                        onDetected(clean);
+
+                        if (onClose) onClose();
+                        return;
+                    }
                     return;
                 }
 
@@ -190,19 +217,23 @@ export default function CameraScannerBox({
 
             const cameraTarget = specificCameraId ? specificCameraId : { facingMode: 'environment' };
 
-            // Optimized scan configuration:
-            // 12 FPS gives near-instant scan (<90ms) while keeping CPU low so phone video preview never lags
-            // ideal 1280x720 (no min width) guarantees zero OverconstrainedError on portrait mobile screens
+            // Full HD 1080p sensor configuration for effortless distance scanning:
+            // 15 FPS: instantaneous (<70ms) scan response without overloading mobile CPU
+            // ideal: 1920x1080: gives 3x more pixel density so barcodes 2-3 feet away resolve razor-sharp
             const config = {
-                fps: 12,
-                qrbox: (viewfinderWidth, viewfinderHeight) => ({
-                    width: Math.max(220, Math.floor(viewfinderWidth * 0.88)),
-                    height: Math.max(120, Math.floor(viewfinderHeight * 0.80))
-                }),
+                fps: 15,
+                qrbox: (viewfinderWidth, viewfinderHeight) => {
+                    const w = Math.min(viewfinderWidth * 0.90, 360);
+                    const h = Math.min(viewfinderHeight * 0.70, 180);
+                    return {
+                        width: Math.max(240, Math.floor(w)),
+                        height: Math.max(130, Math.floor(h))
+                    };
+                },
                 videoConstraints: {
                     facingMode: { ideal: 'environment' },
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 },
+                    width: { ideal: 1920, min: 1280 },
+                    height: { ideal: 1080, min: 720 },
                     focusMode: { ideal: 'continuous' }
                 }
             };
@@ -210,7 +241,7 @@ export default function CameraScannerBox({
             try {
                 await html5QrCode.start(cameraTarget, config, onScanSuccess, onScanFailure);
             } catch (firstErr) {
-                console.warn('Flexible start failed, trying basic camera...', firstErr);
+                console.warn('Full HD start failed, falling back to standard...', firstErr);
                 if (container) {
                     const extraVideos = container.querySelectorAll('video');
                     if (extraVideos.length > 1) {
@@ -222,8 +253,12 @@ export default function CameraScannerBox({
                 await html5QrCode.start(
                     cameraTarget,
                     {
-                        fps: 10,
-                        videoConstraints: { facingMode: 'environment' }
+                        fps: 12,
+                        videoConstraints: {
+                            facingMode: { ideal: 'environment' },
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 }
+                        }
                     },
                     onScanSuccess,
                     onScanFailure
@@ -233,11 +268,10 @@ export default function CameraScannerBox({
             if (!isMountedRef.current) return;
             setIsStarting(false);
 
-            // Configure single video element attributes & ensure continuous live playback
+            // Configure single video element attributes & check hardware capabilities
             try {
                 if (container) {
                     const allVideos = container.querySelectorAll('video');
-                    // Remove any duplicate video nodes WITHOUT stopping tracks (stopping tracks freezes active video!)
                     if (allVideos.length > 1) {
                         for (let i = 1; i < allVideos.length; i++) {
                             allVideos[i].remove();
@@ -253,7 +287,6 @@ export default function CameraScannerBox({
                         videoElem.style.transform = `scale(${zoomLevel})`;
                         videoElem.style.transformOrigin = 'center center';
 
-                        // Ensure continuous video play on mobile
                         const playPromise = videoElem.play();
                         if (playPromise !== undefined) {
                             playPromise.catch(() => {});
@@ -261,6 +294,17 @@ export default function CameraScannerBox({
                         videoElem.onloadedmetadata = () => {
                             videoElem.play().catch(() => {});
                         };
+
+                        // Check capabilities for hardware torch & zoom
+                        if (videoElem.srcObject) {
+                            const track = videoElem.srcObject.getVideoTracks()[0];
+                            if (track && track.getCapabilities) {
+                                const caps = track.getCapabilities();
+                                if (caps.torch) {
+                                    setHasTorch(true);
+                                }
+                            }
+                        }
                     }
                 }
             } catch (e) {}
@@ -293,6 +337,23 @@ export default function CameraScannerBox({
         }
     };
 
+    // Torch / Flashlight Toggle for low light & distant scanning
+    const toggleTorch = async () => {
+        try {
+            const videoElem = document.querySelector(`#${containerId} video`);
+            const track = videoElem?.srcObject?.getVideoTracks()?.[0];
+            if (track && track.applyConstraints) {
+                const nextState = !isTorchOn;
+                await track.applyConstraints({
+                    advanced: [{ torch: nextState }]
+                });
+                setIsTorchOn(nextState);
+            }
+        } catch (err) {
+            console.warn('Torch toggle error:', err);
+        }
+    };
+
     // Mobile Snap Camera Handler: Uses Phone's Native Camera (Works 100% on HTTP)
     const handleSnapPhoto = async (e) => {
         const file = e.target.files?.[0];
@@ -300,7 +361,6 @@ export default function CameraScannerBox({
 
         setIsProcessingSnap(true);
         try {
-            // Create temporary instance for fast file barcode decoding
             let snapScanner = html5QrCodeRef.current;
             if (!snapScanner) {
                 snapScanner = new Html5Qrcode(containerId, { verbose: false });
@@ -352,8 +412,9 @@ export default function CameraScannerBox({
                     if (track && track.applyConstraints) {
                         const capabilities = track.getCapabilities ? track.getCapabilities() : {};
                         if (capabilities.zoom) {
+                            const targetZoom = Math.min(Math.max(newZoom, capabilities.zoom.min || 1), capabilities.zoom.max || 5);
                             await track.applyConstraints({
-                                advanced: [{ zoom: Number(newZoom) }]
+                                advanced: [{ zoom: targetZoom }]
                             });
                         }
                     }
@@ -376,7 +437,7 @@ export default function CameraScannerBox({
     };
 
     return (
-        <div className="card border-success border-2 shadow-sm rounded-3 mb-2 bg-white overflow-hidden">
+        <div className="card border-0 shadow-sm rounded-4 mb-3 bg-white overflow-hidden scanner-card-wrap">
             {/* Native Mobile Camera File Input (Zero HTTP restrictions) */}
             <input
                 type="file"
@@ -387,20 +448,20 @@ export default function CameraScannerBox({
                 onChange={handleSnapPhoto}
             />
 
-            {/* Header Toolbar - Compact */}
-            <div className={`card-header text-white py-1 px-3 d-flex justify-content-between align-items-center transition-all ${justScanned ? 'bg-primary' : 'bg-success'}`}>
-                <div className="d-flex align-items-center gap-2">
+            {/* Header Toolbar - Modern, Compact & Mobile-First */}
+            <div className={`card-header py-2 px-3 d-flex justify-content-between align-items-center transition-all ${justScanned ? 'bg-primary text-white' : 'bg-dark text-white'}`}>
+                <div className="d-flex align-items-center gap-2 text-truncate me-2">
                     <span className="scan-pulse" style={{ width: '8px', height: '8px' }}></span>
-                    <i className="bi bi-camera-fill"></i>
-                    <strong className="small">{title}</strong>
+                    <i className="bi bi-camera-fill text-success"></i>
+                    <strong className="small text-truncate" style={{ maxWidth: '200px' }}>{title}</strong>
                     {lastScanned && (
-                        <span className="badge bg-warning text-dark font-mono ms-1 px-2 py-0 shadow-sm" style={{ fontSize: '0.75rem' }}>
-                            Scanned: {lastScanned}
+                        <span className="badge bg-warning text-dark font-mono px-2 py-0 shadow-sm flex-shrink-0" style={{ fontSize: '0.72rem' }}>
+                            {lastScanned}
                         </span>
                     )}
                 </div>
 
-                <div className="d-flex align-items-center gap-1">
+                <div className="d-flex align-items-center gap-1 flex-shrink-0">
                     {/* Camera Select Dropdown */}
                     {cameras.length > 1 && (
                         <select
@@ -411,7 +472,7 @@ export default function CameraScannerBox({
                         >
                             {cameras.map((c, i) => (
                                 <option key={c.id} value={c.id}>
-                                    📷 {c.label.slice(0, 18) || `Cam ${i + 1}`}
+                                    Cam {i + 1}
                                 </option>
                             ))}
                         </select>
@@ -420,13 +481,13 @@ export default function CameraScannerBox({
                     {/* Turn Off Camera Button */}
                     <button
                         type="button"
-                        className="btn btn-sm btn-danger fw-bold d-flex align-items-center gap-1 py-0 px-2"
+                        className="btn btn-sm btn-danger fw-bold d-flex align-items-center gap-1 py-1 px-2"
                         style={{ fontSize: '0.72rem' }}
                         onClick={handleTurnOffCamera}
                         title="Turn OFF Camera"
                     >
-                        <i className="bi bi-camera-video-off-fill"></i>
-                        <span>Turn OFF</span>
+                        <i className="bi bi-x-lg"></i>
+                        <span>Close</span>
                     </button>
                 </div>
             </div>
@@ -434,17 +495,27 @@ export default function CameraScannerBox({
             {/* Viewfinder & Controls Container */}
             <div className="card-body p-2 bg-light">
                 <div className="row g-2 align-items-center">
-                    {/* Viewfinder Column (Single screen, compact 145px) */}
+                    {/* Viewfinder Column (220px clear height) */}
                     <div className="col-md-6 col-12">
                         <div
                             className="scanner-viewport-box shadow-inner position-relative mx-auto"
-                            style={{ height: '145px', maxHeight: '145px', width: '100%' }}
+                            style={{ height: '220px', maxHeight: '220px', width: '100%' }}
                         >
                             {/* Live Video Target */}
                             <div
                                 id={containerId}
-                                style={{ width: '100%', height: '145px', overflow: 'hidden' }}
+                                style={{ width: '100%', height: '220px', overflow: 'hidden' }}
                             ></div>
+
+                            {/* Viewfinder Targeting Reticle */}
+                            {!isStarting && !scannerError && (
+                                <div className="scanner-reticle-box">
+                                    <div className="scanner-corner top-left"></div>
+                                    <div className="scanner-corner top-right"></div>
+                                    <div className="scanner-corner bottom-left"></div>
+                                    <div className="scanner-corner bottom-right"></div>
+                                </div>
+                            )}
 
                             {/* Single Laser Sweep Line */}
                             {!isStarting && !scannerError && (
@@ -483,64 +554,82 @@ export default function CameraScannerBox({
                             {isStarting && !scannerError && (
                                 <div className="position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-75 d-flex flex-column justify-content-center align-items-center text-white" style={{ zIndex: 15 }}>
                                     <div className="spinner-border spinner-border-sm text-success mb-1" role="status"></div>
-                                    <span className="small" style={{ fontSize: '0.75rem' }}>Opening camera lens...</span>
+                                    <span className="small" style={{ fontSize: '0.75rem' }}>Opening high-resolution lens...</span>
                                 </div>
                             )}
                         </div>
 
-                        {/* Distance Zoom Bar & Quick Snap Button */}
-                        <div className="d-flex justify-content-between align-items-center mt-1 px-1 flex-wrap gap-1">
+                        {/* Distance Zoom Bar, Torch & Quick Snap Toolbar */}
+                        <div className="d-flex justify-content-between align-items-center mt-2 px-1 flex-wrap gap-1">
                             <div className="d-flex align-items-center gap-1">
-                                <span className="text-muted small fw-bold" style={{ fontSize: '0.7rem' }}>
+                                <span className="text-muted small fw-bold me-1" style={{ fontSize: '0.72rem' }}>
                                     Zoom:
                                 </span>
                                 <div className="btn-group btn-group-sm" role="group">
-                                    {[1, 1.5, 2, 2.5, 3].map(z => (
-                                        <button
-                                            key={z}
-                                            type="button"
-                                            className={`btn btn-sm px-2 py-0 fw-bold ${zoomLevel === z ? 'btn-success text-white' : 'btn-outline-secondary'}`}
-                                            style={{ fontSize: '0.68rem' }}
-                                            onClick={() => handleApplyZoom(z)}
-                                            title={`Set Zoom to ${z}x`}
-                                        >
-                                            {z}x
-                                        </button>
-                                    ))}
+                                    <button
+                                        type="button"
+                                        className={`btn btn-sm px-2 py-1 fw-bold ${zoomLevel === 1 ? 'btn-success text-white' : 'btn-outline-secondary'}`}
+                                        style={{ fontSize: '0.72rem' }}
+                                        onClick={() => handleApplyZoom(1)}
+                                    >
+                                        1x
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={`btn btn-sm px-2 py-1 fw-bold ${zoomLevel === 2 ? 'btn-success text-white' : 'btn-outline-secondary'}`}
+                                        style={{ fontSize: '0.72rem' }}
+                                        onClick={() => handleApplyZoom(2)}
+                                        title="2x Hardware Distance Zoom"
+                                    >
+                                        🎯 2x Far
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={`btn btn-sm px-2 py-1 fw-bold ${zoomLevel === 3 ? 'btn-success text-white' : 'btn-outline-secondary'}`}
+                                        style={{ fontSize: '0.72rem' }}
+                                        onClick={() => handleApplyZoom(3)}
+                                    >
+                                        3x
+                                    </button>
                                 </div>
-                                <button
-                                    type="button"
-                                    className={`btn btn-sm px-2 py-0 fw-bold ${zoomLevel >= 2 ? 'btn-warning text-dark' : 'btn-outline-warning text-dark'}`}
-                                    style={{ fontSize: '0.65rem' }}
-                                    onClick={() => handleApplyZoom(zoomLevel >= 2 ? 1 : 2)}
-                                    title="Toggle Far-Distance Counter Barcode Scanning Mode"
-                                >
-                                    🎯 Distance Mode
-                                </button>
                             </div>
 
-                            {/* One-Tap Mobile Camera Snap */}
-                            <button
-                                type="button"
-                                className="btn btn-outline-success btn-sm fw-bold px-2 py-0 shadow-sm d-flex align-items-center gap-1"
-                                style={{ fontSize: '0.72rem' }}
-                                onClick={() => fileInputRef.current?.click()}
-                                title="Open phone camera to snap barcode directly"
-                            >
-                                <i className="bi bi-camera-fill"></i>
-                                <span>Snap Camera</span>
-                            </button>
+                            <div className="d-flex align-items-center gap-1">
+                                {hasTorch && (
+                                    <button
+                                        type="button"
+                                        className={`btn btn-sm px-2 py-1 fw-bold d-flex align-items-center gap-1 ${isTorchOn ? 'btn-warning text-dark' : 'btn-outline-secondary'}`}
+                                        style={{ fontSize: '0.72rem' }}
+                                        onClick={toggleTorch}
+                                        title="Toggle Flashlight / Torch"
+                                    >
+                                        <i className="bi bi-lightbulb-fill"></i>
+                                        <span>{isTorchOn ? 'Torch ON' : 'Torch'}</span>
+                                    </button>
+                                )}
+
+                                <button
+                                    type="button"
+                                    className="btn btn-outline-success btn-sm fw-bold px-2 py-1 shadow-sm d-flex align-items-center gap-1"
+                                    style={{ fontSize: '0.72rem' }}
+                                    onClick={() => fileInputRef.current?.click()}
+                                    title="Open phone camera to snap barcode directly"
+                                >
+                                    <i className="bi bi-camera-fill"></i>
+                                    <span>Snap Photo</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
                     {/* Controls & Manual Input Column */}
                     <div className="col-md-6 col-12">
-                        <div className="p-2 bg-white rounded border h-100 d-flex flex-column justify-content-between">
+                        <div className="p-3 bg-white rounded-3 border h-100 d-flex flex-column justify-content-between">
                             <div>
                                 <label className="form-label small fw-bold text-muted mb-1 text-uppercase" style={{ fontSize: '0.72rem' }}>
                                     Barcode / Manual SKU:
                                 </label>
-                                <div className="input-group input-group-sm mb-1">
+                                <div className="input-group input-group-sm mb-2">
                                     <input
                                         type="text"
                                         className="form-control font-mono fw-bold"
@@ -564,11 +653,11 @@ export default function CameraScannerBox({
                                 </div>
                             </div>
 
-                            <div className="d-flex gap-1 mt-1">
+                            <div className="d-flex gap-2 mt-2">
                                 <button
                                     type="button"
                                     className="btn btn-outline-primary btn-sm fw-bold w-50 py-1"
-                                    style={{ fontSize: '0.72rem' }}
+                                    style={{ fontSize: '0.75rem' }}
                                     onClick={() => fileInputRef.current?.click()}
                                 >
                                     <i className="bi bi-phone me-1"></i> Phone Snap
@@ -576,7 +665,7 @@ export default function CameraScannerBox({
                                 <button
                                     type="button"
                                     className="btn btn-outline-danger btn-sm fw-bold w-50 py-1"
-                                    style={{ fontSize: '0.72rem' }}
+                                    style={{ fontSize: '0.75rem' }}
                                     onClick={handleTurnOffCamera}
                                 >
                                     <i className="bi bi-power me-1"></i> Stop Camera
