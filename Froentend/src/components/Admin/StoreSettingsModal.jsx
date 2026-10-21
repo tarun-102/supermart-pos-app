@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { apiFetch } from '../../utils/api';
+import { useConfirm } from '../../context/ConfirmContext';
+import { toast } from 'react-toastify';
 
 export default function StoreSettingsModal({ isOpen, onClose, onStoreUpdated }) {
+    const confirm = useConfirm();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [newCounterInput, setNewCounterInput] = useState('');
@@ -54,12 +57,12 @@ export default function StoreSettingsModal({ isOpen, onClose, onStoreUpdated }) 
                 body: JSON.stringify(formData)
             });
             if (res.success) {
-                alert('Shop configuration and counters saved successfully!');
+                toast.success('Shop configuration and counters saved successfully!');
                 if (onStoreUpdated) onStoreUpdated(res.config);
                 onClose();
             }
         } catch (err) {
-            alert('Failed to save store configuration: ' + err.message);
+            toast.error('Failed to save store configuration: ' + err.message);
         } finally {
             setSaving(false);
         }
@@ -69,7 +72,7 @@ export default function StoreSettingsModal({ isOpen, onClose, onStoreUpdated }) 
         if (!newCounterInput.trim()) return;
         const trimmed = newCounterInput.trim();
         if (formData.counters.includes(trimmed)) {
-            alert('This counter already exists!');
+            toast.warning('This counter already exists!');
             return;
         }
         setFormData({
@@ -77,14 +80,24 @@ export default function StoreSettingsModal({ isOpen, onClose, onStoreUpdated }) 
             counters: [...formData.counters, trimmed]
         });
         setNewCounterInput('');
+        toast.success(`Counter "${trimmed}" added.`);
     };
 
-    const handleDeleteCounter = (counterName) => {
-        if (!window.confirm(`Delete "${counterName}" from your shop's counter list?`)) return;
+    const handleDeleteCounter = async (counterName) => {
+        const isOk = await confirm({
+            title: 'Delete Counter Desk',
+            message: `Are you sure you want to delete "${counterName}" from your shop's counter list?`,
+            confirmText: 'Delete Counter',
+            confirmVariant: 'danger',
+            icon: 'bi-display'
+        });
+        if (!isOk) return;
+
         setFormData({
             ...formData,
             counters: formData.counters.filter(c => c !== counterName)
         });
+        toast.info(`Counter "${counterName}" removed.`);
     };
 
     if (!isOpen) return null;

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { apiFetch } from '../../utils/api';
 import ReceiptModal from '../POS/ReceiptModal';
-import { printSalesReport, printThermalReceipt, shareBillOnWhatsApp } from '../../utils/printHelper';
+import { printSalesReport, printThermalReceipt, shareBillOnWhatsApp, exportCSVGstStatement } from '../../utils/printHelper';
+import { toast } from 'react-toastify';
 
 export default function BillsHistory({ currentUser, activeShift, onOpenShiftModal }) {
     const isCashier = currentUser?.role === 'cashier';
@@ -69,10 +70,29 @@ export default function BillsHistory({ currentUser, activeShift, onOpenShiftModa
     const totalTaxableSum = totalSalesSum - totalTaxCollected;
 
     const handlePrintReport = () => {
+        if (bills.length === 0) {
+            toast.warning('No invoices available to print');
+            return;
+        }
         printSalesReport(bills, storeConfig, {
             scope: scopeFilter === 'CURRENT_SHIFT' ? 'Current Shift Invoices' : 'All Invoices',
             payment: paymentFilter
         });
+        toast.info('🖨️ Opening GST Sales Statement print preview...');
+    };
+
+    const handleDownloadGstCsv = () => {
+        if (bills.length === 0) {
+            toast.warning('No invoices available to download');
+            return;
+        }
+        const ok = exportCSVGstStatement(bills, storeConfig, {
+            scope: scopeFilter === 'CURRENT_SHIFT' ? 'Current Shift' : 'All Invoices',
+            payment: paymentFilter
+        });
+        if (ok) {
+            toast.success(`📥 GST Statement (${bills.length} invoices) downloaded in Excel format!`);
+        }
     };
 
     return (
@@ -85,17 +105,28 @@ export default function BillsHistory({ currentUser, activeShift, onOpenShiftModa
                         <h4 className="fw-bolder mb-0 text-dark">Customer Invoices &amp; GST Sales Register</h4>
                     </div>
                     <p className="text-muted small mb-0">
-                        View customer transactions, inspect GST (CGST+SGST) tax breakdown, print official reports &amp; receipts.
+                        View customer transactions, inspect GST (CGST+SGST) tax breakdown, print official reports &amp; download statement.
                     </p>
                 </div>
                 <div className="d-flex gap-2 align-items-center flex-wrap">
                     <button
-                        className="btn btn-primary btn-sm fw-bold d-flex align-items-center gap-2 shadow-sm"
+                        type="button"
+                        className="btn btn-success btn-sm fw-bold d-flex align-items-center gap-2 shadow-sm"
+                        onClick={handleDownloadGstCsv}
+                        title="Download official GST Statement in Excel (.csv) format (Zero blank pages)"
+                    >
+                        <i className="bi bi-file-earmark-spreadsheet-fill fs-6"></i>
+                        <span>Download GST Statement</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        className="btn btn-outline-primary btn-sm fw-bold d-flex align-items-center gap-2 shadow-sm"
                         onClick={handlePrintReport}
-                        title="Print official GST tax report (never blank)"
+                        title="Print official GST tax report (Never blank)"
                     >
                         <i className="bi bi-printer-fill fs-6"></i>
-                        <span>Print GST Sales Report</span>
+                        <span>Print Statement</span>
                     </button>
 
                     <div className="btn-group btn-group-sm" role="group">

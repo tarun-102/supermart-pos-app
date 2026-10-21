@@ -1,12 +1,13 @@
 :root {
-  /* Ultra-Modern Clean Obsidian & Electric Indigo Design System (Mobile-First) */
-  --brand-primary: #4f46e5; /* Modern Electric Indigo - High tech, vibrant yet soothing */
-  --brand-primary-hover: #4338ca;
+  /* Ultra-Modern Royal Indigo & Clean Obsidian Design System */
+  --brand-primary: #4338ca; /* Deep Royal Indigo - Contemporary & Premium */
+  --brand-primary-hover: #3730a3;
   --brand-primary-light: #eef2ff;
-  --brand-primary-glow: rgba(79, 70, 229, 0.2);
+  --brand-primary-glow: rgba(67, 56, 202, 0.18);
   --brand-primary-border: #c7d2fe;
+  --brand-accent: #6366f1;
 
-  --brand-dark: #0f172a; /* Obsidian Slate - Crisp modern typography */
+  --brand-dark: #0f172a; /* Deep Obsidian Slate */
   --brand-slate: #1e293b;
   --brand-slate-light: #475569;
   --brand-muted: #64748b;
@@ -16,12 +17,12 @@
   --brand-border: #e2e8f0;
   --brand-border-subtle: #f1f5f9;
 
-  --brand-green: #10b981; /* Fresh Mint for In Stock / Savings */
+  --brand-green: #10b981; /* Emerald Mint for In Stock / Savings */
   --brand-green-light: #ecfdf5;
-  --brand-yellow: #f59e0b; /* Honey Amber for Shortage / Warnings */
+  --brand-yellow: #f59e0b; /* Warm Amber for Shortage / Warnings */
   --brand-yellow-light: #fffbeb;
-  --brand-red: #f43f5e; /* Vivid Rose for Out of stock / Delete */
-  --brand-red-light: #fff1f2;
+  --brand-red: #ef4444; /* Vivid Rose for Out of stock / Delete */
+  --brand-red-light: #fef2f2;
 
   --card-radius: 16px;
   --card-radius-sm: 12px;
@@ -465,10 +466,24 @@ html, body {
   }
 }
 
+/* Modern React-Toastify Styling */
+.Toastify__toast-container {
+  z-index: 99999 !important;
+}
+
+.Toastify__toast {
+  border-radius: 14px !important;
+  font-family: inherit !important;
+  font-size: 0.88rem !important;
+  font-weight: 600 !important;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.08) !important;
+}
+
 /* Print Styles preserved - Isolated & Never Blank */
 @media print {
   @page {
-    margin: 8mm;
+    margin: 4mm;
+    size: auto;
   }
 
   html, body {
@@ -479,6 +494,16 @@ html, body {
     color: #000000 !important;
     margin: 0 !important;
     padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  #shiftflow-print-iframe {
+    display: block !important;
+    visibility: visible !important;
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
   }
 
   #root {

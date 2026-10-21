@@ -3,8 +3,11 @@ import { apiFetch } from '../../utils/api';
 import CameraScannerBox from '../POS/CameraScannerBox';
 import { UNIVERSAL_SHOP_SECTORS, ALL_FLAT_CATEGORIES, GST_SLABS } from '../../utils/categories';
 import { printHtmlViaIframe } from '../../utils/printHelper';
+import { useConfirm } from '../../context/ConfirmContext';
+import { toast } from 'react-toastify';
 
 export default function InventoryManager() {
+    const confirm = useConfirm();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
@@ -129,20 +132,28 @@ export default function InventoryManager() {
             }
             setIsFormOpen(false);
             loadProducts();
-            showToast('✅ Product saved to inventory successfully!');
+            toast.success('✅ Product saved to inventory successfully!');
         } catch (err) {
-            alert('Error saving product: ' + err.message);
+            toast.error('Error saving product: ' + err.message);
         }
     };
 
     const handleDeleteProduct = async (id, name) => {
-        if (!window.confirm(`Are you sure you want to delete "${name}" from inventory?`)) return;
+        const isOk = await confirm({
+            title: 'Delete Product',
+            message: `Are you sure you want to delete "${name}" from inventory? This action cannot be undone.`,
+            confirmText: 'Delete',
+            confirmVariant: 'danger',
+            icon: 'bi-trash3-fill'
+        });
+        if (!isOk) return;
+
         try {
             await apiFetch(`/inventory/${id}`, { method: 'DELETE' });
             loadProducts();
-            showToast('🗑️ Product deleted from inventory.');
+            toast.success('🗑️ Product deleted from inventory.');
         } catch (err) {
-            alert('Delete failed: ' + err.message);
+            toast.error('Delete failed: ' + err.message);
         }
     };
 
@@ -162,27 +173,33 @@ export default function InventoryManager() {
             setAdjustModalProduct(null);
             setStockChangeQty('');
             loadProducts();
-            showToast(`⚡ Stock updated: ${oldName} (${addedQty > 0 ? `+${addedQty}` : addedQty})`);
+            toast.success(`⚡ Stock updated: ${oldName} (${addedQty > 0 ? `+${addedQty}` : addedQty})`);
         } catch (err) {
-            alert('Failed to adjust stock: ' + err.message);
+            toast.error('Failed to adjust stock: ' + err.message);
         }
     };
 
     const handleResetCatalog = async () => {
-        if (window.confirm('Reset catalog to default supermarket catalog? Custom items will be replaced.')) {
-            try {
-                await apiFetch('/inventory/reset-seeds', { method: 'POST' });
-                loadProducts();
-                showToast('🔄 Catalog restored to default retail products.');
-            } catch (err) {
-                alert(err.message);
-            }
+        const isOk = await confirm({
+            title: 'Reset Inventory Catalog',
+            message: 'Are you sure you want to reset the catalog to default supermarket demo items? Custom products will be overwritten.',
+            confirmText: 'Reset Catalog',
+            confirmVariant: 'warning',
+            icon: 'bi-arrow-counterclockwise'
+        });
+        if (!isOk) return;
+
+        try {
+            await apiFetch('/inventory/reset-seeds', { method: 'POST' });
+            loadProducts();
+            toast.success('🔄 Catalog restored to default retail products.');
+        } catch (err) {
+            toast.error('Reset failed: ' + err.message);
         }
     };
 
     const showToast = (msg) => {
-        setToastMessage(msg);
-        setTimeout(() => setToastMessage(null), 3500);
+        toast.info(msg);
     };
 
     // Thermal Barcode Sticker Print (Never blank)
@@ -219,6 +236,7 @@ export default function InventoryManager() {
             </body>
             </html>
         `;
+        toast.info('🖨️ Opening barcode sticker print preview...');
         printHtmlViaIframe(html, `Sticker_${prod.barcode}`);
     };
 
@@ -227,7 +245,7 @@ export default function InventoryManager() {
 
     const handleCopySupplierOrder = () => {
         if (shortItemsList.length === 0) {
-            alert('No short items to order!');
+            toast.info('No short items to order!');
             return;
         }
         const storeName = storeConfig?.storeName || 'SuperStore';
@@ -247,12 +265,12 @@ export default function InventoryManager() {
             `Please dispatch urgent stock. Thank you!`;
 
         navigator.clipboard.writeText(text);
-        showToast('📋 Short list copied to clipboard! Paste directly in WhatsApp.');
+        toast.success('📋 Shortage list copied to clipboard! Ready to paste in WhatsApp.');
     };
 
     const handleWhatsAppSupplierOrder = () => {
         if (shortItemsList.length === 0) {
-            alert('No short items to order!');
+            toast.info('No short items to order!');
             return;
         }
         const storeName = storeConfig?.storeName || 'SuperStore';

@@ -1,15 +1,18 @@
 import React from 'react';
 import { printThermalReceipt, shareBillOnWhatsApp } from '../../utils/printHelper';
+import { toast } from 'react-toastify';
 
 export default function ReceiptModal({ isOpen, onClose, bill, storeConfig }) {
     if (!isOpen || !bill) return null;
 
     const handlePrint = () => {
         printThermalReceipt(bill, storeConfig);
+        toast.info('🖨️ Opening Thermal Receipt print preview...');
     };
 
     const handleWhatsApp = () => {
         shareBillOnWhatsApp(bill, storeConfig);
+        toast.success('📱 Opening WhatsApp to share digital invoice...');
     };
 
     const dateFormatted = new Date(bill.createdAt || Date.now()).toLocaleString('en-IN', {
@@ -22,12 +25,12 @@ export default function ReceiptModal({ isOpen, onClose, bill, storeConfig }) {
             <div className="modal-dialog modal-dialog-centered modal-md">
                 <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '16px', overflow: 'hidden' }}>
                     {/* Modal Header */}
-                    <div className="modal-header bg-dark text-white py-2 no-print">
+                    <div className="modal-header bg-white border-bottom text-dark py-2 px-3 no-print">
                         <div className="d-flex align-items-center gap-2">
-                            <i className="bi bi-receipt-cutoff text-warning fs-5"></i>
+                            <i className="bi bi-receipt-cutoff text-primary fs-5"></i>
                             <h6 className="modal-title fw-bold mb-0">Tax Invoice / Thermal Receipt</h6>
                         </div>
-                        <button type="button" className="btn-close btn-close-white" onClick={onClose}></button>
+                        <button type="button" className="btn-close" onClick={onClose}></button>
                     </div>
 
                     {/* Receipt Scroll Area */}

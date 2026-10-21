@@ -6,8 +6,11 @@ import ReceiptModal from './ReceiptModal';
 import QuickAddModal from './QuickAddModal';
 import HeldBillsModal from './HeldBillsModal';
 import CameraScannerBox from './CameraScannerBox';
+import { useConfirm } from '../../context/ConfirmContext';
+import { toast } from 'react-toastify';
 
 export default function PosBilling({ currentUser, activeShift, refreshShifts, onOpenShiftModal, storeConfig }) {
+    const confirm = useConfirm();
     // POS State
     const [cart, setCart] = useState([]);
     const [barcodeInput, setBarcodeInput] = useState('');
@@ -282,11 +285,19 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
     };
 
     // Clear entire cart
-    const handleClearCart = () => {
+    const handleClearCart = async () => {
         if (cart.length === 0) return;
-        if (window.confirm('Clear all items from current cart?')) {
+        const isOk = await confirm({
+            title: 'Clear Active Cart',
+            message: `Are you sure you want to remove all ${cart.length} item(s) from the current bill?`,
+            confirmText: 'Clear Cart',
+            confirmVariant: 'danger',
+            icon: 'bi-cart-x-fill'
+        });
+        if (isOk) {
             setCart([]);
             setScanMessage(null);
+            toast.info('🛒 Cart cleared.');
         }
     };
 
@@ -343,9 +354,10 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
                 setCustomerName('');
                 setCustomerPhone('');
                 setScanMessage({ type: 'info', text: 'Cart placed on hold successfully!' });
+                toast.info('⏸️ Current bill placed on hold.');
             }
         } catch (err) {
-            alert('Failed to hold bill: ' + err.message);
+            toast.error('Failed to hold bill: ' + err.message);
         }
     };
 
@@ -400,13 +412,14 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
                 setCustomerName('');
                 setCustomerPhone('');
                 setScanMessage({ type: 'success', text: `Bill generated: ${res.bill.billNumber}` });
+                toast.success(`🎉 Bill generated: ${res.bill.billNumber}`);
                 // Refresh shift metrics
                 if (refreshShifts) refreshShifts();
                 // Reload catalog to reflect deducted inventory stock
                 loadCatalog();
             }
         } catch (err) {
-            alert('Checkout failed: ' + err.message);
+            toast.error('Checkout failed: ' + err.message);
         }
     };
 

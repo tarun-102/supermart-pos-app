@@ -9,25 +9,55 @@
  * Eliminates blank-page bugs caused by SPA modal overflows, visibility rules, and fixed positions.
  */
 
-// Internal helper to print HTML content in an isolated invisible iframe
+// Internal helper to print HTML content with 100% reliability (Never blank)
 export function printHtmlViaIframe(htmlContent, title = 'POS Print') {
     return new Promise((resolve) => {
+        const isMobile = typeof navigator !== 'undefined' &&
+            /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent || '');
+
+        // On Mobile devices, window.open is the only method that reliably triggers native Android/iOS print dialogs
+        if (isMobile) {
+            try {
+                const printWindow = window.open('', '_blank');
+                if (printWindow) {
+                    printWindow.document.open();
+                    printWindow.document.write(htmlContent);
+                    printWindow.document.close();
+                    setTimeout(() => {
+                        try {
+                            printWindow.focus();
+                            printWindow.print();
+                        } catch (e) {
+                            console.warn('Mobile print focus error:', e);
+                        }
+                        resolve();
+                    }, 400);
+                    return;
+                }
+            } catch (mobErr) {
+                console.warn('Mobile popup print blocked, falling back to iframe...', mobErr);
+            }
+        }
+
+        // Desktop / Standard Browser: Dedicated Non-Zero Sized Iframe
         let iframe = document.getElementById('shiftflow-print-iframe');
         if (iframe) {
-            iframe.remove();
+            try { iframe.remove(); } catch (e) {}
         }
 
         iframe = document.createElement('iframe');
         iframe.id = 'shiftflow-print-iframe';
+        // CRITICAL: Dimensions must be non-zero (100% viewport) so browser print engine never computes a blank page!
         iframe.style.position = 'fixed';
-        iframe.style.right = '0';
-        iframe.style.bottom = '0';
-        iframe.style.width = '0';
-        iframe.style.height = '0';
-        iframe.style.border = '0';
-        iframe.style.opacity = '0';
-        iframe.style.pointerEvents = 'none';
-        iframe.style.zIndex = '-9999';
+        iframe.style.top = '0';
+        iframe.style.left = '0';
+        iframe.style.width = '100vw';
+        iframe.style.height = '100vh';
+        iframe.style.border = 'none';
+        iframe.style.backgroundColor = '#ffffff';
+        iframe.style.zIndex = '999999';
+        iframe.style.visibility = 'visible';
+        iframe.style.opacity = '1';
 
         document.body.appendChild(iframe);
 
@@ -36,18 +66,25 @@ export function printHtmlViaIframe(htmlContent, title = 'POS Print') {
         doc.write(htmlContent);
         doc.close();
 
-        // Allow fonts, barcode images, and styles to compute
-        setTimeout(() => {
+        const triggerPrint = () => {
             try {
                 iframe.contentWindow.focus();
                 iframe.contentWindow.print();
             } catch (err) {
                 console.error('Iframe print error:', err);
-                // Fallback to direct window print if iframe restricted
-                window.print();
+                try { window.print(); } catch (e) {}
+            } finally {
+                setTimeout(() => {
+                    if (iframe && iframe.parentNode) {
+                        try { iframe.remove(); } catch (e) {}
+                    }
+                    resolve();
+                }, 1200);
             }
-            resolve();
-        }, 300);
+        };
+
+        // Give browser 250ms to paint DOM and styles inside iframe
+        setTimeout(triggerPrint, 300);
     });
 }
 
@@ -534,5 +571,102 @@ export function shareBillOnWhatsApp(bill, storeConfig = {}) {
 
     const url = phone ? `https://wa.me/91${phone}?text=${text}` : `https://wa.me/?text=${text}`;
     window.open(url, '_blank');
+}
+
+/**
+ * Download Official GST Sales Statement in CSV / Excel format
+ * Immune to printer drivers, zero blank pages!
+ */
+export function exportCSVGstStatement(bills = [], storeConfig = {}, filterInfo = {}) {
+    if (!bills || bills.length === 0) return false;
+
+    const headers = [
+        'Invoice Number',
+        'Date & Time',
+        'Counter',
+        'Cashier',
+        'Customer Name',
+        'Customer Mobile',
+        'Items Count',
+        'Gross MRP (₹)',
+        'Discount Saved (₹)',
+        'Taxable Turnover (₹)',
+        'CGST (₹)',
+        'SGST (₹)',
+        'Total GST (₹)',
+        'Net Paid (₹)',
+        'Payment Mode',
+        'Split Details'
+    ];
+
+    const rows = bills.map(b => {
+        const net = Number(b.netPayable || 0);
+        const tax = Number(b.taxAmount || 0);
+        const taxable = Number(b.taxableAmount || (net - tax));
+        const cgst = (tax / 2).toFixed(2);
+        const sgst = (tax / 2).toFixed(2);
+        const mrp = Number(b.grossMrpTotal || (net + (b.totalSavings || 0))).toFixed(2);
+        const savings = Number(b.totalSavings || 0).toFixed(2);
+        const splitInfo = b.paymentMethod === 'SPLIT' && b.splitBreakdown
+            ? `Cash:₹${b.splitBreakdown.cashAmount || 0} UPI:₹${b.splitBreakdown.upiAmount || 0} Card:₹${b.splitBreakdown.cardAmount || 0}`
+            : b.paymentMethod;
+
+        return [
+            `"${b.billNumber || ''}"`,
+            `"${new Date(b.createdAt).toLocaleString('en-IN')}"`,
+            `"${b.counterNo || ''}"`,
+            `"${b.cashierName || ''}"`,
+            `"${(b.customerName || 'Walk-in').replace(/"/g, '""')}"`,
+            `"${b.customerPhone || ''}"`,
+            b.items?.length || 0,
+            mrp,
+            savings,
+            taxable.toFixed(2),
+            cgst,
+            sgst,
+            tax.toFixed(2),
+            net.toFixed(2),
+            `"${b.paymentMethod || ''}"`,
+            `"${splitInfo}"`
+        ].join(',');
+    });
+
+    // Summary totals row
+    const totalTaxable = bills.reduce((s, b) => s + (Number(b.taxableAmount) || (Number(b.netPayable) - Number(b.taxAmount || 0))), 0);
+    const totalTax = bills.reduce((s, b) => s + Number(b.taxAmount || 0), 0);
+    const totalNet = bills.reduce((s, b) => s + Number(b.netPayable || 0), 0);
+    const totalSavings = bills.reduce((s, b) => s + Number(b.totalSavings || 0), 0);
+
+    const totalsRow = [
+        '"TOTALS"',
+        `"${bills.length} Invoices"`,
+        '""',
+        '""',
+        '""',
+        '""',
+        '""',
+        '""',
+        totalSavings.toFixed(2),
+        totalTaxable.toFixed(2),
+        (totalTax / 2).toFixed(2),
+        (totalTax / 2).toFixed(2),
+        totalTax.toFixed(2),
+        totalNet.toFixed(2),
+        '""',
+        '""'
+    ].join(',');
+
+    const csvContent = [headers.join(','), ...rows, totalsRow].join('\r\n');
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const filename = `GST_Sales_Statement_${new Date().toISOString().slice(0, 10)}.csv`;
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    return true;
 }
 

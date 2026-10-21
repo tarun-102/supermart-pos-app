@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiFetch } from '../../utils/api';
+import { toast } from 'react-toastify';
 
 export default function LoginPage({ onLoginSuccess }) {
     const [activeTab, setActiveTab] = useState('login'); // 'login', 'register_store', 'register_staff'
@@ -108,7 +109,7 @@ export default function LoginPage({ onLoginSuccess }) {
         const trimmed = newCounterInput.trim();
         if (!trimmed) return;
         if (storeCounters.includes(trimmed)) {
-            alert('This counter already exists in the list!');
+            toast.warning('This counter already exists in the list!');
             return;
         }
         setStoreCounters([...storeCounters, trimmed]);
@@ -117,7 +118,7 @@ export default function LoginPage({ onLoginSuccess }) {
 
     const handleRemoveStoreCounter = (indexToRemove) => {
         if (storeCounters.length <= 1) {
-            alert('At least one counter is required for billing.');
+            toast.warning('At least one counter is required for billing.');
             return;
         }
         setStoreCounters(storeCounters.filter((_, idx) => idx !== indexToRemove));

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiFetch } from '../../utils/api';
 import { printHtmlViaIframe } from '../../utils/printHelper';
+import { toast } from 'react-toastify';
 
 export default function CashOfficerTally({ currentUser }) {
     const [shifts, setShifts] = useState([]);
@@ -83,8 +84,9 @@ export default function CashOfficerTally({ currentUser }) {
 
             setSelectedShift(null);
             loadData();
+            toast.success('✅ Shift audit record updated successfully!');
         } catch (err) {
-            alert('Failed to save audit: ' + err.message);
+            toast.error('Failed to save audit: ' + err.message);
         }
     };
 

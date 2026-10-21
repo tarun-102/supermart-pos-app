@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import { playBarcodeBeep } from '../../utils/audio';
+import { toast } from 'react-toastify';
 
 export default function CameraScannerBox({
     onDetected,
@@ -389,7 +390,7 @@ export default function CameraScannerBox({
             }
         } catch (err) {
             console.warn('Snap barcode decode error:', err);
-            alert('Barcode was not detected in this snap. Please hold camera closer and keep barcode steady.');
+            toast.warning('Barcode was not detected in this snap. Please hold camera closer and steady.');
         } finally {
             setIsProcessingSnap(false);
             e.target.value = '';

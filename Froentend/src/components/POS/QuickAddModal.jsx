@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'react-toastify';
 
 export default function QuickAddModal({ isOpen, onClose, onAddItem }) {
     const [name, setName] = useState('');
@@ -20,7 +21,7 @@ export default function QuickAddModal({ isOpen, onClose, onAddItem }) {
     const handleFormSubmit = (e) => {
         e.preventDefault();
         if (!name || !sellingPrice) {
-            alert('Please enter Item Name and Selling Price');
+            toast.warning('Please enter Item Name and Selling Price');
             return;
         }
 

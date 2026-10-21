@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { apiFetch } from '../../utils/api';
 import { printHtmlViaIframe } from '../../utils/printHelper';
+import { useConfirm } from '../../context/ConfirmContext';
+import { toast } from 'react-toastify';
 
 export default function ShiftDrawerModal({
     isOpen,
@@ -9,6 +11,7 @@ export default function ShiftDrawerModal({
     activeShift,
     onShiftUpdated
 }) {
+    const confirm = useConfirm();
     // Starting a new shift state
     const [counterNo, setCounterNo] = useState(currentUser.counterAssigned || 'Counter-01');
     const [openingFloat, setOpeningFloat] = useState('2000');
@@ -127,16 +130,21 @@ export default function ShiftDrawerModal({
         e.preventDefault();
         const finalCounter = isCustomCounter ? customCounterInput.trim() : counterNo;
         if (!finalCounter) {
-            alert('Please select or specify your register counter.');
+            toast.warning('Please select or specify your register counter.');
             return;
         }
 
         // Warn if counter is occupied by another cashier
         const matchingCounter = availableCounters.find(c => c.name === finalCounter);
         if (matchingCounter && matchingCounter.isOccupied && matchingCounter.activeCashierId !== currentUser.id) {
-            if (!window.confirm(`Notice: ${finalCounter} is currently marked active under cashier "${matchingCounter.activeCashier}". Do you want to take over this register?`)) {
-                return;
-            }
+            const isOk = await confirm({
+                title: 'Register Counter Occupied',
+                message: `Notice: ${finalCounter} is currently marked active under cashier "${matchingCounter.activeCashier}". Do you want to take over this register?`,
+                confirmText: 'Take Over Counter',
+                confirmVariant: 'warning',
+                icon: 'bi-exclamation-triangle-fill'
+            });
+            if (!isOk) return;
         }
 
         try {
@@ -149,10 +157,11 @@ export default function ShiftDrawerModal({
                     openingFloat: Number(openingFloat) || 0
                 })
             });
+            toast.success(`🚀 Shift started at ${finalCounter} with ₹${openingFloat} opening float!`);
             onShiftUpdated();
             onClose();
         } catch (err) {
-            alert('Failed to open shift: ' + err.message);
+            toast.error('Failed to open shift: ' + err.message);
         }
     };
 
@@ -162,7 +171,14 @@ export default function ShiftDrawerModal({
         if (!activeShift) return;
 
         if (physicalCountedCash === 0) {
-            if (!window.confirm('Total counted physical cash is ₹0. Are you sure you want to proceed?')) return;
+            const isZeroOk = await confirm({
+                title: 'Zero Physical Cash Counted',
+                message: 'Total counted physical cash is ₹0. Are you sure you want to submit shift handover with zero cash?',
+                confirmText: 'Yes, Submit ₹0',
+                confirmVariant: 'danger',
+                icon: 'bi-cash-coin'
+            });
+            if (!isZeroOk) return;
         }
 
         const finalOfficerId = isManualOfficer ? manualOfficerId.trim() : selectedOfficerId;
@@ -171,7 +187,7 @@ export default function ShiftDrawerModal({
             : selectedOfficerName || selectedOfficerId;
 
         if (!finalOfficerId) {
-            alert('Please select or enter the Cash Officer ID for the handover.');
+            toast.warning('Please select or enter the Cash Officer ID for the handover.');
             return;
         }
 
@@ -197,9 +213,10 @@ export default function ShiftDrawerModal({
                 });
             }
 
+            toast.success('🔒 Shift closed and submitted for Cash Officer audit!');
             onShiftUpdated();
         } catch (err) {
-            alert('Failed to close shift: ' + err.message);
+            toast.error('Failed to close shift: ' + err.message);
         }
     };
 

@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { apiFetch } from '../../utils/api';
+import { useConfirm } from '../../context/ConfirmContext';
+import { toast } from 'react-toastify';
 
 export default function StaffApprovalsModal({ isOpen, onClose, onStaffUpdated }) {
+    const confirm = useConfirm();
     const [staffList, setStaffList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [actionMsg, setActionMsg] = useState(null);
@@ -29,23 +32,31 @@ export default function StaffApprovalsModal({ isOpen, onClose, onStaffUpdated })
     const handleApprove = async (id, name) => {
         try {
             const res = await apiFetch(`/auth/approve/${id}`, { method: 'PUT' });
-            setActionMsg({ type: 'success', text: res.message || `${name} approved!` });
+            toast.success(res.message || `${name} approved successfully!`);
             loadStaff();
             if (onStaffUpdated) onStaffUpdated();
         } catch (err) {
-            setActionMsg({ type: 'danger', text: err.message });
+            toast.error(err.message);
         }
     };
 
     const handleReject = async (id, name) => {
-        if (!window.confirm(`Reject registration request for "${name}"?`)) return;
+        const isOk = await confirm({
+            title: 'Reject Staff Request',
+            message: `Are you sure you want to reject the registration request for "${name}"?`,
+            confirmText: 'Reject Request',
+            confirmVariant: 'danger',
+            icon: 'bi-person-x-fill'
+        });
+        if (!isOk) return;
+
         try {
             const res = await apiFetch(`/auth/reject/${id}`, { method: 'PUT' });
-            setActionMsg({ type: 'warning', text: res.message || `${name} rejected.` });
+            toast.info(res.message || `${name} request rejected.`);
             loadStaff();
             if (onStaffUpdated) onStaffUpdated();
         } catch (err) {
-            setActionMsg({ type: 'danger', text: err.message });
+            toast.error(err.message);
         }
     };
 
@@ -59,15 +70,15 @@ export default function StaffApprovalsModal({ isOpen, onClose, onStaffUpdated })
             <div className="modal-dialog modal-dialog-centered modal-lg">
                 <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '16px', overflow: 'hidden' }}>
                     {/* Header */}
-                    <div className="modal-header bg-dark text-white py-3">
+                    <div className="modal-header bg-white border-bottom text-dark py-3">
                         <div className="d-flex align-items-center gap-2">
-                            <i className="bi bi-person-check-fill text-warning fs-5"></i>
+                            <i className="bi bi-person-check-fill text-primary fs-5"></i>
                             <div>
                                 <h6 className="modal-title fw-bold mb-0">Admin Staff Approval &amp; Management</h6>
-                                <small className="text-white-50">Approve or reject new cashier and cash officer registration requests</small>
+                                <small className="text-muted">Approve or reject new cashier and cash officer registration requests</small>
                             </div>
                         </div>
-                        <button type="button" className="btn-close btn-close-white" onClick={onClose}></button>
+                        <button type="button" className="btn-close" onClick={onClose}></button>
                     </div>
 
                     <div className="modal-body p-3 bg-light" style={{ maxHeight: '72vh', overflowY: 'auto' }}>

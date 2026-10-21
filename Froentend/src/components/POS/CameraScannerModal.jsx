@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import { playBarcodeBeep } from '../../utils/audio';
+import { toast } from 'react-toastify';
 
 export default function CameraScannerModal({ isOpen, onClose, onDetected }) {
     const [scannerError, setScannerError] = useState(null);
@@ -203,7 +204,7 @@ export default function CameraScannerModal({ isOpen, onClose, onDetected }) {
                 onClose();
             }
         } catch (err) {
-            alert('Could not decode barcode from photo. Please keep barcode clear and steady.');
+            toast.warning('Could not decode barcode from photo. Please keep barcode clear and steady.');
         } finally {
             setIsProcessingSnap(false);
             e.target.value = '';

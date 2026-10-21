@@ -10,6 +10,8 @@ import LoginPage from './components/Auth/LoginPage';
 import StaffApprovalsModal from './components/Admin/StaffApprovalsModal';
 import StoreSettingsModal from './components/Admin/StoreSettingsModal';
 import { apiFetch } from './utils/api';
+import { ConfirmProvider } from './context/ConfirmContext';
+import { ToastContainer } from 'react-toastify';
 
 export default function App() {
   // Check persisted user from localStorage
@@ -117,125 +119,135 @@ export default function App() {
 
   // IF NOT LOGGED IN: SHOW MANDATORY LOGIN PAGE
   if (!currentUser) {
-    return <LoginPage onLoginSuccess={handleLoginSuccess} />;
+    return (
+      <ConfirmProvider>
+        <LoginPage onLoginSuccess={handleLoginSuccess} />
+        <ToastContainer position="top-right" autoClose={2500} theme="colored" />
+      </ConfirmProvider>
+    );
   }
 
   const currentCounter = activeShift?.counterNo || currentUser.counterAssigned || 'Counter-01';
 
   return (
-    <div className="min-vh-100 d-flex flex-column bg-light w-100" style={{ maxWidth: '100vw', overflowX: 'hidden' }}>
-      {/* Universal Store Navigation Bar */}
-      <Navbar
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        currentUser={currentUser}
-        activeShift={activeShift}
-        onOpenShiftModal={() => setIsShiftModalOpen(true)}
-        onOpenStaffApprovals={() => setIsStaffApprovalsOpen(true)}
-        onOpenStoreSettings={() => setIsStoreSettingsOpen(true)}
-        storeConfig={storeConfig}
-        pendingStaffCount={pendingStaffCount}
-        heldCount={heldCount}
-        onLogout={handleLogout}
-      />
-
-      {/* Main Content Area */}
-      <main className="flex-grow-1 w-100" style={{ maxWidth: '100vw', overflowX: 'hidden' }}>
-        {activeTab === 'pos' && (
-          <PosBilling
-            currentUser={currentUser}
-            activeShift={activeShift}
-            refreshShifts={checkActiveShift}
-            onOpenShiftModal={() => setIsShiftModalOpen(true)}
-            storeConfig={storeConfig}
-          />
-        )}
-
-        {activeTab === 'inventory' && currentUser?.role === 'admin' && (
-          <InventoryManager />
-        )}
-
-        {activeTab === 'cash_officer' && (
-          <CashOfficerTally
-            currentUser={currentUser}
-          />
-        )}
-
-        {activeTab === 'bills' && (
-          <BillsHistory
-            currentUser={currentUser}
-            activeShift={activeShift}
-            onOpenShiftModal={() => setIsShiftModalOpen(true)}
-            storeConfig={storeConfig}
-          />
-        )}
-      </main>
-
-      {/* Quick POS Shortcut Ribbon at bottom (Desktop only) */}
-      <footer className="bg-white border-top py-2 px-3 no-print d-none d-md-block">
-        <div className="container-fluid d-flex flex-wrap justify-content-between align-items-center gap-2 small text-muted">
-          <div className="d-flex align-items-center gap-3">
-            <span className="fw-bold text-primary">
-              <i className="bi bi-shop me-1"></i> {storeConfig?.storeName || 'SuperStore POS'}
-            </span>
-            <span className="d-none d-md-inline">|</span>
-            <span className="d-none d-md-inline">
-              Counter: <strong className="text-dark">{currentCounter}</strong>
-            </span>
-            <span className="d-none d-md-inline">|</span>
-            <span>
-              Logged in as: <strong className="text-dark">{currentUser.name}</strong> ({currentUser.role})
-            </span>
-          </div>
-
-          <div className="d-flex align-items-center gap-3 flex-wrap">
-            <span><kbd>F2</kbd> Focus Barcode</span>
-            <span><kbd>F4</kbd> Checkout / Split Pay</span>
-            <span><kbd>F7</kbd> Hold Bill</span>
-            <span><kbd>Ctrl+P</kbd> Print Receipt</span>
-          </div>
-        </div>
-      </footer>
-
-      {/* Native Mobile Bottom Navigation Bar (< md) */}
-      <MobileBottomNav
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        currentUser={currentUser}
-        heldCount={heldCount}
-        onOpenShiftModal={() => setIsShiftModalOpen(true)}
-      />
-
-      {/* Register Shift & Cash Tally Handover Modal */}
-      <ShiftDrawerModal
-        isOpen={isShiftModalOpen}
-        onClose={() => setIsShiftModalOpen(false)}
-        currentUser={currentUser}
-        activeShift={activeShift}
-        onShiftUpdated={checkActiveShift}
-      />
-
-      {/* Admin Staff Approvals Modal */}
-      {currentUser.role === 'admin' && (
-        <StaffApprovalsModal
-          isOpen={isStaffApprovalsOpen}
-          onClose={() => setIsStaffApprovalsOpen(false)}
-          onStaffUpdated={() => {
-            fetchPendingStaffCount();
-          }}
+    <ConfirmProvider>
+      <div className="min-vh-100 d-flex flex-column bg-light w-100" style={{ maxWidth: '100vw', overflowX: 'hidden' }}>
+        {/* Universal Store Navigation Bar */}
+        <Navbar
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          currentUser={currentUser}
+          activeShift={activeShift}
+          onOpenShiftModal={() => setIsShiftModalOpen(true)}
+          onOpenStaffApprovals={() => setIsStaffApprovalsOpen(true)}
+          onOpenStoreSettings={() => setIsStoreSettingsOpen(true)}
+          storeConfig={storeConfig}
+          pendingStaffCount={pendingStaffCount}
+          heldCount={heldCount}
+          onLogout={handleLogout}
         />
-      )}
 
-      {/* Store Settings & Counters Modal (Store Owner / Admin) */}
-      {currentUser.role === 'admin' && (
-        <StoreSettingsModal
-          isOpen={isStoreSettingsOpen}
-          onClose={() => setIsStoreSettingsOpen(false)}
-          onStoreUpdated={(newConfig) => {
-            setStoreConfig(newConfig);
-          }}
+        {/* Main Content Area */}
+        <main className="flex-grow-1 w-100" style={{ maxWidth: '100vw', overflowX: 'hidden' }}>
+          {activeTab === 'pos' && (
+            <PosBilling
+              currentUser={currentUser}
+              activeShift={activeShift}
+              refreshShifts={checkActiveShift}
+              onOpenShiftModal={() => setIsShiftModalOpen(true)}
+              storeConfig={storeConfig}
+            />
+          )}
+
+          {activeTab === 'inventory' && currentUser?.role === 'admin' && (
+            <InventoryManager />
+          )}
+
+          {activeTab === 'cash_officer' && (
+            <CashOfficerTally
+              currentUser={currentUser}
+            />
+          )}
+
+          {activeTab === 'bills' && (
+            <BillsHistory
+              currentUser={currentUser}
+              activeShift={activeShift}
+              onOpenShiftModal={() => setIsShiftModalOpen(true)}
+              storeConfig={storeConfig}
+            />
+          )}
+        </main>
+
+        {/* Quick POS Shortcut Ribbon at bottom (Desktop only) */}
+        <footer className="bg-white border-top py-2 px-3 no-print d-none d-md-block">
+          <div className="container-fluid d-flex flex-wrap justify-content-between align-items-center gap-2 small text-muted">
+            <div className="d-flex align-items-center gap-3">
+              <span className="fw-bold text-primary">
+                <i className="bi bi-shop me-1"></i> {storeConfig?.storeName || 'SuperStore POS'}
+              </span>
+              <span className="d-none d-md-inline">|</span>
+              <span className="d-none d-md-inline">
+                Counter: <strong className="text-dark">{currentCounter}</strong>
+              </span>
+              <span className="d-none d-md-inline">|</span>
+              <span>
+                Logged in as: <strong className="text-dark">{currentUser.name}</strong> ({currentUser.role})
+              </span>
+            </div>
+
+            <div className="d-flex align-items-center gap-3 flex-wrap">
+              <span><kbd>F2</kbd> Focus Barcode</span>
+              <span><kbd>F4</kbd> Checkout / Split Pay</span>
+              <span><kbd>F7</kbd> Hold Bill</span>
+              <span><kbd>Ctrl+P</kbd> Print Receipt</span>
+            </div>
+          </div>
+        </footer>
+
+        {/* Native Mobile Bottom Navigation Bar (< md) */}
+        <MobileBottomNav
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          currentUser={currentUser}
+          heldCount={heldCount}
+          onOpenShiftModal={() => setIsShiftModalOpen(true)}
         />
-      )}
-    </div>
+
+        {/* Register Shift & Cash Tally Handover Modal */}
+        <ShiftDrawerModal
+          isOpen={isShiftModalOpen}
+          onClose={() => setIsShiftModalOpen(false)}
+          currentUser={currentUser}
+          activeShift={activeShift}
+          onShiftUpdated={checkActiveShift}
+        />
+
+        {/* Admin Staff Approvals Modal */}
+        {currentUser.role === 'admin' && (
+          <StaffApprovalsModal
+            isOpen={isStaffApprovalsOpen}
+            onClose={() => setIsStaffApprovalsOpen(false)}
+            onStaffUpdated={() => {
+              fetchPendingStaffCount();
+            }}
+          />
+        )}
+
+        {/* Store Settings & Counters Modal (Store Owner / Admin) */}
+        {currentUser.role === 'admin' && (
+          <StoreSettingsModal
+            isOpen={isStoreSettingsOpen}
+            onClose={() => setIsStoreSettingsOpen(false)}
+            onStoreUpdated={(newConfig) => {
+              setStoreConfig(newConfig);
+            }}
+          />
+        )}
+
+        {/* Universal React Toastify Notification Container */}
+        <ToastContainer position="top-right" autoClose={2500} theme="colored" />
+      </div>
+    </ConfirmProvider>
   );
 }
