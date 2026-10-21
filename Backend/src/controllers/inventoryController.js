@@ -1,4 +1,6 @@
 const { getStore, saveStore, getStoreId } = require('../store/dataStore');
+const Product = require('../models/productModel');
+const { isConnected } = require('../config/db');
 
 // GET all products with filtering & search (Scoped to Store)
 const getProducts = async (req, res) => {
@@ -7,7 +9,40 @@ const getProducts = async (req, res) => {
         const storeId = getStoreId(req);
         const { search, category, lowStock } = req.query;
 
-        // Filter products belonging to this specific store
+        // If MongoDB is connected, load from MongoDB and sync to local memory
+        if (isConnected()) {
+            try {
+                const query = { storeId };
+                if (category && category !== 'ALL') {
+                    query.category = category;
+                }
+                if (lowStock === 'true') {
+                    query.$expr = { $lte: ['$stock', '$minStockAlert'] };
+                }
+                if (search) {
+                    const q = search.trim();
+                    query.$or = [
+                        { name: { $regex: q, $options: 'i' } },
+                        { barcode: { $regex: q, $options: 'i' } },
+                        { category: { $regex: q, $options: 'i' } }
+                    ];
+                }
+
+                let dbProducts = await Product.find(query).sort({ name: 1 }).lean();
+                if (dbProducts && dbProducts.length > 0) {
+                    return res.status(200).json({
+                        success: true,
+                        storeId,
+                        count: dbProducts.length,
+                        products: dbProducts
+                    });
+                }
+            } catch (dbErr) {
+                console.warn('MongoDB find failed, falling back to local store:', dbErr.message);
+            }
+        }
+
+        // Filter products belonging to this specific store from local dataStore
         let products = (store.products || []).filter(
             p => (p.storeId || 'store_default') === storeId
         );
@@ -49,10 +84,27 @@ const getProductByBarcode = async (req, res) => {
         const { barcode } = req.params;
         const store = getStore();
         const storeId = getStoreId(req);
-
         const cleanBarcode = barcode.trim();
+
+        // 1. Try DB first if connected
+        if (isConnected()) {
+            try {
+                const dbProduct = await Product.findOne({
+                    barcode: cleanBarcode,
+                    storeId
+                }).lean();
+                if (dbProduct) {
+                    return res.status(200).json({ success: true, product: dbProduct });
+                }
+            } catch (dbErr) {
+                console.warn('MongoDB getProductByBarcode fallback:', dbErr.message);
+            }
+        }
+
+        // 2. Local store search
         const product = (store.products || []).find(
-            p => p.barcode === cleanBarcode && (p.storeId || 'store_default') === storeId
+            p => (p.barcode === cleanBarcode || p.barcode.trim() === cleanBarcode) &&
+                 (p.storeId || 'store_default') === storeId
         );
 
         if (!product) {
@@ -68,11 +120,11 @@ const getProductByBarcode = async (req, res) => {
     }
 };
 
-// CREATE new product (Scoped to Store)
+// CREATE new product (Scoped to Store - Direct DB + Local Store)
 const createProduct = async (req, res) => {
     try {
         const store = getStore();
-        const storeId = getStoreId(req);
+        const storeId = req.body.storeId || getStoreId(req);
         const {
             barcode,
             name,
@@ -94,7 +146,8 @@ const createProduct = async (req, res) => {
         }
 
         const cleanBarcode = barcode.trim();
-        // Check duplicate barcode within THIS store
+
+        // Check duplicate barcode within THIS store in local store
         const existing = (store.products || []).find(
             p => p.barcode === cleanBarcode && (p.storeId || 'store_default') === storeId
         );
@@ -105,8 +158,38 @@ const createProduct = async (req, res) => {
             });
         }
 
+        let dbProduct = null;
+        if (isConnected()) {
+            try {
+                // Check if already in MongoDB
+                const existingDb = await Product.findOne({ storeId, barcode: cleanBarcode });
+                if (existingDb) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `Barcode "${barcode}" already exists in database for this store.`
+                    });
+                }
+
+                dbProduct = await Product.create({
+                    storeId,
+                    barcode: cleanBarcode,
+                    name: name.trim(),
+                    category: category.trim(),
+                    unit: unit.trim(),
+                    mrp: Number(mrp),
+                    sellingPrice: Number(sellingPrice),
+                    purchasePrice: Number(purchasePrice),
+                    taxPercent: Number(taxPercent),
+                    stock: Number(stock),
+                    minStockAlert: Number(minStockAlert)
+                });
+            } catch (dbErr) {
+                console.warn('MongoDB Product.create warning:', dbErr.message);
+            }
+        }
+
         const newProduct = {
-            _id: `prod_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+            _id: dbProduct ? dbProduct._id.toString() : `prod_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
             storeId,
             barcode: cleanBarcode,
             name: name.trim(),
@@ -127,7 +210,7 @@ const createProduct = async (req, res) => {
 
         res.status(201).json({
             success: true,
-            message: 'Product added successfully to store inventory.',
+            message: 'Product added successfully to store database inventory.',
             product: newProduct
         });
     } catch (err) {
@@ -140,17 +223,17 @@ const updateProduct = async (req, res) => {
     try {
         const { id } = req.params;
         const store = getStore();
-        const storeId = getStoreId(req);
+        const storeId = req.body.storeId || getStoreId(req);
 
         const idx = (store.products || []).findIndex(
             p => (p._id === id || p.barcode === id) && (p.storeId || 'store_default') === storeId
         );
 
-        if (idx === -1) {
+        if (idx === -1 && !isConnected()) {
             return res.status(404).json({ success: false, message: 'Product not found in this store.' });
         }
 
-        const current = store.products[idx];
+        const current = idx !== -1 ? store.products[idx] : {};
         const {
             barcode,
             name,
@@ -167,7 +250,7 @@ const updateProduct = async (req, res) => {
         // If barcode changed, check uniqueness within THIS store
         if (barcode && barcode.trim() !== current.barcode) {
             const cleanBarcode = barcode.trim();
-            const conflict = store.products.find(
+            const conflict = (store.products || []).find(
                 p => p.barcode === cleanBarcode && p._id !== current._id && (p.storeId || 'store_default') === storeId
             );
             if (conflict) {
@@ -178,9 +261,8 @@ const updateProduct = async (req, res) => {
             }
         }
 
-        const updated = {
-            ...current,
-            barcode: barcode ? barcode.trim() : current.barcode,
+        const updateData = {
+            barcode: barcode ? barcode.trim() : (current.barcode || id),
             name: name ? name.trim() : current.name,
             category: category ? category.trim() : current.category,
             unit: unit ? unit.trim() : current.unit,
@@ -193,13 +275,41 @@ const updateProduct = async (req, res) => {
             updatedAt: new Date().toISOString()
         };
 
-        store.products[idx] = updated;
-        saveStore();
+        // Update MongoDB if connected
+        if (isConnected()) {
+            try {
+                await Product.findOneAndUpdate(
+                    {
+                        $or: [{ _id: id }, { barcode: id }],
+                        storeId
+                    },
+                    { $set: updateData },
+                    { new: true }
+                );
+            } catch (dbErr) {
+                console.warn('MongoDB updateProduct warning:', dbErr.message);
+            }
+        }
+
+        if (idx !== -1) {
+            const updated = {
+                ...current,
+                ...updateData
+            };
+            store.products[idx] = updated;
+            saveStore();
+
+            return res.status(200).json({
+                success: true,
+                message: 'Product updated successfully.',
+                product: updated
+            });
+        }
 
         res.status(200).json({
             success: true,
-            message: 'Product updated successfully.',
-            product: updated
+            message: 'Product updated in database.',
+            product: updateData
         });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
@@ -213,12 +323,24 @@ const deleteProduct = async (req, res) => {
         const store = getStore();
         const storeId = getStoreId(req);
 
-        const initialLen = store.products.length;
+        // Delete from MongoDB
+        if (isConnected()) {
+            try {
+                await Product.deleteOne({
+                    $or: [{ _id: id }, { barcode: id }],
+                    storeId
+                });
+            } catch (dbErr) {
+                console.warn('MongoDB deleteProduct warning:', dbErr.message);
+            }
+        }
+
+        const initialLen = (store.products || []).length;
         store.products = (store.products || []).filter(
             p => !( (p._id === id || p.barcode === id) && (p.storeId || 'store_default') === storeId )
         );
 
-        if (store.products.length === initialLen) {
+        if (store.products.length === initialLen && !isConnected()) {
             return res.status(404).json({ success: false, message: 'Product not found in this store.' });
         }
 
@@ -240,17 +362,34 @@ const adjustStock = async (req, res) => {
             p => (p._id === productId || p.barcode === productId) && (p.storeId || 'store_default') === storeId
         );
 
-        if (!product) {
+        if (!product && !isConnected()) {
             return res.status(404).json({ success: false, message: 'Product not found in this store.' });
         }
 
         const diff = Number(changeAmount) || 0;
-        product.stock = Math.max(0, Number(product.stock) + diff);
-        saveStore();
+        if (product) {
+            product.stock = Math.max(0, Number(product.stock) + diff);
+            saveStore();
+        }
+
+        // MongoDB sync
+        if (isConnected()) {
+            try {
+                await Product.findOneAndUpdate(
+                    {
+                        $or: [{ _id: productId }, { barcode: productId }],
+                        storeId
+                    },
+                    { $inc: { stock: diff } }
+                );
+            } catch (dbErr) {
+                console.warn('MongoDB adjustStock warning:', dbErr.message);
+            }
+        }
 
         res.status(200).json({
             success: true,
-            message: `Stock updated for ${product.name}. New Stock: ${product.stock}`,
+            message: `Stock updated for ${product ? product.name : productId}. New Stock: ${product ? product.stock : 'updated'}`,
             product
         });
     } catch (err) {

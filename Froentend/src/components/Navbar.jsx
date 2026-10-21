@@ -32,7 +32,7 @@ export default function Navbar({
             <div className="container-fluid p-0">
                 <div className="d-flex align-items-center justify-content-between gap-1 gap-sm-2">
                     {/* Brand & Store Info */}
-                    <div className="d-flex align-items-center gap-2 text-truncate" style={{ maxWidth: '60%' }}>
+                    <div className="d-flex align-items-center gap-2 text-truncate flex-shrink-1" style={{ maxWidth: '42%', minWidth: 0 }}>
                         <div className="rounded-3 bg-primary-subtle text-primary p-1 d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: '34px', height: '34px' }}>
                             <i className="bi bi-shop-window fs-5"></i>
                         </div>
@@ -70,7 +70,7 @@ export default function Navbar({
                     </div>
 
                     {/* Navigation Pills (Integrated for Desktop >= md) */}
-                    <nav className="nav nav-pills nav-pills-pos d-none d-md-flex align-items-center">
+                    <nav className="nav nav-pills nav-pills-pos d-none d-md-flex align-items-center flex-nowrap overflow-auto">
                         {isCashier && (
                             <button
                                 className={`nav-link ${activeTab === 'pos' ? 'active' : ''}`}

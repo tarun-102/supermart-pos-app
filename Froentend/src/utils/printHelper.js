@@ -1,3 +1,5 @@
+import { jsPDF } from 'jspdf';
+
 /**
  * Print Helper Utility for ShiftFlow SuperStore POS
  * Uses dedicated isolated iframes to guarantee 100% reliable printing on:
@@ -543,7 +545,7 @@ export function printSalesReport(bills = [], storeConfig = {}, filterInfo = {}) 
 }
 
 /**
- * Share Bill directly to Customer's WhatsApp
+ * Share Bill directly to Customer's WhatsApp (Clean UTF-8 URI encoding - Zero Garbled Characters)
  */
 export function shareBillOnWhatsApp(bill, storeConfig = {}) {
     if (!bill) return;
@@ -551,26 +553,222 @@ export function shareBillOnWhatsApp(bill, storeConfig = {}) {
     const storeName = storeConfig?.storeName || bill.storeName || 'SuperStore';
 
     const itemsSummary = (bill.items || [])
-        .slice(0, 5)
-        .map((it, idx) => `${idx + 1}. ${it.name} x ${it.quantity} = ₹${it.total}`)
-        .join('%0A');
+        .slice(0, 8)
+        .map((it, idx) => `${idx + 1}. ${it.name} x ${it.quantity} = Rs. ${it.total}`)
+        .join('\n');
 
-    const moreText = (bill.items || []).length > 5 ? `%0A...+${bill.items.length - 5} more items` : '';
+    const moreText = (bill.items || []).length > 8 ? `\n...+${bill.items.length - 8} more items` : '';
 
-    const text = `🧾 *Tax Invoice - ${storeName}*%0A%0A` +
-        `*Invoice No:* ${bill.billNumber}%0A` +
-        `*Date:* ${new Date(bill.createdAt).toLocaleDateString('en-IN')}%0A` +
-        `*Customer:* ${bill.customerName || 'Valued Customer'}%0A` +
-        `---------------------------%0A` +
-        `*Items Purchased:*%0A${itemsSummary}${moreText}%0A` +
-        `---------------------------%0A` +
-        `*Net Paid:* ₹${bill.netPayable} via ${bill.paymentMethod}%0A` +
-        (bill.totalSavings > 0 ? `🎉 *You Saved:* ₹${bill.totalSavings}%0A` : '') +
-        (storeConfig?.gstin ? `*GSTIN:* ${storeConfig.gstin}%0A` : '') +
-        `%0AThank you for shopping with us! Visit again.`;
+    const lines = [
+        `*TAX INVOICE - ${storeName.toUpperCase()}*`,
+        '',
+        `*Invoice No:* ${bill.billNumber}`,
+        `*Date:* ${new Date(bill.createdAt || Date.now()).toLocaleDateString('en-IN')}`,
+        `*Customer:* ${bill.customerName || 'Valued Customer'}`,
+        '--------------------------------',
+        '*Items Purchased:*',
+        itemsSummary + moreText,
+        '--------------------------------',
+        `*Net Paid:* Rs. ${bill.netPayable} via ${bill.paymentMethod}`
+    ];
 
-    const url = phone ? `https://wa.me/91${phone}?text=${text}` : `https://wa.me/?text=${text}`;
+    if (bill.totalSavings > 0) {
+        lines.push(`*You Saved:* Rs. ${bill.totalSavings}`);
+    }
+    if (storeConfig?.gstin || bill.storeGstin) {
+        lines.push(`*GSTIN:* ${storeConfig?.gstin || bill.storeGstin}`);
+    }
+
+    lines.push('');
+    lines.push('Thank you for shopping with us! Visit again.');
+
+    const fullMessage = lines.join('\n');
+    const encodedText = encodeURIComponent(fullMessage);
+    const url = phone ? `https://wa.me/91${phone}?text=${encodedText}` : `https://wa.me/?text=${encodedText}`;
     window.open(url, '_blank');
+}
+
+/**
+ * Download Clean Vector PDF for Thermal Slip / Tax Invoice
+ * Zero blank pages, crisp, offline-ready
+ */
+export function downloadBillPdf(bill, storeConfig = {}) {
+    if (!bill) return false;
+
+    const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+    });
+
+    const storeName = (storeConfig?.storeName || bill.storeName || 'SUPERSTORE POS').toUpperCase();
+    const storeType = storeConfig?.storeType || bill.storeType || 'Supermarket & Retail';
+    const storeAddress = storeConfig?.address || bill.storeAddress || '';
+    const storeGstin = storeConfig?.gstin || bill.storeGstin || '';
+    const storeContact = storeConfig?.contact || bill.storeContact || '';
+
+    // Header styling
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(18);
+    doc.setTextColor(2, 132, 199); // Nordic Azure
+    doc.text(storeName, 105, 18, { align: 'center' });
+
+    doc.setFontSize(9.5);
+    doc.setTextColor(71, 85, 105);
+    doc.setFont('helvetica', 'normal');
+    let y = 24;
+    if (storeType) {
+        doc.text(storeType, 105, y, { align: 'center' });
+        y += 5;
+    }
+    if (storeAddress) {
+        doc.text(storeAddress, 105, y, { align: 'center' });
+        y += 5;
+    }
+    const metaParts = [];
+    if (storeGstin) metaParts.push(`GSTIN: ${storeGstin}`);
+    if (storeContact) metaParts.push(`Tel: ${storeContact}`);
+    if (metaParts.length > 0) {
+        doc.text(metaParts.join('  |  '), 105, y, { align: 'center' });
+        y += 6;
+    }
+
+    doc.setDrawColor(2, 132, 199);
+    doc.setLineWidth(0.6);
+    doc.line(14, y, 196, y);
+    y += 7;
+
+    // Title banner
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(15, 23, 42);
+    doc.text('TAX INVOICE / CASH MEMO', 14, y);
+
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100, 116, 139);
+    const dateFormatted = new Date(bill.createdAt || Date.now()).toLocaleString('en-IN', {
+        dateStyle: 'medium',
+        timeStyle: 'short'
+    });
+    doc.text(`Date & Time: ${dateFormatted}`, 196, y, { align: 'right' });
+    y += 6;
+
+    // Invoice Meta Grid
+    doc.setFillColor(248, 250, 252);
+    doc.rect(14, y, 182, 18, 'F');
+    doc.setDrawColor(226, 232, 240);
+    doc.setLineWidth(0.3);
+    doc.rect(14, y, 182, 18, 'D');
+
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(15, 23, 42);
+    doc.setFontSize(9);
+    doc.text(`Invoice No: ${bill.billNumber}`, 18, y + 6);
+    doc.text(`Cashier: ${bill.cashierName || 'Cashier'}`, 18, y + 13);
+
+    doc.text(`Counter: ${bill.counterNo || 'Counter-01'}`, 90, y + 6);
+    doc.text(`Payment: ${bill.paymentMethod || 'CASH'}`, 90, y + 13);
+
+    doc.text(`Customer: ${bill.customerName || 'Walk-in'}`, 145, y + 6);
+    if (bill.customerPhone) {
+        doc.text(`Mob: ${bill.customerPhone}`, 145, y + 13);
+    }
+    y += 24;
+
+    // Items Table Header
+    doc.setFillColor(2, 132, 199);
+    doc.rect(14, y, 182, 7, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(255, 255, 255);
+    doc.text('#', 17, y + 5);
+    doc.text('Item Description', 25, y + 5);
+    doc.text('Qty', 115, y + 5, { align: 'center' });
+    doc.text('MRP (Rs)', 140, y + 5, { align: 'right' });
+    doc.text('Rate (Rs)', 165, y + 5, { align: 'right' });
+    doc.text('Amount (Rs)', 192, y + 5, { align: 'right' });
+    y += 7;
+
+    // Items List
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+    doc.setTextColor(15, 23, 42);
+
+    (bill.items || []).forEach((it, idx) => {
+        if (y > 260) {
+            doc.addPage();
+            y = 20;
+        }
+        if (idx % 2 === 1) {
+            doc.setFillColor(248, 250, 252);
+            doc.rect(14, y, 182, 6, 'F');
+        }
+        doc.setDrawColor(241, 245, 249);
+        doc.line(14, y + 6, 196, y + 6);
+
+        doc.text(String(idx + 1), 17, y + 4.5);
+        const name = (it.name || '').slice(0, 42);
+        doc.text(name, 25, y + 4.5);
+        doc.text(`${it.quantity} ${it.unit || ''}`, 115, y + 4.5, { align: 'center' });
+        doc.text(Number(it.mrp || it.sellingPrice).toFixed(2), 140, y + 4.5, { align: 'right' });
+        doc.text(Number(it.sellingPrice).toFixed(2), 165, y + 4.5, { align: 'right' });
+        doc.text(Number(it.total).toFixed(2), 192, y + 4.5, { align: 'right' });
+        y += 6.5;
+    });
+
+    y += 3;
+    doc.setDrawColor(2, 132, 199);
+    doc.setLineWidth(0.4);
+    doc.line(14, y, 196, y);
+    y += 5;
+
+    // Totals & GST Summary
+    const net = Number(bill.netPayable || 0);
+    const tax = Number(bill.taxAmount || 0);
+    const taxable = (net - tax).toFixed(2);
+    const savings = Number(bill.totalSavings || 0).toFixed(2);
+
+    doc.setFillColor(241, 245, 249);
+    doc.rect(110, y, 86, 36, 'F');
+    doc.setDrawColor(203, 213, 225);
+    doc.rect(110, y, 86, 36, 'D');
+
+    doc.setFontSize(8.5);
+    doc.setTextColor(71, 85, 105);
+    doc.text('Taxable Turnover:', 114, y + 6);
+    doc.text(`Rs. ${taxable}`, 192, y + 6, { align: 'right' });
+
+    doc.text('Total GST (CGST+SGST):', 114, y + 12);
+    doc.text(`Rs. ${tax.toFixed(2)}`, 192, y + 12, { align: 'right' });
+
+    if (Number(savings) > 0) {
+        doc.setTextColor(5, 150, 105);
+        doc.text('Total Discount / Savings:', 114, y + 18);
+        doc.text(`-Rs. ${savings}`, 192, y + 18, { align: 'right' });
+    }
+
+    doc.setFillColor(2, 132, 199);
+    doc.rect(110, y + 23, 86, 13, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10.5);
+    doc.text('NET PAYABLE:', 114, y + 31);
+    doc.text(`Rs. ${net.toLocaleString('en-IN')}`, 192, y + 31, { align: 'right' });
+
+    // Left Box: Terms & Signature
+    doc.setTextColor(100, 116, 139);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.text('Terms & Conditions:', 14, y + 6);
+    doc.text('1. Goods once sold can be exchanged within 7 days with bill.', 14, y + 11);
+    doc.text('2. Computer-generated tax invoice. No physical seal required.', 14, y + 16);
+    doc.text(storeConfig?.receiptTagline || 'Thank You For Shopping With Us! Visit Again.', 14, y + 23);
+
+    doc.text('Authorized Signatory: _________________________', 14, y + 34);
+
+    doc.save(`Invoice_${bill.billNumber || Date.now()}.pdf`);
+    return true;
 }
 
 /**

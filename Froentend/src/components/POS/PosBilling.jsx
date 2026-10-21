@@ -305,10 +305,11 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
     const handleQuickAdd = async (itemData) => {
         if (itemData.saveToInventory) {
             try {
+                const targetStoreId = currentUser?.storeId || storeConfig?.storeId || storeConfig?._id || localStorage.getItem('pos_store_id') || 'store_default';
                 const res = await apiFetch('/inventory', {
                     method: 'POST',
                     body: JSON.stringify({
-                        storeId: currentUser.storeId || storeConfig?._id,
+                        storeId: targetStoreId,
                         barcode: itemData.barcode,
                         name: itemData.name,
                         category: itemData.category,
@@ -682,7 +683,7 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
                         </div>
 
                         {/* Cart View: Desktop Data Table (d-none d-md-block) */}
-                        <div className="d-none d-md-block table-responsive flex-grow-1" style={{ minHeight: '380px', maxHeight: '520px', overflowY: 'auto' }}>
+                        <div className="d-none d-md-block table-responsive flex-grow-1 cart-table-wrapper" style={{ minHeight: '260px', maxHeight: 'clamp(300px, 48vh, 560px)', overflowY: 'auto' }}>
                             {cart.length === 0 ? (
                                 <div className="text-center py-5">
                                     <div className="display-4 text-muted opacity-50 mb-2">🛒</div>
@@ -711,7 +712,7 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
                                             <th style={{ width: '10%' }}>Unit</th>
                                             <th style={{ width: '15%' }} className="text-center">Quantity / Wt</th>
                                             <th style={{ width: '12%' }} className="text-end">MRP</th>
-                                            <th style={{ width: '12%' }} className="text-end">DMart Rate</th>
+                                            <th style={{ width: '12%' }} className="text-end">Our Rate</th>
                                             <th style={{ width: '13%' }} className="text-end">Total</th>
                                             <th style={{ width: '5%' }} className="text-center">Del</th>
                                         </tr>
@@ -805,7 +806,7 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
                         </div>
 
                         {/* Cart View: Native Mobile App Cards (d-block d-md-none) */}
-                        <div className="d-block d-md-none p-2 flex-grow-1" style={{ minHeight: '260px', maxHeight: '420px', overflowY: 'auto' }}>
+                        <div className="d-block d-md-none p-2 flex-grow-1" style={{ minHeight: '220px', maxHeight: 'clamp(260px, 45vh, 460px)', overflowY: 'auto' }}>
                             {cart.length === 0 ? (
                                 <div className="text-center py-4">
                                     <div className="fs-1 text-muted opacity-50 mb-1">🛒</div>
@@ -957,7 +958,7 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
 
                 {/* RIGHT: BILL SUMMARY & CHECKOUT */}
                 <div className="col-xl-4 col-lg-5">
-                    <div className="pos-summary-card p-3 h-100 d-flex flex-column justify-content-between">
+                    <div className="pos-summary-card p-3 d-flex flex-column justify-content-between" style={{ minHeight: '100%' }}>
                         <div>
                             {/* Customer Details Box */}
                             <div className="bg-white p-3 rounded-3 border mb-3 shadow-sm">

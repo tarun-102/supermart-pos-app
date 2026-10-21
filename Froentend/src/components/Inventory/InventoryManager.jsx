@@ -112,8 +112,10 @@ export default function InventoryManager() {
     const handleSaveProduct = async (e) => {
         e.preventDefault();
         try {
+            const currentStoreId = storeConfig?.storeId || storeConfig?._id || localStorage.getItem('pos_store_id') || 'store_default';
             const payload = {
                 ...formData,
+                storeId: currentStoreId,
                 category: customCategoryInput.trim() ? customCategoryInput.trim() : formData.category
             };
 
@@ -132,7 +134,7 @@ export default function InventoryManager() {
             }
             setIsFormOpen(false);
             loadProducts();
-            toast.success('✅ Product saved to inventory successfully!');
+            toast.success('✅ Product saved directly to database inventory!');
         } catch (err) {
             toast.error('Error saving product: ' + err.message);
         }

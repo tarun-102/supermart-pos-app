@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 let _isConnected = false;
 
 const connectDB = async () => {
-    const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/dmart_pos';
+    const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/shiftflow_pos';
 
     try {
         const conn = await mongoose.connect(mongoUri, {
@@ -17,7 +17,7 @@ const connectDB = async () => {
         if (!mongoUri.includes('127.0.0.1') && !mongoUri.includes('localhost')) {
             console.warn(`⚠️  Remote Atlas DB failed (${primaryErr.message.slice(0, 70)}...). Trying local MongoDB...`);
             try {
-                const localConn = await mongoose.connect('mongodb://127.0.0.1:27017/dmart_pos', {
+                const localConn = await mongoose.connect('mongodb://127.0.0.1:27017/shiftflow_pos', {
                     serverSelectionTimeoutMS: 2000
                 });
                 _isConnected = true;

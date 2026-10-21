@@ -1,5 +1,5 @@
 import React from 'react';
-import { printThermalReceipt, shareBillOnWhatsApp } from '../../utils/printHelper';
+import { printThermalReceipt, shareBillOnWhatsApp, downloadBillPdf } from '../../utils/printHelper';
 import { toast } from 'react-toastify';
 
 export default function ReceiptModal({ isOpen, onClose, bill, storeConfig }) {
@@ -13,6 +13,11 @@ export default function ReceiptModal({ isOpen, onClose, bill, storeConfig }) {
     const handleWhatsApp = () => {
         shareBillOnWhatsApp(bill, storeConfig);
         toast.success('📱 Opening WhatsApp to share digital invoice...');
+    };
+
+    const handleDownloadPdf = () => {
+        downloadBillPdf(bill, storeConfig);
+        toast.success(`📥 Invoice ${bill.billNumber} PDF downloaded successfully!`);
     };
 
     const dateFormatted = new Date(bill.createdAt || Date.now()).toLocaleString('en-IN', {
@@ -236,6 +241,15 @@ export default function ReceiptModal({ isOpen, onClose, bill, storeConfig }) {
                             Close (Esc)
                         </button>
                         <div className="d-flex gap-2 flex-wrap">
+                            <button
+                                type="button"
+                                className="btn btn-outline-primary px-3 fw-bold d-flex align-items-center gap-2"
+                                onClick={handleDownloadPdf}
+                                title="Download official Invoice PDF"
+                            >
+                                <i className="bi bi-file-earmark-pdf-fill fs-6 text-primary"></i>
+                                <span>Download PDF</span>
+                            </button>
                             <button
                                 type="button"
                                 className="btn btn-outline-success px-3 fw-bold d-flex align-items-center gap-2"

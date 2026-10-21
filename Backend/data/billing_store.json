@@ -1,4 +1,4 @@
-{
+﻿{
   "users": [
     {
       "_id": "usr_admin",
@@ -1023,7 +1023,7 @@
   "bills": [
     {
       "_id": "bill_1791723709327_469",
-      "billNumber": "DM-20261011-1933",
+      "billNumber": "INV-20261011-1933",
       "storeId": "store_default",
       "storeName": "Smart Retail & SuperMarket",
       "storeType": "Supermarket & Kirana Store",
@@ -1069,7 +1069,7 @@
     },
     {
       "_id": "bill_1791723633296_179",
-      "billNumber": "DM-20261011-8798",
+      "billNumber": "INV-20261011-8798",
       "storeId": "store_default",
       "storeName": "Smart Retail & SuperMarket",
       "storeType": "Supermarket & Kirana Store",
@@ -1115,7 +1115,7 @@
     },
     {
       "_id": "bill_1791721069805_220",
-      "billNumber": "DM-20261011-6106",
+      "billNumber": "INV-20261011-6106",
       "storeId": "store_1791720911081",
       "storeName": "Radhe Krishna Super Market",
       "storeType": "Supermarket and Kirana",
@@ -1161,7 +1161,7 @@
     },
     {
       "_id": "bill_1791717230810_252",
-      "billNumber": "DM-20261011-2566",
+      "billNumber": "INV-20261011-2566",
       "counterNo": "Counter-01",
       "cashierName": "Rahul Sharma",
       "cashierId": "usr_cashier1",
@@ -1237,7 +1237,7 @@
     },
     {
       "_id": "bill_1791635177222_772",
-      "billNumber": "DM-20261010-7520",
+      "billNumber": "INV-20261010-7520",
       "counterNo": "Counter-01",
       "cashierName": "Rahul Sharma",
       "cashierId": "usr_cashier1",
@@ -1277,7 +1277,7 @@
     },
     {
       "_id": "bill_1791634720953_568",
-      "billNumber": "DM-20261010-8401",
+      "billNumber": "INV-20261010-8401",
       "counterNo": "Counter-01",
       "cashierName": "Rahul Sharma",
       "cashierId": "usr_cashier1",
@@ -1317,7 +1317,7 @@
     },
     {
       "_id": "bill_1791634710827_824",
-      "billNumber": "DM-20261010-8620",
+      "billNumber": "INV-20261010-8620",
       "counterNo": "Counter-01",
       "cashierName": "Rahul Sharma",
       "cashierId": "usr_cashier1",
@@ -1357,7 +1357,7 @@
     },
     {
       "_id": "bill_1791634581302_961",
-      "billNumber": "DM-20261010-6810",
+      "billNumber": "INV-20261010-6810",
       "counterNo": "Counter-01",
       "cashierName": "Rahul Sharma",
       "cashierId": "usr_cashier1",
@@ -1409,7 +1409,7 @@
     },
     {
       "_id": "bill_1791633737160_877",
-      "billNumber": "DM-20261010-9544",
+      "billNumber": "INV-20261010-9544",
       "counterNo": "Counter-01",
       "cashierName": "Rahul Sharma",
       "cashierId": "usr_cashier1",
@@ -1461,7 +1461,7 @@
     },
     {
       "_id": "bill_1791632224791_316",
-      "billNumber": "DM-20261010-5111",
+      "billNumber": "INV-20261010-5111",
       "counterNo": "All Counters",
       "cashierName": "Rajesh Mehta",
       "cashierId": "usr_admin",
@@ -1525,7 +1525,7 @@
     },
     {
       "_id": "bill_1791632178375_266",
-      "billNumber": "DM-20261010-2115",
+      "billNumber": "INV-20261010-2115",
       "counterNo": "All Counters",
       "cashierName": "Rajesh Mehta",
       "cashierId": "usr_admin",
@@ -1577,7 +1577,7 @@
     },
     {
       "_id": "bill_001",
-      "billNumber": "DM-20261010-0001",
+      "billNumber": "INV-20261010-0001",
       "counterNo": "Counter-01",
       "cashierName": "Rahul Sharma",
       "cashierId": "usr_cashier1",
@@ -1628,7 +1628,7 @@
     },
     {
       "_id": "bill_002",
-      "billNumber": "DM-20261010-0002",
+      "billNumber": "INV-20261010-0002",
       "counterNo": "Counter-01",
       "cashierName": "Rahul Sharma",
       "cashierId": "usr_cashier1",

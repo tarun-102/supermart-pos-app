@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiFetch } from '../../utils/api';
 import ReceiptModal from '../POS/ReceiptModal';
-import { printSalesReport, printThermalReceipt, shareBillOnWhatsApp, exportCSVGstStatement } from '../../utils/printHelper';
+import { printSalesReport, printThermalReceipt, shareBillOnWhatsApp, exportCSVGstStatement, downloadBillPdf } from '../../utils/printHelper';
 import { toast } from 'react-toastify';
 
 export default function BillsHistory({ currentUser, activeShift, onOpenShiftModal }) {
@@ -202,7 +202,7 @@ export default function BillsHistory({ currentUser, activeShift, onOpenShiftModa
                                 <input
                                     type="text"
                                     className="form-control"
-                                    placeholder="Search Bill Number (e.g. DM-...) or Mobile..."
+                                    placeholder="Search Bill Number (e.g. INV-...) or Mobile..."
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                 />
@@ -450,6 +450,16 @@ export default function BillsHistory({ currentUser, activeShift, onOpenShiftModa
                                                     title="Quick print thermal slip"
                                                 >
                                                     <i className="bi bi-printer"></i>
+                                                </button>
+                                                <button
+                                                    className="btn btn-sm btn-outline-danger fw-semibold"
+                                                    onClick={() => {
+                                                        downloadBillPdf(b, storeConfig);
+                                                        toast.success(`📥 Bill ${b.billNumber} PDF downloaded!`);
+                                                    }}
+                                                    title="Download Invoice PDF"
+                                                >
+                                                    <i className="bi bi-file-earmark-pdf"></i>
                                                 </button>
                                                 <button
                                                     className="btn btn-sm btn-outline-success fw-semibold"
