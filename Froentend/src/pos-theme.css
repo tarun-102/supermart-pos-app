@@ -1,27 +1,34 @@
 :root {
-  /* Eye-Friendly Soft Charcoal & Deep Navy POS Theme (Zero Eye-Strain & Zero Lag) */
-  --brand-primary: #1e3a8a; /* Deep calm navy - soft on eyes, non-glaring */
-  --brand-primary-hover: #172554;
-  --brand-primary-light: #f1f5f9;
-  --brand-primary-border: #cbd5e1;
-  
-  --brand-dark: #1e293b; /* Soft Charcoal - NOT harsh stark black */
-  --brand-slate: #334155;
+  /* Ultra-Modern Clean Obsidian & Electric Indigo Design System (Mobile-First) */
+  --brand-primary: #4f46e5; /* Modern Electric Indigo - High tech, vibrant yet soothing */
+  --brand-primary-hover: #4338ca;
+  --brand-primary-light: #eef2ff;
+  --brand-primary-glow: rgba(79, 70, 229, 0.2);
+  --brand-primary-border: #c7d2fe;
+
+  --brand-dark: #0f172a; /* Obsidian Slate - Crisp modern typography */
+  --brand-slate: #1e293b;
   --brand-slate-light: #475569;
   --brand-muted: #64748b;
-  
-  --brand-bg: #f8fafc; /* Gentle warm paper background */
+
+  --brand-bg: #f8fafc; /* Crisp pearl canvas */
   --brand-card: #ffffff;
   --brand-border: #e2e8f0;
-  
-  --brand-accent: #334155;
-  --brand-green: #047857; /* Soft forest green, never bright neon */
-  --brand-yellow: #d97706; /* Soft amber */
-  --brand-red: #dc2626;
-  --card-radius: 10px;
+  --brand-border-subtle: #f1f5f9;
+
+  --brand-green: #10b981; /* Fresh Mint for In Stock / Savings */
+  --brand-green-light: #ecfdf5;
+  --brand-yellow: #f59e0b; /* Honey Amber for Shortage / Warnings */
+  --brand-yellow-light: #fffbeb;
+  --brand-red: #f43f5e; /* Vivid Rose for Out of stock / Delete */
+  --brand-red-light: #fff1f2;
+
+  --card-radius: 16px;
+  --card-radius-sm: 12px;
+  --bottom-nav-height: 64px;
 }
 
-/* Fast Rendering Baseline */
+/* Fast 60 FPS Mobile Baseline */
 *, *::before, *::after {
   box-sizing: border-box;
 }
@@ -34,9 +41,9 @@ html, body {
   padding: 0;
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
-  background-color: #f8fafc;
-  color: #1e293b;
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--brand-bg);
+  color: var(--brand-dark);
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -54,226 +61,411 @@ html, body {
   font-feature-settings: 'tnum';
 }
 
-/* Top App Header - Soft Charcoal Slate (Comfortable for 8+ hours of billing) */
-.navbar-dmart {
-  background: #1e293b;
-  color: #f8fafc;
-  border-bottom: 2px solid #334155;
+/* Modern Top Navbar */
+.navbar-modern {
+  background: #ffffff;
+  color: var(--brand-dark);
+  border-bottom: 1px solid var(--brand-border);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
 }
 
 .brand-badge {
-  background: #334155;
-  color: #e2e8f0;
-  border: 1px solid #475569;
+  background: var(--brand-primary-light);
+  color: var(--brand-primary);
+  border: 1px solid var(--brand-primary-border);
   font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 6px;
+  padding: 3px 8px;
+  border-radius: 8px;
   font-size: 0.72rem;
   letter-spacing: 0.5px;
 }
 
-/* Nav Pills - Calm, Non-vibrant Navigation */
+/* Desktop Navigation Pills */
 .nav-pills-pos {
   display: flex;
-  flex-wrap: nowrap !important;
-  overflow-x: auto !important;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
   gap: 6px;
   padding: 2px 0;
 }
 
-.nav-pills-pos::-webkit-scrollbar {
-  display: none;
-}
-
 .nav-pills-pos .nav-link {
-  color: #cbd5e1;
+  color: var(--brand-slate-light);
   font-weight: 600;
-  border-radius: 8px;
-  padding: 7px 13px;
+  border-radius: 10px;
+  padding: 8px 14px;
   display: flex;
   align-items: center;
-  gap: 7px;
-  white-space: nowrap !important;
-  flex-shrink: 0 !important;
-  font-size: 0.85rem;
+  gap: 8px;
+  font-size: 0.88rem;
   border: 1px solid transparent;
   background: transparent;
-  transition: background-color 0.1s ease, color 0.1s ease;
+  transition: all 0.15s ease;
 }
 
 .nav-pills-pos .nav-link:hover {
-  background-color: #334155;
-  color: #ffffff;
+  background-color: var(--brand-border-subtle);
+  color: var(--brand-dark);
 }
 
 .nav-pills-pos .nav-link.active {
-  background-color: #334155;
+  background-color: var(--brand-primary);
   color: #ffffff;
-  border-color: #475569;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 12px var(--brand-primary-glow);
 }
 
-/* POS Barcode Scanner Input Box - Neutral, Soft-Contrast Border */
-.barcode-scan-box {
-  background: #ffffff;
-  border: 1.5px solid #cbd5e1;
-  border-radius: 10px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
-}
-
-.barcode-scan-box:focus-within {
-  border-color: #475569;
-  box-shadow: 0 0 0 3px rgba(71, 85, 105, 0.12);
-}
-
-/* Calm, static indicator dot */
-.scan-pulse {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: #64748b;
-}
-
-/* Global Button Softening: Deep Calm Navy (No Electric Blinding Blue) */
+/* Primary Button Styling - Electric Indigo */
 .btn-primary {
-  background-color: #1e3a8a !important;
-  border-color: #1e3a8a !important;
+  background-color: var(--brand-primary) !important;
+  border-color: var(--brand-primary) !important;
   color: #ffffff !important;
+  font-weight: 600;
+  border-radius: 12px;
+  transition: all 0.15s ease;
 }
 
 .btn-primary:hover, .btn-primary:focus {
-  background-color: #172554 !important;
-  border-color: #172554 !important;
+  background-color: var(--brand-primary-hover) !important;
+  border-color: var(--brand-primary-hover) !important;
   color: #ffffff !important;
+  box-shadow: 0 4px 14px var(--brand-primary-glow);
 }
 
 .btn-outline-primary {
-  color: #1e3a8a !important;
-  border-color: #cbd5e1 !important;
+  color: var(--brand-primary) !important;
+  border-color: var(--brand-primary-border) !important;
   background-color: transparent !important;
+  border-radius: 12px;
+  font-weight: 600;
 }
 
 .btn-outline-primary:hover {
-  background-color: #f1f5f9 !important;
-  color: #1e3a8a !important;
-  border-color: #94a3b8 !important;
+  background-color: var(--brand-primary-light) !important;
+  color: var(--brand-primary-hover) !important;
+  border-color: var(--brand-primary) !important;
 }
 
 .text-primary {
-  color: #1e3a8a !important;
+  color: var(--brand-primary) !important;
 }
 
 .bg-primary-subtle {
-  background-color: #f1f5f9 !important;
-  color: #334155 !important;
+  background-color: var(--brand-primary-light) !important;
+  color: var(--brand-primary) !important;
 }
 
-/* POS Cart Table */
-.pos-table-card {
+/* Modern Card Containers */
+.modern-card {
   background: #ffffff;
-  border-radius: 10px;
   border: 1px solid var(--brand-border);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  border-radius: var(--card-radius);
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.pos-table th {
-  background-color: #f8fafc;
-  color: #64748b;
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: 700;
-  border-bottom: 2px solid #e2e8f0;
+/* Barcode Scan Input Box */
+.barcode-scan-box {
+  background: #ffffff;
+  border: 2px solid var(--brand-border);
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.pos-table td {
-  vertical-align: middle;
-  padding: 10px 12px;
-  font-size: 0.95rem;
+.barcode-scan-box:focus-within {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 4px var(--brand-primary-glow);
 }
 
-.cart-item-row:hover {
-  background-color: #f8fafc;
-}
-
-.price-strike {
-  text-decoration: line-through;
-  color: #94a3b8;
-  font-size: 0.85rem;
-}
-
-.price-sp {
-  color: #1e293b;
-  font-weight: 800;
-  font-size: 1.05rem;
-}
-
-.savings-pill {
-  background-color: #f1f5f9;
-  color: #334155;
-  font-size: 0.72rem;
-  font-weight: 700;
-  padding: 2px 7px;
-  border-radius: 6px;
-  border: 1px solid #cbd5e1;
+.scan-pulse {
   display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background-color: var(--brand-primary);
+}
+
+/* Mobile Product Card (Grid / List) */
+.product-touch-card {
+  background: #ffffff;
+  border: 1px solid var(--brand-border);
+  border-radius: var(--card-radius-sm);
+  padding: 12px;
+  transition: all 0.15s ease;
+  user-select: none;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.03);
+}
+
+.product-touch-card:active {
+  transform: scale(0.97);
+  background-color: var(--brand-primary-light);
+  border-color: var(--brand-primary-border);
+}
+
+/* Mobile Cart Card Item */
+.mobile-cart-card {
+  background: #ffffff;
+  border-radius: var(--card-radius-sm);
+  border: 1px solid var(--brand-border);
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.03);
+  transition: all 0.15s ease;
+}
+
+/* Stepper Buttons for Fingers */
+.touch-stepper-btn {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: 10px !important;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8fafc;
+  border: 1px solid var(--brand-border);
+  color: var(--brand-dark);
+}
+
+.touch-stepper-btn:active {
+  background-color: var(--brand-primary);
+  color: #ffffff;
+  transform: scale(0.92);
 }
 
 /* POS Summary Card */
 .pos-summary-card {
   background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  border: 1px solid var(--brand-border);
+  border-radius: var(--card-radius);
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
 }
 
 .grand-total-banner {
-  background: #1e293b;
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
   color: #ffffff;
-  border-radius: 10px;
+  border-radius: var(--card-radius-sm);
   padding: 16px;
-  border: 1px solid #334155;
+  box-shadow: 0 6px 18px rgba(49, 46, 129, 0.2);
 }
 
-/* Thermal Receipt Styling */
-.thermal-receipt {
-  width: 320px;
-  margin: 0 auto;
+/* Camera Viewfinder Box for Distance Scanning */
+.scanner-viewport-box {
+  position: relative;
+  width: 100%;
+  height: 240px;
+  min-height: 240px;
+  max-height: 260px;
+  background-color: #090d16;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--brand-border);
+}
+
+.scanner-viewport-box video {
+  width: 100% !important;
+  height: 240px !important;
+  max-height: 260px !important;
+  object-fit: cover !important;
+  border-radius: 14px;
+  display: block;
+}
+
+/* Reticle targeting overlay */
+.scanner-reticle-box {
+  position: absolute;
+  width: 86%;
+  height: 72%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 12;
+  border: 2px dashed rgba(255, 255, 255, 0.65);
+  border-radius: 12px;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4);
+}
+
+.scanner-corner {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-color: #6366f1;
+  border-style: solid;
+}
+.scanner-corner.top-left {
+  top: -2px; left: -2px;
+  border-width: 3.5px 0 0 3.5px;
+  border-top-left-radius: 8px;
+}
+.scanner-corner.top-right {
+  top: -2px; right: -2px;
+  border-width: 3.5px 3.5px 0 0;
+  border-top-right-radius: 8px;
+}
+.scanner-corner.bottom-left {
+  bottom: -2px; left: -2px;
+  border-width: 0 0 3.5px 3.5px;
+  border-bottom-left-radius: 8px;
+}
+.scanner-corner.bottom-right {
+  bottom: -2px; right: -2px;
+  border-width: 0 3.5px 3.5px 0;
+  border-bottom-right-radius: 8px;
+}
+
+.scanner-laser-line {
+  position: absolute;
+  top: 50%;
+  left: 8%;
+  right: 8%;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0) 0%, rgba(99, 102, 241, 1) 50%, rgba(99, 102, 241, 0) 100%);
+  box-shadow: 0 0 10px #6366f1;
+  animation: laserSweepModern 1.8s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 10;
+}
+
+@keyframes laserSweepModern {
+  0% { transform: translateY(-60px); opacity: 0.9; }
+  100% { transform: translateY(60px); opacity: 0.9; }
+}
+
+/* FIXED MOBILE BOTTOM NAVIGATION BAR (Mobile Native App Bar) */
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  max-width: 100vw;
+  height: var(--bottom-nav-height);
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--brand-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 1030;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-shadow: 0 -4px 16px rgba(15, 23, 42, 0.05);
+}
+
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  height: 100%;
+  color: var(--brand-muted);
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  padding: 4px 0;
+  font-size: 0.68rem;
+  font-weight: 600;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.mobile-nav-item i {
+  font-size: 1.25rem;
+  margin-bottom: 2px;
+  transition: transform 0.15s ease;
+}
+
+.mobile-nav-item.active {
+  color: var(--brand-primary);
+  font-weight: 700;
+}
+
+.mobile-nav-item.active i {
+  transform: translateY(-2px);
+  color: var(--brand-primary);
+}
+
+.mobile-nav-item .nav-indicator-dot {
+  position: absolute;
+  bottom: 6px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: var(--brand-primary);
+}
+
+/* Floating Mobile Checkout Bar (Sits directly above bottom nav) */
+.mobile-floating-cart-bar {
+  position: fixed;
+  bottom: calc(var(--bottom-nav-height) + 8px);
+  left: 12px;
+  right: 12px;
   background: #ffffff;
-  padding: 16px;
-  font-family: 'JetBrains Mono', 'Courier New', monospace;
-  font-size: 12px;
-  color: #000;
-  border: 1px dashed #cbd5e1;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  line-height: 1.4;
+  border: 1px solid var(--brand-border);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.15);
+  border-radius: 16px;
+  padding: 10px 14px;
+  z-index: 1025;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.thermal-receipt-divider {
-  border-top: 1px dashed #475569;
-  margin: 8px 0;
+/* Status Badges */
+.badge-stock-in {
+  background-color: var(--brand-green-light);
+  color: var(--brand-green);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  font-weight: 700;
+  border-radius: 8px;
+  padding: 3px 8px;
 }
 
-.border-dashed {
-  border-style: dashed !important;
+.badge-stock-short {
+  background-color: var(--brand-yellow-light);
+  color: #b45309;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  font-weight: 700;
+  border-radius: 8px;
+  padding: 3px 8px;
 }
 
-.thermal-receipt-header {
-  text-align: center;
+.badge-stock-out {
+  background-color: var(--brand-red-light);
+  color: var(--brand-red);
+  border: 1px solid rgba(244, 63, 94, 0.3);
+  font-weight: 700;
+  border-radius: 8px;
+  padding: 3px 8px;
 }
 
-.thermal-receipt-barcode {
-  font-family: 'Libre Barcode 128', monospace;
-  font-size: 40px;
-  text-align: center;
-  line-height: 1;
-  margin: 10px 0 2px 0;
+/* Mobile-First Responsive Adjustments */
+@media (max-width: 768px) {
+  body {
+    padding-bottom: calc(var(--bottom-nav-height) + 70px) !important;
+    font-size: 13.5px;
+  }
+
+  .container, .container-fluid {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .modern-card {
+    border-radius: 14px;
+  }
+
+  /* Full screen touch modals */
+  .modal-dialog {
+    margin: 8px auto !important;
+    max-width: 98% !important;
+  }
 }
 
-/* Print Only Styles - Bulletproof Print Engine (Zero Blank Pages) */
+/* Print Styles preserved - Isolated & Never Blank */
 @media print {
   @page {
     margin: 8mm;
@@ -291,69 +483,45 @@ html, body {
 
   #root {
     width: 100% !important;
-    min-height: auto !important;
-    overflow: visible !important;
     display: block !important;
   }
 
-  /* Unclip modals and scrolling viewports during print */
   .modal {
     position: static !important;
     display: block !important;
     overflow: visible !important;
     background: transparent !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    z-index: 1 !important;
   }
 
-  .modal-dialog {
-    max-width: 100% !important;
-    margin: 0 auto !important;
-    padding: 0 !important;
-    transform: none !important;
-  }
-
-  .modal-content {
+  .modal-dialog, .modal-content, .modal-body {
     border: none !important;
     box-shadow: none !important;
     overflow: visible !important;
     background: transparent !important;
-  }
-
-  .modal-body {
-    overflow: visible !important;
     max-height: none !important;
+    margin: 0 !important;
     padding: 0 !important;
-    background: transparent !important;
   }
 
-  /* Hide unnecessary browser UI and navigation */
   .no-print,
   nav,
   .navbar,
-  .navbar-dmart,
+  .mobile-bottom-nav,
+  .mobile-floating-cart-bar,
   .modal-backdrop,
   .modal-header,
   .modal-footer,
   button,
   .btn,
-  footer,
-  .alert {
+  footer {
     display: none !important;
   }
 
-  /* Thermal slip centered on standard 80mm roll */
   .thermal-receipt, .print-area {
     display: block !important;
-    visibility: visible !important;
-    position: static !important;
     width: 78mm !important;
-    max-width: 100% !important;
     margin: 0 auto !important;
     padding: 4mm !important;
-    box-shadow: none !important;
-    border: none !important;
     background: #ffffff !important;
     color: #000000 !important;
   }
@@ -362,219 +530,5 @@ html, body {
     color: #000000 !important;
     text-shadow: none !important;
     box-shadow: none !important;
-  }
-}
-
-/* Custom Scrollbars */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-/* Scanner Viewfinder Box - Calm Muted Reticle */
-.scanner-viewport-box {
-  position: relative;
-  width: 100%;
-  height: 220px;
-  min-height: 220px;
-  max-height: 220px;
-  background-color: #0f172a;
-  border-radius: 12px;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid #475569;
-}
-
-.scanner-viewport-box video {
-  width: 100% !important;
-  height: 220px !important;
-  max-height: 220px !important;
-  object-fit: cover !important;
-  border-radius: 10px;
-  display: block;
-}
-
-/* Hard guarantee: If a second video is ever injected by browser, hide it immediately */
-.scanner-viewport-box video ~ video,
-.scanner-viewport-box video:not(:first-of-type),
-.scanner-viewport-box div:not(:first-child) video,
-.scanner-viewport-box #camera-barcode-viewfinder > div ~ div,
-.scanner-viewport-box #camera-barcode-viewfinder-admin > div ~ div,
-.scanner-viewport-box #admin-camera-scanner-viewfinder > div ~ div,
-.scanner-viewport-box #pos-camera-scanner-viewfinder > div ~ div {
-  display: none !important;
-  visibility: hidden !important;
-  height: 0 !important;
-  width: 0 !important;
-  opacity: 0 !important;
-  position: absolute !important;
-}
-
-.scanner-viewport-box canvas {
-  display: none !important;
-}
-
-/* Targeting Reticle Overlay */
-.scanner-reticle-box {
-  position: absolute;
-  width: 78%;
-  height: 66%;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  z-index: 12;
-  border: 2px dashed rgba(203, 213, 225, 0.7);
-  border-radius: 10px;
-  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.35);
-}
-
-.scanner-corner {
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  border-color: #94a3b8;
-  border-style: solid;
-}
-.scanner-corner.top-left {
-  top: -2px; left: -2px;
-  border-width: 3px 0 0 3px;
-  border-top-left-radius: 8px;
-}
-.scanner-corner.top-right {
-  top: -2px; right: -2px;
-  border-width: 3px 3px 0 0;
-  border-top-right-radius: 8px;
-}
-.scanner-corner.bottom-left {
-  bottom: -2px; left: -2px;
-  border-width: 0 0 3px 3px;
-  border-bottom-left-radius: 8px;
-}
-.scanner-corner.bottom-right {
-  bottom: -2px; right: -2px;
-  border-width: 0 3px 3px 0;
-  border-bottom-right-radius: 8px;
-}
-
-/* Laser sweep line animation - Calm Slate Tone */
-.scanner-laser-line {
-  position: absolute;
-  top: 50%;
-  left: 12%;
-  right: 12%;
-  height: 2px;
-  background: linear-gradient(90deg, rgba(148, 163, 184, 0.1) 0%, rgba(148, 163, 184, 0.9) 50%, rgba(148, 163, 184, 0.1) 100%);
-  box-shadow: 0 0 6px rgba(148, 163, 184, 0.6);
-  animation: laserSweepCompact 1.8s ease-in-out infinite alternate;
-  pointer-events: none;
-  z-index: 10;
-}
-
-@keyframes laserSweepCompact {
-  0% { transform: translateY(-55px); opacity: 0.85; }
-  100% { transform: translateY(55px); opacity: 0.85; }
-}
-
-/* Ensure bootstrap rows and containers never expand past 100% */
-.container, .container-fluid {
-  width: 100% !important;
-  max-width: 100vw !important;
-  box-sizing: border-box;
-}
-
-/* Mobile-First App Styling for Smartphone Displays */
-@media (max-width: 768px) {
-  body {
-    padding-bottom: 92px; /* Leave room for sticky bottom checkout bar */
-    font-size: 13.5px;
-  }
-
-  .container-fluid {
-    padding-left: 10px !important;
-    padding-right: 10px !important;
-  }
-
-  .row {
-    margin-left: -5px !important;
-    margin-right: -5px !important;
-  }
-
-  .row > * {
-    padding-left: 5px !important;
-    padding-right: 5px !important;
-  }
-
-  .pos-mobile-full {
-    padding-left: 4px !important;
-    padding-right: 4px !important;
-  }
-
-  .pos-table-card {
-    border-radius: 10px;
-    border: 1px solid var(--brand-border);
-  }
-
-  /* Native Mobile App Cart Card Item */
-  .mobile-cart-card {
-    background: #ffffff;
-    border-radius: 10px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
-  }
-
-  .mobile-cart-card:active {
-    background-color: #f1f5f9;
-  }
-
-  /* Stepper buttons sized for thumb clicks */
-  .mobile-stepper-btn {
-    min-width: 34px;
-    height: 32px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 6px !important;
-  }
-
-  /* Sticky Bottom POS Checkout Bar */
-  .mobile-pos-bottom-bar {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    max-width: 100vw;
-    background: #ffffff;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.06);
-    padding: 10px 14px;
-    padding-bottom: max(12px, env(safe-area-inset-bottom, 12px));
-    z-index: 1040;
-    border-top: 2px solid #334155;
-    box-sizing: border-box;
-  }
-
-  /* Form modal full width on mobile */
-  .modal-dialog {
-    margin: 8px auto !important;
-    max-width: 98% !important;
-  }
-
-  /* Native App Touch Feedback */
-  .btn:active {
-    transform: scale(0.98);
   }
 }

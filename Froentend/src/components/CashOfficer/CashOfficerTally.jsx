@@ -341,8 +341,122 @@ export default function CashOfficerTally({ currentUser }) {
                 </div>
             </div>
 
-            {/* Cashier Tally Records Table */}
-            <div className="card border-0 shadow-sm rounded-3 overflow-hidden bg-white no-print">
+            {/* Mobile View: Shift Touch Cards (< md) */}
+            <div className="d-block d-md-none mb-3 no-print">
+                {loading ? (
+                    <div className="card border-0 shadow-sm p-5 text-center text-muted bg-white">
+                        <div className="spinner-border text-primary mx-auto mb-2"></div>
+                        <div>Loading cashier tally reports...</div>
+                    </div>
+                ) : displayedShifts.length === 0 ? (
+                    <div className="card border-0 shadow-sm p-4 text-center text-muted bg-white">
+                        <i className="bi bi-file-earmark-text display-4 opacity-50 mb-2"></i>
+                        <div className="fw-semibold">No shift records matching criteria.</div>
+                    </div>
+                ) : (
+                    <div className="d-flex flex-column gap-2">
+                        {displayedShifts.map((sh) => {
+                            const diff = sh.cashDifference || 0;
+                            const isTallied = sh.tallyStatus === 'TALLIED' || diff === 0;
+                            const isShort = sh.tallyStatus === 'SHORTAGE' || diff < -1;
+                            const isExcess = sh.tallyStatus === 'EXCESS' || diff > 1;
+
+                            return (
+                                <div key={sh._id} className="card border-0 shadow-sm p-3 rounded-3 bg-white">
+                                    <div className="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <div className="fw-bold font-mono text-dark" style={{ fontSize: '0.95rem' }}>
+                                                {sh.shiftNumber}
+                                            </div>
+                                            <div className="small text-muted">
+                                                {new Date(sh.startTime).toLocaleDateString([], { month: 'short', day: 'numeric' })}{' '}
+                                                {new Date(sh.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </div>
+                                            <div className="d-flex align-items-center gap-1 mt-1">
+                                                <span className="badge bg-light text-dark border">
+                                                    {sh.cashierName}
+                                                </span>
+                                                <span className="badge bg-light text-primary border">
+                                                    {sh.counterNo}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div className="text-end">
+                                            {sh.status === 'ACTIVE' ? (
+                                                <span className="badge bg-light text-muted border">
+                                                    Active Shift
+                                                </span>
+                                            ) : isTallied ? (
+                                                <span className="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fw-bold">
+                                                    ✓ Tallied (₹0)
+                                                </span>
+                                            ) : isShort ? (
+                                                <span className="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 fw-bold">
+                                                    Shortage (-₹{Math.abs(diff)})
+                                                </span>
+                                            ) : (
+                                                <span className="badge bg-info-subtle text-info border border-info-subtle px-2 py-1 fw-bold">
+                                                    Excess (+₹{diff})
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="d-flex justify-content-between align-items-center py-2 border-top border-bottom my-1 bg-light rounded-2 px-2 small font-mono">
+                                        <div>
+                                            <span className="text-muted">Net: </span>
+                                            <strong className="text-dark">₹{sh.netSales?.toLocaleString('en-IN')}</strong>
+                                        </div>
+                                        <div>
+                                            <span className="text-muted">Handed: </span>
+                                            <strong className="text-primary fs-6">
+                                                ₹{sh.physicalCashHandedOver ? sh.physicalCashHandedOver.toLocaleString('en-IN') : '0'}
+                                            </strong>
+                                        </div>
+                                    </div>
+
+                                    <div className="d-flex gap-2 align-items-center mt-2">
+                                        {currentUser?.role === 'admin' || currentUser?.role === 'cash_officer' ? (
+                                            <button
+                                                type="button"
+                                                className="btn btn-sm btn-primary fw-bold flex-grow-1 py-2 d-flex align-items-center justify-content-center gap-1 shadow-sm"
+                                                onClick={() => handleOpenAuditModal(sh)}
+                                            >
+                                                <i className="bi bi-shield-check"></i>
+                                                <span>Audit &amp; Approve</span>
+                                            </button>
+                                        ) : null}
+
+                                        {sh.denominations && Object.keys(sh.denominations).length > 0 && (
+                                            <button
+                                                type="button"
+                                                className="btn btn-sm btn-outline-secondary px-3 py-2"
+                                                onClick={() => setViewingDenomShift(sh)}
+                                                title="View Denominations"
+                                            >
+                                                <i className="bi bi-cash-stack"></i>
+                                            </button>
+                                        )}
+
+                                        <button
+                                            type="button"
+                                            className="btn btn-sm btn-outline-dark px-3 py-2"
+                                            onClick={() => handlePrintReceipt(sh)}
+                                            title="Print Settlement Slip"
+                                        >
+                                            <i className="bi bi-printer"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
+
+            {/* Desktop Cashier Tally Records Table (d-none d-md-block) */}
+            <div className="card border-0 shadow-sm rounded-3 overflow-hidden bg-white no-print d-none d-md-block">
                 <div className="table-responsive">
                     <table className="table table-hover align-middle mb-0">
                         <thead className="table-light">

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
+import MobileBottomNav from './components/MobileBottomNav';
 import PosBilling from './components/POS/PosBilling';
 import InventoryManager from './components/Inventory/InventoryManager';
 import CashOfficerTally from './components/CashOfficer/CashOfficerTally';
@@ -195,6 +196,15 @@ export default function App() {
           </div>
         </div>
       </footer>
+
+      {/* Native Mobile Bottom Navigation Bar (< md) */}
+      <MobileBottomNav
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        currentUser={currentUser}
+        heldCount={heldCount}
+        onOpenShiftModal={() => setIsShiftModalOpen(true)}
+      />
 
       {/* Register Shift & Cash Tally Handover Modal */}
       <ShiftDrawerModal

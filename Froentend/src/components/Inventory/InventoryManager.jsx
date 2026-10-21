@@ -73,7 +73,7 @@ export default function InventoryManager() {
         setIsCameraScanningForProduct(false);
         setCustomCategoryInput('');
         setFormData({
-            barcode: '890' + Math.floor(1000000000 + Math.random() * 9000000000),
+            barcode: '',
             name: '',
             category: 'Staples & Flour',
             unit: 'pc',
@@ -561,8 +561,126 @@ export default function InventoryManager() {
                 </div>
             </div>
 
-            {/* Products Table */}
-            <div className="card border-0 shadow-sm rounded-3 overflow-hidden bg-white">
+            {/* Mobile View: Touch Cards (< md) */}
+            <div className="d-block d-md-none mb-3">
+                {loading ? (
+                    <div className="card border-0 shadow-sm p-5 text-center text-muted bg-white">
+                        <div className="spinner-border text-primary mx-auto mb-2"></div>
+                        <div>Loading inventory items...</div>
+                    </div>
+                ) : displayedProducts.length === 0 ? (
+                    <div className="card border-0 shadow-sm p-4 text-center text-muted bg-white">
+                        <i className="bi bi-box-seam display-4 opacity-50 mb-2"></i>
+                        <div className="fw-semibold">
+                            {inventoryTab === 'SHORT_BOOK' ? '🎉 Great news! Zero shortage items in this category.' : 'No products found.'}
+                        </div>
+                    </div>
+                ) : (
+                    <div className="d-flex flex-column gap-2">
+                        {displayedProducts.map((p) => {
+                            const stockNum = Number(p.stock);
+                            const minAlert = Number(p.minStockAlert || 10);
+                            const isOut = stockNum === 0;
+                            const isShort = stockNum > 0 && stockNum <= minAlert;
+
+                            return (
+                                <div key={p._id} className="card border-0 shadow-sm p-3 rounded-3 bg-white">
+                                    <div className="d-flex justify-content-between align-items-start mb-2">
+                                        <div className="pe-2 text-truncate" style={{ maxWidth: '75%' }}>
+                                            <div className="fw-bold text-dark text-truncate" style={{ fontSize: '0.95rem' }}>
+                                                {p.name}
+                                            </div>
+                                            <div className="d-flex align-items-center gap-1 mt-1 flex-wrap">
+                                                <span className="badge bg-light text-dark border" style={{ fontSize: '0.7rem' }}>
+                                                    {p.category || 'General'}
+                                                </span>
+                                                <span className="badge bg-light text-muted border font-mono" style={{ fontSize: '0.7rem' }}>
+                                                    {p.barcode}
+                                                </span>
+                                                <span className="badge bg-light text-secondary border font-mono" style={{ fontSize: '0.7rem' }}>
+                                                    {p.unit}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            {isOut ? (
+                                                <span className="badge bg-danger text-white px-2 py-1 fw-bold" style={{ fontSize: '0.75rem' }}>
+                                                    Out of Stock (0)
+                                                </span>
+                                            ) : isShort ? (
+                                                <span className="badge bg-warning text-dark px-2 py-1 fw-bold border border-warning" style={{ fontSize: '0.75rem' }}>
+                                                    ⚡ Short: {stockNum} {p.unit}
+                                                </span>
+                                            ) : (
+                                                <span className="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fw-bold" style={{ fontSize: '0.75rem' }}>
+                                                    ✓ Stock: {stockNum} {p.unit}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="d-flex justify-content-between align-items-center py-2 border-top border-bottom my-1 bg-light rounded-2 px-2">
+                                        <div>
+                                            <span className="text-muted text-decoration-line-through small me-1 font-mono">
+                                                ₹{p.mrp}
+                                            </span>
+                                            <span className="fw-bolder fs-6 text-primary font-mono">
+                                                ₹{p.sellingPrice}
+                                            </span>
+                                            <span className="text-muted small"> / {p.unit}</span>
+                                        </div>
+                                        <div className="small font-mono text-muted">
+                                            Cost: ₹{p.purchasePrice || 0} | GST: {p.taxPercent || 0}%
+                                        </div>
+                                    </div>
+
+                                    <div className="d-flex gap-2 align-items-center mt-2">
+                                        <button
+                                            type="button"
+                                            className="btn btn-sm btn-warning text-dark fw-bold flex-grow-1 py-2 d-flex align-items-center justify-content-center gap-1 shadow-sm"
+                                            onClick={() => {
+                                                setAdjustModalProduct(p);
+                                                setStockChangeQty('');
+                                            }}
+                                            title="Quick Stock Refill / माल भरें"
+                                        >
+                                            <i className="bi bi-box-arrow-in-down"></i>
+                                            <span>⚡ Fill Stock</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="btn btn-sm btn-outline-secondary px-3 py-2"
+                                            onClick={() => handlePrintSticker(p)}
+                                            title="Print Barcode Sticker"
+                                        >
+                                            <i className="bi bi-printer"></i>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="btn btn-sm btn-outline-primary px-3 py-2"
+                                            onClick={() => handleOpenEdit(p)}
+                                            title="Edit Product"
+                                        >
+                                            <i className="bi bi-pencil"></i>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="btn btn-sm btn-outline-danger px-3 py-2"
+                                            onClick={() => handleDeleteProduct(p._id, p.name)}
+                                            title="Delete"
+                                        >
+                                            <i className="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
+
+            {/* Desktop Products Table (d-none d-md-block) */}
+            <div className="card border-0 shadow-sm rounded-3 overflow-hidden bg-white d-none d-md-block">
                 <div className="table-responsive">
                     <table className="table table-hover align-middle mb-0">
                         <thead className="table-light">
@@ -747,20 +865,32 @@ export default function InventoryManager() {
                                                 <input
                                                     type="text"
                                                     className="form-control font-mono fw-bold"
-                                                    placeholder="Scan or enter barcode"
+                                                    placeholder="Scan barcode or type SKU..."
                                                     value={formData.barcode}
                                                     onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
                                                     required
                                                 />
                                                 <button
                                                     type="button"
-                                                    className="btn btn-outline-secondary"
+                                                    className={`btn fw-bold d-flex align-items-center gap-1 ${isCameraScanningForProduct ? 'btn-danger text-white' : 'btn-primary'}`}
                                                     onClick={() => setIsCameraScanningForProduct(prev => !prev)}
-                                                    title="Scan using camera"
+                                                    title="Scan barcode with camera"
                                                 >
-                                                    <i className="bi bi-camera"></i>
+                                                    <i className={`bi ${isCameraScanningForProduct ? 'bi-x-lg' : 'bi-camera-fill'}`}></i>
+                                                    <span className="d-none d-sm-inline">{isCameraScanningForProduct ? 'Close' : 'Camera'}</span>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-outline-secondary"
+                                                    onClick={() => setFormData(prev => ({ ...prev, barcode: '890' + Math.floor(1000000000 + Math.random() * 9000000000) }))}
+                                                    title="Auto generate barcode SKU"
+                                                >
+                                                    ⚡ Auto
                                                 </button>
                                             </div>
+                                            <small className="text-muted" style={{ fontSize: '0.72rem' }}>
+                                                Point camera at product packaging barcode, or click ⚡ Auto for loose items.
+                                            </small>
                                         </div>
 
                                         {/* Name */}
@@ -783,10 +913,11 @@ export default function InventoryManager() {
                                             <div className="col-12">
                                                 <CameraScannerBox
                                                     containerId="admin-camera-scanner-viewfinder"
-                                                    title="📷 Camera Barcode Scanner"
+                                                    title="📷 Scan Product Barcode"
                                                     onDetected={(scannedCode) => {
                                                         setFormData(prev => ({ ...prev, barcode: scannedCode }));
                                                         setIsCameraScanningForProduct(false);
+                                                        showToast(`✅ Scanned Barcode: ${scannedCode}`);
                                                     }}
                                                     onClose={() => setIsCameraScanningForProduct(false)}
                                                     autoCloseOnScan={true}

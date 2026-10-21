@@ -136,7 +136,7 @@ export default function CameraScannerBox({
                     Html5QrcodeSupportedFormats.QR_CODE
                 ],
                 experimentalFeatures: {
-                    useBarCodeDetectorIfSupported: false
+                    useBarCodeDetectorIfSupported: true
                 },
                 verbose: false
             });
@@ -218,16 +218,16 @@ export default function CameraScannerBox({
             const cameraTarget = specificCameraId ? specificCameraId : { facingMode: 'environment' };
 
             // Full HD 1080p sensor configuration for effortless distance scanning:
-            // 15 FPS: instantaneous (<70ms) scan response without overloading mobile CPU
-            // ideal: 1920x1080: gives 3x more pixel density so barcodes 2-3 feet away resolve razor-sharp
+            // 20 FPS: instantaneous scan response with native GPU/hardware BarcodeDetector
+            // ideal: 1920x1080: gives 3x more pixel density so barcodes 2-4 feet away resolve razor-sharp
             const config = {
-                fps: 15,
+                fps: 20,
                 qrbox: (viewfinderWidth, viewfinderHeight) => {
-                    const w = Math.min(viewfinderWidth * 0.90, 360);
-                    const h = Math.min(viewfinderHeight * 0.70, 180);
+                    const w = Math.floor(viewfinderWidth * 0.95);
+                    const h = Math.floor(viewfinderHeight * 0.85);
                     return {
-                        width: Math.max(240, Math.floor(w)),
-                        height: Math.max(130, Math.floor(h))
+                        width: Math.max(260, Math.min(w, 520)),
+                        height: Math.max(160, Math.min(h, 320))
                     };
                 },
                 videoConstraints: {
@@ -253,11 +253,20 @@ export default function CameraScannerBox({
                 await html5QrCode.start(
                     cameraTarget,
                     {
-                        fps: 12,
+                        fps: 15,
+                        qrbox: (viewfinderWidth, viewfinderHeight) => {
+                            const w = Math.floor(viewfinderWidth * 0.95);
+                            const h = Math.floor(viewfinderHeight * 0.85);
+                            return {
+                                width: Math.max(250, Math.min(w, 480)),
+                                height: Math.max(150, Math.min(h, 280))
+                            };
+                        },
                         videoConstraints: {
                             facingMode: { ideal: 'environment' },
                             width: { ideal: 1280 },
-                            height: { ideal: 720 }
+                            height: { ideal: 720 },
+                            focusMode: { ideal: 'continuous' }
                         }
                     },
                     onScanSuccess,
@@ -449,11 +458,11 @@ export default function CameraScannerBox({
             />
 
             {/* Header Toolbar - Modern, Compact & Mobile-First */}
-            <div className={`card-header py-2 px-3 d-flex justify-content-between align-items-center transition-all ${justScanned ? 'bg-primary text-white' : 'bg-dark text-white'}`}>
+            <div className={`card-header py-2 px-3 d-flex justify-content-between align-items-center transition-all ${justScanned ? 'bg-primary text-white' : 'bg-white border-bottom text-dark'}`}>
                 <div className="d-flex align-items-center gap-2 text-truncate me-2">
                     <span className="scan-pulse" style={{ width: '8px', height: '8px' }}></span>
-                    <i className="bi bi-camera-fill text-success"></i>
-                    <strong className="small text-truncate" style={{ maxWidth: '200px' }}>{title}</strong>
+                    <i className="bi bi-camera-fill text-primary"></i>
+                    <strong className="small text-truncate" style={{ maxWidth: '220px' }}>{title}</strong>
                     {lastScanned && (
                         <span className="badge bg-warning text-dark font-mono px-2 py-0 shadow-sm flex-shrink-0" style={{ fontSize: '0.72rem' }}>
                             {lastScanned}
@@ -465,7 +474,7 @@ export default function CameraScannerBox({
                     {/* Camera Select Dropdown */}
                     {cameras.length > 1 && (
                         <select
-                            className="form-select form-select-sm bg-white text-dark py-0 px-2 fw-semibold border-0"
+                            className="form-select form-select-sm bg-light text-dark py-0 px-2 fw-semibold border"
                             style={{ fontSize: '0.72rem', width: 'auto' }}
                             value={selectedCameraId}
                             onChange={handleCameraSwitch}
@@ -481,10 +490,10 @@ export default function CameraScannerBox({
                     {/* Turn Off Camera Button */}
                     <button
                         type="button"
-                        className="btn btn-sm btn-danger fw-bold d-flex align-items-center gap-1 py-1 px-2"
+                        className="btn btn-sm btn-outline-danger fw-bold d-flex align-items-center gap-1 py-1 px-2"
                         style={{ fontSize: '0.72rem' }}
                         onClick={handleTurnOffCamera}
-                        title="Turn OFF Camera"
+                        title="Close Camera"
                     >
                         <i className="bi bi-x-lg"></i>
                         <span>Close</span>

@@ -1087,18 +1087,18 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
                 storeConfig={storeConfig}
             />
 
-            {/* Sticky Mobile Bottom Checkout Bar (Optimized for Smartphone Screens) */}
-            <div className="mobile-pos-bottom-bar d-md-none shadow-sm">
-                <div className="d-flex align-items-center justify-content-between gap-2">
+            {/* Floating Mobile Bottom Checkout Bar (Optimized for Smartphone Screens - Above Bottom Nav) */}
+            {cart.length > 0 && (
+                <div className="mobile-floating-cart-bar d-flex d-md-none">
                     <div>
                         <div className="small text-muted" style={{ fontSize: '0.72rem' }}>
-                            Cart: <strong>{totalItemsCount} items</strong> ({totalQty.toFixed(1)} qty)
+                            Cart: <strong className="text-dark">{totalItemsCount} items</strong> ({totalQty.toFixed(1)} qty)
                         </div>
                         <div className="fs-5 fw-bolder text-primary font-mono">
                             ₹{netPayable.toLocaleString('en-IN')}
                         </div>
                     </div>
-                    <div className="d-flex gap-1">
+                    <div className="d-flex align-items-center gap-1">
                         <button
                             type="button"
                             className="btn btn-outline-secondary btn-sm fw-bold px-2 py-2"
@@ -1110,7 +1110,6 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
                         <button
                             type="button"
                             className="btn btn-primary fw-bold px-3 py-2 d-flex align-items-center gap-1 shadow-sm"
-                            disabled={cart.length === 0}
                             onClick={() => setIsPaymentOpen(true)}
                         >
                             <i className="bi bi-wallet2"></i>
@@ -1118,7 +1117,7 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
                         </button>
                     </div>
                 </div>
-            </div>
+            )}
 
             {/* Quick Add Custom Item Modal */}
             <QuickAddModal

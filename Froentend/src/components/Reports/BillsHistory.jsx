@@ -199,8 +199,85 @@ export default function BillsHistory({ currentUser, activeShift, onOpenShiftModa
                 </div>
             </div>
 
-            {/* Bills Table */}
-            <div className="card border-0 shadow-sm rounded-3 overflow-hidden bg-white">
+            {/* Mobile Invoices View: Touch Cards (< md) */}
+            <div className="d-block d-md-none mb-3">
+                {loading ? (
+                    <div className="card border-0 shadow-sm p-5 text-center text-muted bg-white">
+                        <div className="spinner-border text-primary mx-auto mb-2"></div>
+                        <div>Loading invoices...</div>
+                    </div>
+                ) : bills.length === 0 ? (
+                    <div className="card border-0 shadow-sm p-4 text-center text-muted bg-white">
+                        <i className="bi bi-receipt display-4 opacity-50 mb-2"></i>
+                        <div className="fw-semibold">No invoices matching criteria.</div>
+                    </div>
+                ) : (
+                    <div className="d-flex flex-column gap-2">
+                        {bills.map((b) => (
+                            <div key={b._id} className="card border-0 shadow-sm p-3 rounded-3 bg-white">
+                                <div className="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <div className="fw-bolder font-mono text-dark" style={{ fontSize: '0.95rem' }}>
+                                            {b.billNumber}
+                                        </div>
+                                        <div className="text-muted small">
+                                            {new Date(b.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}{' '}
+                                            {new Date(b.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        </div>
+                                    </div>
+                                    <div className="text-end">
+                                        <div className="fs-5 fw-bolder text-primary font-mono">
+                                            ₹{b.netPayable?.toLocaleString('en-IN')}
+                                        </div>
+                                        <span className={`badge px-2 py-1 small fw-bold ${b.paymentMethod === 'SPLIT' ? 'bg-primary' : b.paymentMethod === 'CASH' ? 'bg-success' : b.paymentMethod === 'UPI' ? 'bg-info text-dark' : 'bg-dark'}`}>
+                                            {b.paymentMethod}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className="d-flex justify-content-between align-items-center py-2 border-top border-bottom my-1 bg-light rounded-2 px-2 small font-mono">
+                                    <span className="text-muted">
+                                        Customer: <strong className="text-dark">{b.customerName || 'Walk-in'}</strong>
+                                    </span>
+                                    <span className="text-muted">
+                                        Items: <strong className="text-dark">{b.items?.length || 0}</strong> | GST: <strong className="text-success">₹{Number(b.taxAmount || 0).toFixed(1)}</strong>
+                                    </span>
+                                </div>
+
+                                <div className="d-flex gap-2 align-items-center mt-2">
+                                    <button
+                                        type="button"
+                                        className="btn btn-sm btn-outline-primary fw-bold flex-grow-1 py-2 d-flex align-items-center justify-content-center gap-1 shadow-sm"
+                                        onClick={() => setSelectedBill(b)}
+                                    >
+                                        <i className="bi bi-receipt"></i>
+                                        <span>View Bill</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="btn btn-sm btn-outline-secondary px-3 py-2"
+                                        onClick={() => printThermalReceipt(b, storeConfig)}
+                                        title="Print Thermal Receipt"
+                                    >
+                                        <i className="bi bi-printer"></i>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="btn btn-sm btn-outline-success px-3 py-2"
+                                        onClick={() => shareBillOnWhatsApp(b, storeConfig)}
+                                        title="Share on WhatsApp"
+                                    >
+                                        <i className="bi bi-whatsapp"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {/* Desktop Bills Table (d-none d-md-block) */}
+            <div className="card border-0 shadow-sm rounded-3 overflow-hidden bg-white d-none d-md-block">
                 <div className="table-responsive">
                     <table className="table table-hover align-middle mb-0">
                         <thead className="table-light">
