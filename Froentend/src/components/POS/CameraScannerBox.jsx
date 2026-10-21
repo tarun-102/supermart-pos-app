@@ -223,7 +223,7 @@ export default function CameraScannerBox({
             // 20 FPS: instantaneous scan response with native GPU/hardware BarcodeDetector
             // ideal: 1920x1080: gives 3x more pixel density so barcodes 2-4 feet away resolve razor-sharp
             const config = {
-                fps: 20,
+                fps: 30,
                 qrbox: (viewfinderWidth, viewfinderHeight) => {
                     const w = Math.floor(viewfinderWidth * 0.95);
                     const h = Math.floor(viewfinderHeight * 0.85);
