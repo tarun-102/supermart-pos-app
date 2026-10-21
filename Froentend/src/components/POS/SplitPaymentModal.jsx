@@ -555,18 +555,18 @@ export default function SplitPaymentModal({
                         </div>
 
                         {/* Modal Footer */}
-                        <div className="modal-footer bg-white border-top p-3 d-flex justify-content-between">
-                            <button type="button" className="btn btn-outline-secondary px-4 fw-semibold" onClick={onClose}>
-                                Cancel (Esc)
+                        <div className="modal-footer bg-white border-top p-2 p-sm-3 d-flex flex-column flex-sm-row justify-content-between gap-2">
+                            <button type="button" className="btn btn-outline-secondary w-100 w-sm-auto px-4 fw-semibold py-2" onClick={onClose}>
+                                Cancel
                             </button>
 
                             <button
                                 type="submit"
-                                className="btn btn-success btn-lg px-4 fw-bold shadow d-flex align-items-center gap-2"
+                                className="btn btn-success btn-lg w-100 w-sm-auto px-4 fw-bold shadow d-flex align-items-center justify-content-center gap-2 py-2"
                                 disabled={!canComplete}
                             >
                                 <i className="bi bi-printer-fill fs-5"></i>
-                                <span>Complete Sale &amp; Print Bill (F4)</span>
+                                <span>Complete &amp; Print Bill</span>
                             </button>
                         </div>
                     </form>

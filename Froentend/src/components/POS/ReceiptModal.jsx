@@ -241,44 +241,41 @@ export default function ReceiptModal({ isOpen, onClose, bill, storeConfig }) {
                     </div>
 
                     {/* Modal Footer (No Print) */}
-                    <div className="modal-footer bg-white border-top p-3 d-flex flex-wrap justify-content-between gap-2 no-print">
-                        <button type="button" className="btn btn-outline-secondary px-3" onClick={onClose}>
-                            Close (Esc)
-                        </button>
-                        <div className="d-flex gap-2 flex-wrap">
+                    <div className="modal-footer bg-white border-top p-2 p-sm-3 d-flex flex-column flex-sm-row justify-content-between gap-2 no-print">
+                        <div className="d-flex w-100 justify-content-between gap-2 flex-wrap">
                             <button
                                 type="button"
-                                className="btn btn-outline-primary px-3 fw-bold d-flex align-items-center gap-2"
+                                className="btn btn-outline-primary btn-sm flex-grow-1 fw-bold d-flex align-items-center justify-content-center gap-1 py-2"
                                 onClick={handleDownloadPdf}
-                                title="Download official Invoice PDF"
+                                title="Download official Thermal Invoice PDF"
                             >
-                                <i className="bi bi-file-earmark-pdf-fill fs-6 text-primary"></i>
+                                <i className="bi bi-file-earmark-pdf-fill text-primary"></i>
                                 <span>Download PDF</span>
                             </button>
                             <button
                                 type="button"
-                                className="btn btn-outline-success px-3 fw-bold d-flex align-items-center gap-2"
+                                className="btn btn-outline-success btn-sm flex-grow-1 fw-bold d-flex align-items-center justify-content-center gap-1 py-2"
                                 onClick={handleWhatsApp}
-                                title="Send e-bill directly to customer's WhatsApp"
+                                title="Send e-bill directly to customer WhatsApp"
                             >
-                                <i className="bi bi-whatsapp fs-6 text-success"></i>
-                                <span>WhatsApp Bill</span>
+                                <i className="bi bi-whatsapp text-success"></i>
+                                <span>WhatsApp</span>
                             </button>
                             <button
                                 type="button"
-                                className="btn btn-primary px-4 fw-bold d-flex align-items-center gap-2 shadow-sm"
+                                className="btn btn-primary btn-sm flex-grow-1 fw-bold d-flex align-items-center justify-content-center gap-1 py-2 shadow-sm"
                                 onClick={handlePrint}
                             >
-                                <i className="bi bi-printer fs-6"></i>
-                                <span>Print Thermal Slip (Ctrl+P)</span>
+                                <i className="bi bi-printer"></i>
+                                <span>Print Slip</span>
                             </button>
                             <button
                                 type="button"
-                                className="btn btn-dark px-4 fw-bold"
+                                className="btn btn-dark btn-sm flex-grow-1 fw-bold d-flex align-items-center justify-content-center gap-1 py-2"
                                 onClick={onClose}
                             >
-                                <i className="bi bi-cart-plus me-1"></i>
-                                <span>Next Customer</span>
+                                <i className="bi bi-cart-plus"></i>
+                                <span>Next Bill</span>
                             </button>
                         </div>
                     </div>

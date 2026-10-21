@@ -30,15 +30,40 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
     const [isCameraScannerOpen, setIsCameraScannerOpen] = useState(false);
     const [heldBills, setHeldBills] = useState([]);
     const [completedBill, setCompletedBill] = useState(null);
+    const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
 
     const barcodeInputRef = useRef(null);
+
+    // Track mobile viewport resize & initial camera launch
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    // Auto-dismiss scan feedback message after 4.5 seconds
+    useEffect(() => {
+        if (scanMessage) {
+            const timer = setTimeout(() => {
+                setScanMessage(null);
+            }, 4500);
+            return () => clearTimeout(timer);
+        }
+    }, [scanMessage]);
 
     // Load inventory catalog for quick-click shelf
     useEffect(() => {
         loadCatalog();
         loadHeldBills();
-        // Auto focus barcode input
-        if (barcodeInputRef.current) {
+        // On mobile devices, enable camera scanner by default for instant scanning!
+        if (window.innerWidth < 768) {
+            setIsCameraScannerOpen(true);
+        }
+        // Auto focus barcode input on desktop only
+        if (window.innerWidth >= 768 && barcodeInputRef.current) {
             barcodeInputRef.current.focus();
         }
     }, []);
@@ -147,7 +172,7 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
                 setBarcodeInput('');
                 setScanMessage({
                     type: 'success',
-                    text: `✅ Added to Cart: ${found.name} (${found.unit}) &bull; ₹${found.sellingPrice}`
+                    text: `✅ Added: ${found.name} (${found.unit}) • ₹${found.sellingPrice}`
                 });
             } else {
                 // NOT FOUND IN INVENTORY: Sound warning buzzer and reject barcode
@@ -155,7 +180,7 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
                 setBarcodeInput('');
                 setScanMessage({
                     type: 'error',
-                    text: `❌ Item Not Found: Barcode "${cleanCode}" is not registered in this store's inventory!`
+                    text: `❌ Barcode "${cleanCode}" is not registered in this store's inventory!`
                 });
             }
         } catch (err) {
@@ -163,11 +188,11 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
             setBarcodeInput('');
             setScanMessage({
                 type: 'error',
-                text: `❌ Item Not Found: Barcode "${cleanCode}" is not registered in this store's inventory!`
+                text: `❌ Barcode "${cleanCode}" is not registered in this store's inventory!`
             });
         } finally {
             setIsLoadingScan(false);
-            if (barcodeInputRef.current) barcodeInputRef.current.focus();
+            if (!isMobile && barcodeInputRef.current) barcodeInputRef.current.focus();
         }
     };
 
@@ -176,25 +201,26 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
         await scanBarcodeString(barcodeInput, false);
     };
 
-    // Add product to cart
+    // Add product to cart (Always positions the latest item at the top of the bill)
     const addProductToCart = (prod, customQty = 1) => {
         setCart(prev => {
             const existingIdx = prev.findIndex(item => item.barcode === prod.barcode);
             if (existingIdx > -1) {
-                const updated = [...prev];
-                const current = updated[existingIdx];
+                const current = prev[existingIdx];
                 const newQty = Number((Number(current.quantity) + Number(customQty)).toFixed(2));
                 const itemTotal = Number((newQty * current.sellingPrice).toFixed(2));
                 const itemGross = Number((newQty * current.mrp).toFixed(2));
                 const discount = Math.max(0, Number((itemGross - itemTotal).toFixed(2)));
 
-                updated[existingIdx] = {
+                const updatedItem = {
                     ...current,
                     quantity: newQty,
                     total: itemTotal,
                     discount: discount
                 };
-                return updated;
+                // Move updated item to front so cashier sees the change immediately at the top
+                const rest = prev.filter((_, i) => i !== existingIdx);
+                return [updatedItem, ...rest];
             } else {
                 const qty = Number(customQty);
                 const mrp = Number(prod.mrp) || Number(prod.sellingPrice);
@@ -204,7 +230,6 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
                 const discount = Math.max(0, Number((itemGross - itemTotal).toFixed(2)));
 
                 return [
-                    ...prev,
                     {
                         productId: prod._id,
                         barcode: prod.barcode,
@@ -217,7 +242,8 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
                         discount: discount,
                         total: itemTotal,
                         taxPercent: prod.taxPercent || 0
-                    }
+                    },
+                    ...prev
                 ];
             }
         });
@@ -456,7 +482,330 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
     const categories = ['ALL', ...Array.from(new Set(catalog.map(p => p.category).filter(Boolean)))];
 
     return (
-        <div className="container-fluid py-3 px-3">
+        <div className={`container-fluid ${isMobile ? 'p-2' : 'py-3 px-3'}`}>
+            {isMobile ? (
+                /* ==============================================================
+                   MOBILE-FIRST BILLING WORKSPACE: ONLY CAMERA + BILL + PAY BAR
+                   ============================================================== */
+                <div className="mobile-pos-container">
+                    {/* Compact Mobile Status Header */}
+                    <div className="d-flex align-items-center justify-content-between p-2 mb-2 bg-dark rounded-3 border border-secondary border-opacity-25 shadow-sm">
+                        <div className="d-flex align-items-center gap-1 text-truncate" style={{ maxWidth: '55%' }}>
+                            <div className="d-flex align-items-center gap-1 bg-primary text-white rounded px-2 py-1 shadow-sm flex-shrink-0">
+                                <i className="bi bi-display small"></i>
+                                <select
+                                    className="form-select form-select-sm fw-bold border-0 bg-transparent text-white font-mono p-0"
+                                    style={{ fontSize: '0.72rem', width: 'auto', cursor: 'pointer', appearance: 'none' }}
+                                    value={selectedCounter}
+                                    onChange={(e) => handleCounterChange(e.target.value)}
+                                    title="Tap to switch counter"
+                                >
+                                    {(storeConfig?.counters || ['Counter-01', 'Counter-02', 'Counter-03']).map(c => (
+                                        <option key={c} value={c} className="text-dark bg-white">{c}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <span className="text-light fw-bold small text-truncate" style={{ fontSize: '0.82rem' }}>
+                                {storeConfig?.storeName || 'ShiftFlow POS'}
+                            </span>
+                        </div>
+                        <div className="d-flex align-items-center gap-1 flex-shrink-0">
+                            {activeShift ? (
+                                <button
+                                    type="button"
+                                    className="btn btn-xs btn-outline-info text-info py-1 px-2 fw-semibold"
+                                    style={{ fontSize: '0.72rem' }}
+                                    onClick={onOpenShiftModal}
+                                    title="Active Shift Details"
+                                >
+                                    Shift ({activeShift.billsCount || 0})
+                                </button>
+                            ) : (
+                                <button
+                                    type="button"
+                                    className="btn btn-xs btn-warning text-dark py-1 px-2 fw-bold"
+                                    style={{ fontSize: '0.72rem' }}
+                                    onClick={onOpenShiftModal}
+                                >
+                                    Start Shift
+                                </button>
+                            )}
+                            <button
+                                type="button"
+                                className={`btn btn-xs py-1 px-2 fw-bold shadow-sm ${isCameraScannerOpen ? 'btn-danger text-white' : 'btn-primary text-white'}`}
+                                style={{ fontSize: '0.72rem' }}
+                                onClick={() => setIsCameraScannerOpen(!isCameraScannerOpen)}
+                            >
+                                <i className={`bi ${isCameraScannerOpen ? 'bi-camera-video-off' : 'bi-camera'} me-1`}></i>
+                                {isCameraScannerOpen ? 'Hide Cam' : 'Open Cam'}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* SECTION 1: EMBEDDED NON-BLOCKING LIVE CAMERA SCANNER */}
+                    {isCameraScannerOpen && (
+                        <div className="mobile-camera-wrapper mb-2">
+                            <CameraScannerBox
+                                containerId="pos-camera-scanner-viewfinder-mobile"
+                                title="Live Camera Scanner"
+                                onDetected={(code) => scanBarcodeString(code, true)}
+                                onClose={() => setIsCameraScannerOpen(false)}
+                                autoCloseOnScan={false}
+                                compact={true}
+                            />
+                        </div>
+                    )}
+
+                    {/* SECTION 2: INSTANT SCAN FEEDBACK BANNER (High Visibility & Feedback) */}
+                    {scanMessage && (
+                        <div className={`mobile-scan-feedback mb-2 p-2 rounded-3 shadow-sm d-flex align-items-center justify-content-between ${scanMessage.type === 'success' ? 'bg-success bg-opacity-25 border border-success text-success' : 'bg-danger bg-opacity-25 border border-danger text-danger'}`}>
+                            <div className="d-flex align-items-center gap-2 text-truncate pe-1">
+                                <i className={`bi ${scanMessage.type === 'success' ? 'bi-check-circle-fill fs-5' : 'bi-exclamation-triangle-fill fs-5'}`}></i>
+                                <strong className="text-truncate" style={{ fontSize: '0.84rem' }}>
+                                    {scanMessage.text}
+                                </strong>
+                            </div>
+                            <button
+                                type="button"
+                                className="btn-close btn-close-white btn-close-sm flex-shrink-0"
+                                onClick={() => setScanMessage(null)}
+                            ></button>
+                        </div>
+                    )}
+
+                    {/* SECTION 3: THE CURRENT BILL (LIVE CART) - TOTAL FOCUS ON PRODUCTS */}
+                    <div className="mobile-bill-sheet rounded-3 shadow-sm mb-2">
+                        {/* Bill Header & Thumb Actions */}
+                        <div className="p-2 d-flex align-items-center justify-content-between border-bottom border-secondary border-opacity-25 bg-dark rounded-top-3">
+                            <div className="d-flex align-items-center gap-2">
+                                <i className="bi bi-receipt-cutoff text-primary fs-5"></i>
+                                <span className="fw-bolder text-white" style={{ fontSize: '0.95rem' }}>Current Bill</span>
+                                <span className="badge bg-primary-subtle text-primary fw-bold px-2 py-1" style={{ fontSize: '0.72rem' }}>
+                                    {totalItemsCount} Items ({totalQty.toFixed(1)} Qty)
+                                </span>
+                            </div>
+                            <div className="d-flex align-items-center gap-1">
+                                <button
+                                    type="button"
+                                    className="btn btn-sm btn-outline-warning text-warning fw-bold py-1 px-2 d-flex align-items-center gap-1"
+                                    style={{ fontSize: '0.75rem' }}
+                                    onClick={() => setIsQuickAddOpen(true)}
+                                    title="Add Loose Item (kg/pc)"
+                                >
+                                    <i className="bi bi-plus-circle"></i>
+                                    <span>+ Loose</span>
+                                </button>
+                                {cart.length > 0 && (
+                                    <button
+                                        type="button"
+                                        className="btn btn-sm btn-outline-danger py-1 px-2"
+                                        onClick={handleClearCart}
+                                        title="Clear Bill"
+                                    >
+                                        <i className="bi bi-trash"></i>
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Barcode Quick Search / Manual Fallback */}
+                        <div className="p-2 bg-dark bg-opacity-50 border-bottom border-secondary border-opacity-25">
+                            <form onSubmit={handleBarcodeScan} className="d-flex gap-1">
+                                <div className="input-group input-group-sm">
+                                    <span className="input-group-text bg-dark border-secondary border-opacity-50 text-muted">
+                                        <i className="bi bi-upc-scan"></i>
+                                    </span>
+                                    <input
+                                        type="text"
+                                        className="form-control form-control-sm bg-dark border-secondary border-opacity-50 text-white font-mono"
+                                        placeholder="Type Barcode / SKU if unreadable..."
+                                        value={barcodeInput}
+                                        onChange={(e) => setBarcodeInput(e.target.value)}
+                                        disabled={isLoadingScan}
+                                    />
+                                    <button
+                                        type="submit"
+                                        className="btn btn-sm btn-primary fw-bold px-3"
+                                        disabled={isLoadingScan || !barcodeInput.trim()}
+                                    >
+                                        {isLoadingScan ? <span className="spinner-border spinner-border-sm"></span> : 'Add'}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        {/* Scanned Items List */}
+                        <div className="mobile-cart-items-scroll p-2" style={{ maxHeight: isCameraScannerOpen ? '44vh' : '68vh', overflowY: 'auto' }}>
+                            {cart.length === 0 ? (
+                                <div className="text-center py-4 px-2">
+                                    <div className="fs-1 text-muted opacity-50 mb-2">🛒</div>
+                                    <h6 className="fw-bold text-light mb-1">Bill is Ready</h6>
+                                    <p className="text-muted small mb-3" style={{ fontSize: '0.8rem' }}>
+                                        Scan product barcodes with the camera above to add items directly to this bill.
+                                    </p>
+                                    <div className="d-flex justify-content-center gap-2">
+                                        <button
+                                            type="button"
+                                            className="btn btn-sm btn-outline-warning text-warning fw-bold px-3 py-1 shadow-sm"
+                                            onClick={() => setIsQuickAddOpen(true)}
+                                        >
+                                            <i className="bi bi-plus-circle me-1"></i> Add Loose Item (kg/pc)
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="d-flex flex-column gap-2">
+                                    {cart.map((item, idx) => (
+                                        <div key={idx} className="mobile-cart-card p-2 rounded-3 border border-secondary border-opacity-25 bg-dark shadow-sm">
+                                            <div className="d-flex justify-content-between align-items-start mb-1">
+                                                <div className="pe-1 text-truncate" style={{ maxWidth: '85%' }}>
+                                                    <div className="fw-bolder text-white text-truncate" style={{ fontSize: '0.92rem' }}>
+                                                        {item.name}
+                                                    </div>
+                                                    <div className="d-flex align-items-center gap-1 mt-1 flex-wrap">
+                                                        <span className="badge bg-secondary bg-opacity-25 text-light border border-secondary border-opacity-25 font-mono" style={{ fontSize: '0.68rem' }}>
+                                                            {item.barcode}
+                                                        </span>
+                                                        <span className="badge bg-secondary bg-opacity-25 text-info border border-secondary border-opacity-25" style={{ fontSize: '0.68rem' }}>
+                                                            {item.unit}
+                                                        </span>
+                                                        {item.discount > 0 && (
+                                                            <span className="savings-pill" style={{ fontSize: '0.68rem', padding: '1px 6px' }}>
+                                                                Save ₹{item.discount}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-sm btn-link text-danger p-0"
+                                                    onClick={() => handleRemoveItem(idx)}
+                                                    title="Remove Item"
+                                                >
+                                                    <i className="bi bi-trash fs-5"></i>
+                                                </button>
+                                            </div>
+
+                                            <div className="d-flex justify-content-between align-items-center pt-2 border-top border-secondary border-opacity-25 mt-1">
+                                                <div>
+                                                    <span className="text-muted text-decoration-line-through small me-1 font-mono" style={{ fontSize: '0.78rem' }}>
+                                                        ₹{item.mrp}
+                                                    </span>
+                                                    <span className="fw-bolder text-info font-mono" style={{ fontSize: '1rem' }}>
+                                                        ₹{item.sellingPrice}
+                                                    </span>
+                                                    <span className="text-muted small" style={{ fontSize: '0.75rem' }}> / {item.unit}</span>
+                                                </div>
+
+                                                <div className="d-flex align-items-center gap-2">
+                                                    <div className="input-group input-group-sm" style={{ width: '115px' }}>
+                                                        <button
+                                                            className="btn btn-outline-secondary mobile-stepper-btn px-2 fw-bold text-light"
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const cur = Number(item.quantity) || 1;
+                                                                if (cur > 1) handleUpdateQuantity(idx, cur - 1);
+                                                            }}
+                                                        >
+                                                            -
+                                                        </button>
+                                                        <input
+                                                            type="number"
+                                                            step="0.01"
+                                                            className="form-control text-center font-mono fw-bold px-1 bg-dark text-white border-secondary"
+                                                            value={item.quantity}
+                                                            onChange={(e) => handleUpdateQuantity(idx, e.target.value)}
+                                                            onBlur={() => handleQuantityBlur(idx)}
+                                                            style={{ fontSize: '0.9rem' }}
+                                                        />
+                                                        <button
+                                                            className="btn btn-outline-secondary mobile-stepper-btn px-2 fw-bold text-light"
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const cur = Number(item.quantity) || 0;
+                                                                handleUpdateQuantity(idx, cur + 1);
+                                                            }}
+                                                        >
+                                                            +
+                                                        </button>
+                                                    </div>
+                                                    <div className="fw-bolder font-mono text-white text-end" style={{ minWidth: '60px', fontSize: '1.05rem' }}>
+                                                        ₹{item.total}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* SECTION 4: MOBILE STICKY BOTTOM BILL CHECKOUT BAR */}
+                    {cart.length > 0 && (
+                        <div className="mobile-sticky-checkout-bar shadow-lg">
+                            <div className="d-flex justify-content-between align-items-center mb-1">
+                                <div>
+                                    <span className="text-muted small" style={{ fontSize: '0.75rem' }}>
+                                        Total: <strong className="text-white">{totalItemsCount} items</strong> ({totalQty.toFixed(1)} qty)
+                                    </span>
+                                    {totalSavings > 0 && (
+                                        <span className="text-success small fw-bold ms-2" style={{ fontSize: '0.75rem' }}>
+                                            Save ₹{totalSavings.toFixed(0)}
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="d-flex align-items-center gap-1">
+                                    <button
+                                        type="button"
+                                        className="btn btn-xs btn-outline-secondary py-1 px-2 text-light"
+                                        style={{ fontSize: '0.72rem' }}
+                                        onClick={handleHoldBill}
+                                        title="Hold Bill"
+                                    >
+                                        <i className="bi bi-pause-circle me-1"></i> Hold
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="btn btn-xs btn-outline-secondary py-1 px-2 text-light"
+                                        style={{ fontSize: '0.72rem' }}
+                                        onClick={() => setIsHeldModalOpen(true)}
+                                        title="View Held Bills"
+                                    >
+                                        Held ({heldBills.length})
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="d-flex align-items-center justify-content-between gap-2">
+                                <div>
+                                    <div className="small text-muted text-uppercase fw-bold" style={{ fontSize: '0.68rem', letterSpacing: '0.5px' }}>
+                                        Net Payable
+                                    </div>
+                                    <div className="fs-4 fw-bolder text-info font-mono" style={{ lineHeight: 1.1 }}>
+                                        ₹{netPayable.toLocaleString('en-IN')}
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    className="btn btn-primary btn-lg fw-bolder px-4 py-2 d-flex align-items-center gap-2 shadow-sm rounded-pill flex-grow-1 justify-content-center"
+                                    style={{ fontSize: '1.1rem', letterSpacing: '0.5px', background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)' }}
+                                    onClick={() => setIsPaymentOpen(true)}
+                                >
+                                    <i className="bi bi-wallet2 fs-5"></i>
+                                    <span>PAY ₹{netPayable}</span>
+                                    <i className="bi bi-arrow-right-short fs-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            ) : (
+                /* ==============================================================
+                   DESKTOP POS BILLING WORKSPACE: FULL 2-COLUMN LAYOUT
+                   ============================================================== */
+                <>
             {/* Shift Status Bar / Drawer Alert */}
             {!activeShift ? (
                 <div className="card border-warning-subtle bg-warning-subtle shadow-sm mb-3">
@@ -1085,6 +1434,8 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
                     </div>
                 </div>
             </div>
+            </>
+            )}
 
             {/* Split Payment Modal */}
             <SplitPaymentModal
@@ -1102,38 +1453,6 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
                 bill={completedBill}
                 storeConfig={storeConfig}
             />
-
-            {/* Floating Mobile Bottom Checkout Bar (Optimized for Smartphone Screens - Above Bottom Nav) */}
-            {cart.length > 0 && (
-                <div className="mobile-floating-cart-bar d-flex d-md-none">
-                    <div>
-                        <div className="small text-muted" style={{ fontSize: '0.72rem' }}>
-                            Cart: <strong className="text-dark">{totalItemsCount} items</strong> ({totalQty.toFixed(1)} qty)
-                        </div>
-                        <div className="fs-5 fw-bolder text-primary font-mono">
-                            ₹{netPayable.toLocaleString('en-IN')}
-                        </div>
-                    </div>
-                    <div className="d-flex align-items-center gap-1">
-                        <button
-                            type="button"
-                            className="btn btn-outline-secondary btn-sm fw-bold px-2 py-2"
-                            onClick={() => setIsCameraScannerOpen(!isCameraScannerOpen)}
-                            title="Toggle Scanner"
-                        >
-                            <i className={`bi ${isCameraScannerOpen ? 'bi-camera-video-off-fill text-danger' : 'bi-camera-fill'}`}></i>
-                        </button>
-                        <button
-                            type="button"
-                            className="btn btn-primary fw-bold px-3 py-2 d-flex align-items-center gap-1 shadow-sm"
-                            onClick={() => setIsPaymentOpen(true)}
-                        >
-                            <i className="bi bi-wallet2"></i>
-                            <span>PAY ₹{netPayable}</span>
-                        </button>
-                    </div>
-                </div>
-            )}
 
             {/* Quick Add Custom Item Modal */}
             <QuickAddModal

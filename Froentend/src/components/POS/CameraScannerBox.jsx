@@ -8,7 +8,8 @@ export default function CameraScannerBox({
     onClose,
     containerId = 'camera-barcode-viewfinder',
     title = 'Live Camera Barcode Scanner',
-    autoCloseOnScan = false
+    autoCloseOnScan = false,
+    compact = false
 }) {
     const [scannerError, setScannerError] = useState(null);
     const [cameras, setCameras] = useState([]);
@@ -186,12 +187,12 @@ export default function CameraScannerBox({
                 }
 
                 // Mode B: Continuous POS billing scanner mode (autoCloseOnScan = false)
-                // 1. Never re-scan the exact same barcode within 3500ms
-                if (lastScannedBarcodeRef.current === clean && (now - lastScanRef.current.time < 3500)) {
+                // 1. Never re-scan the exact same barcode within 2200ms
+                if (lastScannedBarcodeRef.current === clean && (now - lastScanRef.current.time < 2200)) {
                     return;
                 }
-                // 2. Never scan ANY barcode faster than 1800ms
-                if (now - lastScanRef.current.time < 1800) {
+                // 2. Never scan ANY barcode faster than 1200ms
+                if (now - lastScanRef.current.time < 1200) {
                     return;
                 }
 
@@ -205,13 +206,13 @@ export default function CameraScannerBox({
                 // Notify POS parent (which verifies inventory and triggers single beep)
                 onDetected(clean);
 
-                // Release lock after 1800ms cooldown for next item
+                // Release lock after cooldown for next item
                 setTimeout(() => {
                     if (isMountedRef.current) {
                         isScanLockedRef.current = false;
                         setJustScanned(false);
                     }
-                }, 1800);
+                }, 1200);
             };
 
             const onScanFailure = () => {};
@@ -503,18 +504,18 @@ export default function CameraScannerBox({
             </div>
 
             {/* Viewfinder & Controls Container */}
-            <div className="card-body p-2 bg-light">
-                <div className="row g-2 align-items-center">
-                    {/* Viewfinder Column (220px clear height) */}
-                    <div className="col-md-6 col-12">
+            <div className={`card-body p-2 ${compact ? 'p-1 bg-dark' : 'bg-light'}`}>
+                {compact ? (
+                    /* COMPACT MOBILE VIEW: Dedicated 1-Column Camera Scanner */
+                    <div className="w-100">
                         <div
-                            className="scanner-viewport-box shadow-inner position-relative mx-auto"
-                            style={{ height: '220px', maxHeight: '220px', width: '100%' }}
+                            className="scanner-viewport-box shadow-inner position-relative mx-auto rounded-3 overflow-hidden"
+                            style={{ height: '200px', maxHeight: '200px', width: '100%' }}
                         >
                             {/* Live Video Target */}
                             <div
                                 id={containerId}
-                                style={{ width: '100%', height: '220px', overflow: 'hidden' }}
+                                style={{ width: '100%', height: '200px', overflow: 'hidden' }}
                             ></div>
 
                             {/* Viewfinder Targeting Reticle */}
@@ -536,7 +537,7 @@ export default function CameraScannerBox({
                             {isProcessingSnap && (
                                 <div className="position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-75 d-flex flex-column justify-content-center align-items-center text-white" style={{ zIndex: 25 }}>
                                     <div className="spinner-border spinner-border-sm text-warning mb-1" role="status"></div>
-                                    <span className="small fw-bold">Reading barcode from photo...</span>
+                                    <span className="small fw-bold">Reading barcode...</span>
                                 </div>
                             )}
 
@@ -545,17 +546,17 @@ export default function CameraScannerBox({
                                 <div className="position-absolute top-0 start-0 w-100 h-100 bg-dark p-2 text-center text-white d-flex flex-column justify-content-center align-items-center" style={{ zIndex: 20 }}>
                                     <i className="bi bi-camera text-warning fs-3 mb-1"></i>
                                     <h6 className="fw-bold text-white mb-1" style={{ fontSize: '0.85rem' }}>
-                                        {isMobileDevice ? 'Mobile Phone Camera Ready' : 'Camera Live Feed Blocked'}
+                                        {isMobileDevice ? 'Mobile Camera Ready' : 'Camera Feed Blocked'}
                                     </h6>
                                     <p className="small text-light mb-2 px-1" style={{ fontSize: '0.72rem', maxWidth: '320px' }}>
-                                        Tap below to scan with your phone's native camera:
+                                        Tap below to scan with native camera:
                                     </p>
                                     <button
                                         type="button"
                                         className="btn btn-primary btn-sm fw-bold px-3 py-1 shadow-sm"
                                         onClick={() => fileInputRef.current?.click()}
                                     >
-                                        <i className="bi bi-camera-fill me-1"></i> Snap Barcode Now
+                                        <i className="bi bi-camera-fill me-1"></i> Snap Barcode
                                     </button>
                                 </div>
                             )}
@@ -564,13 +565,13 @@ export default function CameraScannerBox({
                             {isStarting && !scannerError && (
                                 <div className="position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-75 d-flex flex-column justify-content-center align-items-center text-white" style={{ zIndex: 15 }}>
                                     <div className="spinner-border spinner-border-sm text-primary mb-1" role="status"></div>
-                                    <span className="small" style={{ fontSize: '0.75rem' }}>Opening high-resolution lens...</span>
+                                    <span className="small" style={{ fontSize: '0.75rem' }}>Starting lens...</span>
                                 </div>
                             )}
                         </div>
 
-                        {/* Distance Zoom Bar, Torch & Quick Snap Toolbar */}
-                        <div className="d-flex justify-content-between align-items-center mt-2 px-1 flex-wrap gap-1">
+                        {/* Mobile Single-Row Controls: Zoom, Torch, Snap Photo */}
+                        <div className="d-flex justify-content-between align-items-center mt-2 px-1">
                             <div className="d-flex align-items-center gap-1">
                                 <span className="text-muted small fw-bold me-1" style={{ fontSize: '0.72rem' }}>
                                     Zoom:
@@ -578,7 +579,7 @@ export default function CameraScannerBox({
                                 <div className="btn-group btn-group-sm" role="group">
                                     <button
                                         type="button"
-                                        className={`btn btn-sm px-2 py-1 fw-bold ${zoomLevel === 1 ? 'btn-primary text-white' : 'btn-outline-secondary'}`}
+                                        className={`btn btn-xs py-1 px-2 fw-bold ${zoomLevel === 1 ? 'btn-primary text-white' : 'btn-outline-secondary text-light'}`}
                                         style={{ fontSize: '0.72rem' }}
                                         onClick={() => handleApplyZoom(1)}
                                     >
@@ -586,16 +587,16 @@ export default function CameraScannerBox({
                                     </button>
                                     <button
                                         type="button"
-                                        className={`btn btn-sm px-2 py-1 fw-bold ${zoomLevel === 2 ? 'btn-primary text-white' : 'btn-outline-secondary'}`}
+                                        className={`btn btn-xs py-1 px-2 fw-bold ${zoomLevel === 2 ? 'btn-primary text-white' : 'btn-outline-secondary text-light'}`}
                                         style={{ fontSize: '0.72rem' }}
                                         onClick={() => handleApplyZoom(2)}
-                                        title="2x Hardware Distance Zoom"
+                                        title="2x Far"
                                     >
-                                        🎯 2x Far
+                                        🎯 2x
                                     </button>
                                     <button
                                         type="button"
-                                        className={`btn btn-sm px-2 py-1 fw-bold ${zoomLevel === 3 ? 'btn-primary text-white' : 'btn-outline-secondary'}`}
+                                        className={`btn btn-xs py-1 px-2 fw-bold ${zoomLevel === 3 ? 'btn-primary text-white' : 'btn-outline-secondary text-light'}`}
                                         style={{ fontSize: '0.72rem' }}
                                         onClick={() => handleApplyZoom(3)}
                                     >
@@ -608,7 +609,7 @@ export default function CameraScannerBox({
                                 {hasTorch && (
                                     <button
                                         type="button"
-                                        className={`btn btn-sm px-2 py-1 fw-bold d-flex align-items-center gap-1 ${isTorchOn ? 'btn-warning text-dark' : 'btn-outline-secondary'}`}
+                                        className={`btn btn-xs py-1 px-2 fw-bold d-flex align-items-center gap-1 ${isTorchOn ? 'btn-warning text-dark' : 'btn-outline-secondary text-light'}`}
                                         style={{ fontSize: '0.72rem' }}
                                         onClick={toggleTorch}
                                         title="Toggle Flashlight / Torch"
@@ -620,70 +621,200 @@ export default function CameraScannerBox({
 
                                 <button
                                     type="button"
-                                    className="btn btn-outline-primary btn-sm fw-bold px-2 py-1 shadow-sm d-flex align-items-center gap-1"
+                                    className="btn btn-outline-info btn-xs fw-bold px-2 py-1 shadow-sm d-flex align-items-center gap-1"
                                     style={{ fontSize: '0.72rem' }}
                                     onClick={() => fileInputRef.current?.click()}
                                     title="Open phone camera to snap barcode directly"
                                 >
                                     <i className="bi bi-camera-fill"></i>
-                                    <span>Snap Photo</span>
+                                    <span>Snap</span>
                                 </button>
                             </div>
                         </div>
                     </div>
+                ) : (
+                    /* DESKTOP 2-COLUMN VIEW */
+                    <div className="row g-2 align-items-center">
+                        {/* Viewfinder Column (220px clear height) */}
+                        <div className="col-md-6 col-12">
+                            <div
+                                className="scanner-viewport-box shadow-inner position-relative mx-auto"
+                                style={{ height: '220px', maxHeight: '220px', width: '100%' }}
+                            >
+                                {/* Live Video Target */}
+                                <div
+                                    id={containerId}
+                                    style={{ width: '100%', height: '220px', overflow: 'hidden' }}
+                                ></div>
 
-                    {/* Controls & Manual Input Column */}
-                    <div className="col-md-6 col-12">
-                        <div className="p-3 bg-white rounded-3 border h-100 d-flex flex-column justify-content-between">
-                            <div>
-                                <label className="form-label small fw-bold text-muted mb-1 text-uppercase" style={{ fontSize: '0.72rem' }}>
-                                    Barcode / Manual SKU:
-                                </label>
-                                <div className="input-group input-group-sm mb-2">
-                                    <input
-                                        type="text"
-                                        className="form-control font-mono fw-bold"
-                                        placeholder="Scan or type barcode..."
-                                        value={manualCode}
-                                        onChange={(e) => setManualCode(e.target.value)}
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter') {
-                                                e.preventDefault();
-                                                handleManualSubmit(e);
-                                            }
-                                        }}
-                                    />
+                                {/* Viewfinder Targeting Reticle */}
+                                {!isStarting && !scannerError && (
+                                    <div className="scanner-reticle-box">
+                                        <div className="scanner-corner top-left"></div>
+                                        <div className="scanner-corner top-right"></div>
+                                        <div className="scanner-corner bottom-left"></div>
+                                        <div className="scanner-corner bottom-right"></div>
+                                    </div>
+                                )}
+
+                                {/* Single Laser Sweep Line */}
+                                {!isStarting && !scannerError && (
+                                    <div className="scanner-laser-line"></div>
+                                )}
+
+                                {/* Processing Snap Indicator */}
+                                {isProcessingSnap && (
+                                    <div className="position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-75 d-flex flex-column justify-content-center align-items-center text-white" style={{ zIndex: 25 }}>
+                                        <div className="spinner-border spinner-border-sm text-warning mb-1" role="status"></div>
+                                        <span className="small fw-bold">Reading barcode from photo...</span>
+                                    </div>
+                                )}
+
+                                {/* Mobile / Insecure HTTP Viewfinder Fallback (Direct Snap) */}
+                                {scannerError && (
+                                    <div className="position-absolute top-0 start-0 w-100 h-100 bg-dark p-2 text-center text-white d-flex flex-column justify-content-center align-items-center" style={{ zIndex: 20 }}>
+                                        <i className="bi bi-camera text-warning fs-3 mb-1"></i>
+                                        <h6 className="fw-bold text-white mb-1" style={{ fontSize: '0.85rem' }}>
+                                            {isMobileDevice ? 'Mobile Phone Camera Ready' : 'Camera Live Feed Blocked'}
+                                        </h6>
+                                        <p className="small text-light mb-2 px-1" style={{ fontSize: '0.72rem', maxWidth: '320px' }}>
+                                            Tap below to scan with your phone's native camera:
+                                        </p>
+                                        <button
+                                            type="button"
+                                            className="btn btn-primary btn-sm fw-bold px-3 py-1 shadow-sm"
+                                            onClick={() => fileInputRef.current?.click()}
+                                        >
+                                            <i className="bi bi-camera-fill me-1"></i> Snap Barcode Now
+                                        </button>
+                                    </div>
+                                )}
+
+                                {/* Loading state indicator */}
+                                {isStarting && !scannerError && (
+                                    <div className="position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-75 d-flex flex-column justify-content-center align-items-center text-white" style={{ zIndex: 15 }}>
+                                        <div className="spinner-border spinner-border-sm text-primary mb-1" role="status"></div>
+                                        <span className="small" style={{ fontSize: '0.75rem' }}>Opening high-resolution lens...</span>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Distance Zoom Bar, Torch & Quick Snap Toolbar */}
+                            <div className="d-flex justify-content-between align-items-center mt-2 px-1 flex-wrap gap-1">
+                                <div className="d-flex align-items-center gap-1">
+                                    <span className="text-muted small fw-bold me-1" style={{ fontSize: '0.72rem' }}>
+                                        Zoom:
+                                    </span>
+                                    <div className="btn-group btn-group-sm" role="group">
+                                        <button
+                                            type="button"
+                                            className={`btn btn-sm px-2 py-1 fw-bold ${zoomLevel === 1 ? 'btn-primary text-white' : 'btn-outline-secondary'}`}
+                                            style={{ fontSize: '0.72rem' }}
+                                            onClick={() => handleApplyZoom(1)}
+                                        >
+                                            1x
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className={`btn btn-sm px-2 py-1 fw-bold ${zoomLevel === 2 ? 'btn-primary text-white' : 'btn-outline-secondary'}`}
+                                            style={{ fontSize: '0.72rem' }}
+                                            onClick={() => handleApplyZoom(2)}
+                                            title="2x Hardware Distance Zoom"
+                                        >
+                                            🎯 2x Far
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className={`btn btn-sm px-2 py-1 fw-bold ${zoomLevel === 3 ? 'btn-primary text-white' : 'btn-outline-secondary'}`}
+                                            style={{ fontSize: '0.72rem' }}
+                                            onClick={() => handleApplyZoom(3)}
+                                        >
+                                            3x
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="d-flex align-items-center gap-1">
+                                    {hasTorch && (
+                                        <button
+                                            type="button"
+                                            className={`btn btn-sm px-2 py-1 fw-bold d-flex align-items-center gap-1 ${isTorchOn ? 'btn-warning text-dark' : 'btn-outline-secondary'}`}
+                                            style={{ fontSize: '0.72rem' }}
+                                            onClick={toggleTorch}
+                                            title="Toggle Flashlight / Torch"
+                                        >
+                                            <i className="bi bi-lightbulb-fill"></i>
+                                            <span>{isTorchOn ? 'Torch ON' : 'Torch'}</span>
+                                        </button>
+                                    )}
+
                                     <button
                                         type="button"
-                                        className="btn btn-success fw-bold px-3"
-                                        onClick={handleManualSubmit}
+                                        className="btn btn-outline-primary btn-sm fw-bold px-2 py-1 shadow-sm d-flex align-items-center gap-1"
+                                        style={{ fontSize: '0.72rem' }}
+                                        onClick={() => fileInputRef.current?.click()}
+                                        title="Open phone camera to snap barcode directly"
                                     >
-                                        Scan
+                                        <i className="bi bi-camera-fill"></i>
+                                        <span>Snap Photo</span>
                                     </button>
                                 </div>
                             </div>
+                        </div>
 
-                            <div className="d-flex gap-2 mt-2">
-                                <button
-                                    type="button"
-                                    className="btn btn-outline-primary btn-sm fw-bold w-50 py-1"
-                                    style={{ fontSize: '0.75rem' }}
-                                    onClick={() => fileInputRef.current?.click()}
-                                >
-                                    <i className="bi bi-phone me-1"></i> Phone Snap
-                                </button>
-                                <button
-                                    type="button"
-                                    className="btn btn-outline-danger btn-sm fw-bold w-50 py-1"
-                                    style={{ fontSize: '0.75rem' }}
-                                    onClick={handleTurnOffCamera}
-                                >
-                                    <i className="bi bi-power me-1"></i> Stop Camera
-                                </button>
+                        {/* Controls & Manual Input Column */}
+                        <div className="col-md-6 col-12">
+                            <div className="p-3 bg-white rounded-3 border h-100 d-flex flex-column justify-content-between">
+                                <div>
+                                    <label className="form-label small fw-bold text-muted mb-1 text-uppercase" style={{ fontSize: '0.72rem' }}>
+                                        Barcode / Manual SKU:
+                                    </label>
+                                    <div className="input-group input-group-sm mb-2">
+                                        <input
+                                            type="text"
+                                            className="form-control font-mono fw-bold"
+                                            placeholder="Scan or type barcode..."
+                                            value={manualCode}
+                                            onChange={(e) => setManualCode(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    e.preventDefault();
+                                                    handleManualSubmit(e);
+                                                }
+                                            }}
+                                        />
+                                        <button
+                                            type="button"
+                                            className="btn btn-success fw-bold px-3"
+                                            onClick={handleManualSubmit}
+                                        >
+                                            Scan
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="d-flex gap-2 mt-2">
+                                    <button
+                                        type="button"
+                                        className="btn btn-outline-primary btn-sm fw-bold w-50 py-1"
+                                        style={{ fontSize: '0.75rem' }}
+                                        onClick={() => fileInputRef.current?.click()}
+                                    >
+                                        <i className="bi bi-phone me-1"></i> Phone Snap
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="btn btn-outline-danger btn-sm fw-bold w-50 py-1"
+                                        style={{ fontSize: '0.75rem' }}
+                                        onClick={handleTurnOffCamera}
+                                    >
+                                        <i className="bi bi-power me-1"></i> Stop Camera
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                )}
             </div>
         </div>
     );
