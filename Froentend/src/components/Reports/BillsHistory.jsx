@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiFetch } from '../../utils/api';
 import ReceiptModal from '../POS/ReceiptModal';
-import { printSalesReport, printThermalReceipt, shareBillOnWhatsApp, exportCSVGstStatement, downloadBillPdf } from '../../utils/printHelper';
+import { printSalesReport, printThermalReceipt, shareBillOnWhatsApp, exportCSVGstStatement, downloadBillPdf, cleanBillNumber } from '../../utils/printHelper';
 import { toast } from 'react-toastify';
 
 export default function BillsHistory({ currentUser, activeShift, onOpenShiftModal }) {
@@ -367,7 +367,7 @@ export default function BillsHistory({ currentUser, activeShift, onOpenShiftModa
                                     <tr key={b._id}>
                                         {/* Invoice # & Time */}
                                         <td>
-                                            <div className="fw-bold font-mono text-dark">{b.billNumber}</div>
+                                            <div className="fw-bold font-mono text-dark">{cleanBillNumber(b.billNumber)}</div>
                                             <small className="text-muted">
                                                 {new Date(b.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}{' '}
                                                 {new Date(b.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -438,7 +438,7 @@ export default function BillsHistory({ currentUser, activeShift, onOpenShiftModa
                                             <div className="d-flex align-items-center justify-content-center gap-1">
                                                 <button
                                                     className="btn btn-sm btn-outline-primary fw-semibold d-flex align-items-center gap-1"
-                                                    onClick={() => setSelectedBill(b)}
+                                                    onClick={() => setSelectedBill({ ...b, billNumber: cleanBillNumber(b.billNumber) })}
                                                     title="View detailed tax invoice"
                                                 >
                                                     <i className="bi bi-receipt"></i>
@@ -446,16 +446,17 @@ export default function BillsHistory({ currentUser, activeShift, onOpenShiftModa
                                                 </button>
                                                 <button
                                                     className="btn btn-sm btn-outline-secondary fw-semibold"
-                                                    onClick={() => printThermalReceipt(b, storeConfig)}
+                                                    onClick={() => printThermalReceipt({ ...b, billNumber: cleanBillNumber(b.billNumber) }, storeConfig)}
                                                     title="Quick print thermal slip"
                                                 >
                                                     <i className="bi bi-printer"></i>
                                                 </button>
                                                 <button
                                                     className="btn btn-sm btn-outline-danger fw-semibold"
-                                                    onClick={() => {
-                                                        downloadBillPdf(b, storeConfig);
-                                                        toast.success(`📥 Bill ${b.billNumber} PDF downloaded!`);
+                                                    onClick={async () => {
+                                                        const cleanNum = cleanBillNumber(b.billNumber);
+                                                        await downloadBillPdf({ ...b, billNumber: cleanNum }, storeConfig);
+                                                        toast.success(`📥 Thermal Receipt ${cleanNum} downloaded as PDF!`);
                                                     }}
                                                     title="Download Invoice PDF"
                                                 >
@@ -463,7 +464,7 @@ export default function BillsHistory({ currentUser, activeShift, onOpenShiftModa
                                                 </button>
                                                 <button
                                                     className="btn btn-sm btn-outline-success fw-semibold"
-                                                    onClick={() => shareBillOnWhatsApp(b, storeConfig)}
+                                                    onClick={() => shareBillOnWhatsApp({ ...b, billNumber: cleanBillNumber(b.billNumber) }, storeConfig)}
                                                     title="Share on WhatsApp"
                                                 >
                                                     <i className="bi bi-whatsapp"></i>

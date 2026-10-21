@@ -63,6 +63,21 @@ export async function apiFetch(endpoint, options = {}) {
                 // Legitimate server error (e.g. 400 Invalid credentials, 404, etc.)
                 throw new Error(data.message || data.error || `Request failed with status ${res.status}`);
             }
+
+            // Universal sanitization: ensure billNumber NEVER starts with DM- anywhere
+            if (data) {
+                if (data.bill && data.bill.billNumber) {
+                    data.bill.billNumber = String(data.bill.billNumber).replace(/^DM-/i, 'INV-');
+                }
+                if (Array.isArray(data.bills)) {
+                    data.bills.forEach(b => {
+                        if (b && b.billNumber) {
+                            b.billNumber = String(b.billNumber).replace(/^DM-/i, 'INV-');
+                        }
+                    });
+                }
+            }
+
             return data;
         } catch (err) {
             lastError = err;

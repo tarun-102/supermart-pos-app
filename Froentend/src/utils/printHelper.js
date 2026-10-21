@@ -1,4 +1,198 @@
 import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
+
+/**
+ * Universal Bill Number Sanitizer: Guarantees 'DM-' prefix is permanently converted to 'INV-'
+ */
+export function cleanBillNumber(billNo) {
+    if (!billNo) return 'INV-' + Date.now().toString().slice(-6);
+    return String(billNo).replace(/^DM-/i, 'INV-');
+}
+
+/**
+ * Build 100% Identical Thermal Receipt HTML (Used for Print, Modal and PDF)
+ */
+export function buildThermalReceiptHtml(bill, storeConfig = {}) {
+    const cleanNumber = cleanBillNumber(bill?.billNumber);
+    const storeName = storeConfig?.storeName || bill?.storeName || 'SUPERSTORE POS';
+    const storeType = storeConfig?.storeType || bill?.storeType || 'Supermarket & Kirana Store';
+    const storeAddress = storeConfig?.address || bill?.storeAddress || '';
+    const storeContact = storeConfig?.contact || bill?.storeContact || '';
+    const storeGstin = storeConfig?.gstin || bill?.storeGstin || '';
+    const tagline = storeConfig?.receiptTagline || bill?.storeTagline || 'Thank You For Shopping With Us! Visit Again.';
+
+    const dateFormatted = new Date(bill?.createdAt || Date.now()).toLocaleString('en-IN', {
+        dateStyle: 'medium',
+        timeStyle: 'short'
+    });
+
+    const items = bill?.items || [];
+    const grossMrp = Number(bill?.grossMrpTotal || (bill?.netPayable + (bill?.totalSavings || 0))).toFixed(2);
+    const savings = Number(bill?.totalSavings || 0).toFixed(2);
+    const netPayable = Number(bill?.netPayable || 0);
+
+    let totalTax = Number(bill?.taxAmount || 0);
+    let taxableTotal = Number(bill?.taxableAmount || (netPayable - totalTax));
+    if (taxableTotal <= 0 || isNaN(taxableTotal)) taxableTotal = netPayable - totalTax;
+
+    const cgstTotal = (totalTax / 2).toFixed(2);
+    const sgstTotal = (totalTax / 2).toFixed(2);
+
+    const itemsHtml = items.map((it, idx) => {
+        const qty = it.quantity || 1;
+        const rate = Number(it.sellingPrice || 0).toFixed(2);
+        const total = Number(it.total || (qty * rate)).toFixed(2);
+        const taxPct = it.taxPercent ? `${it.taxPercent}%` : '5%';
+
+        return `
+            <tr>
+                <td style="padding: 3px 0; text-align: left; vertical-align: top;">
+                    <div style="font-weight: bold; font-size: 11px;">${idx + 1}. ${it.name}</div>
+                    <div style="font-size: 9px; color: #444;">${it.barcode || ''} (${it.unit || 'pc'}) | GST:${taxPct}</div>
+                </td>
+                <td style="padding: 3px 2px; text-align: center; vertical-align: top; font-size: 10px;">${qty}</td>
+                <td style="padding: 3px 2px; text-align: right; vertical-align: top; font-size: 10px;">${rate}</td>
+                <td style="padding: 3px 0; text-align: right; vertical-align: top; font-weight: bold; font-size: 11px;">${total}</td>
+            </tr>
+        `;
+    }).join('');
+
+    return `
+        <div style="width: 100%; max-width: 330px; margin: 0 auto; padding: 12px; background: #ffffff; color: #000000; font-family: 'Courier New', Courier, monospace; font-size: 11px; line-height: 1.35; box-sizing: border-box;">
+            <div style="text-align: center;">
+                <div style="font-size: 16px; font-weight: 900; letter-spacing: 0.5px;">${storeName.toUpperCase()}</div>
+                ${storeType ? `<div style="font-size: 10px; font-weight: bold;">${storeType}</div>` : ''}
+                ${storeAddress ? `<div style="font-size: 9px; color: #334155;">${storeAddress}</div>` : ''}
+                ${storeGstin ? `<div style="font-size: 9.5px; font-weight: bold;">GSTIN: ${storeGstin}</div>` : ''}
+                ${storeContact ? `<div style="font-size: 9px; color: #334155;">Tel / Mobile: ${storeContact}</div>` : ''}
+                <div style="font-size: 10.5px; font-weight: bold; margin-top: 4px;">*** TAX INVOICE / CASH MEMO ***</div>
+            </div>
+
+            <div style="border-bottom: 1px dashed #000; margin: 6px 0;"></div>
+
+            <div style="font-size: 10px; text-align: left;">
+                <div style="display: flex; justify-content: space-between;">
+                    <span><strong>Invoice No:</strong> ${cleanNumber}</span>
+                    <span>${dateFormatted}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span><strong>Cashier:</strong> ${bill?.cashierName || 'Cashier'}</span>
+                    <span><strong>Counter:</strong> ${bill?.counterNo || 'Counter-01'}</span>
+                </div>
+                ${bill?.customerPhone ? `
+                <div style="display: flex; justify-content: space-between;">
+                    <span><strong>Customer:</strong> ${bill?.customerName || 'Customer'}</span>
+                    <span><strong>Mob:</strong> ${bill?.customerPhone}</span>
+                </div>` : ''}
+            </div>
+
+            <div style="border-bottom: 1px dashed #000; margin: 6px 0;"></div>
+
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 1px solid #000; font-size: 10px;">
+                        <th style="text-align: left; padding: 2px 0;">Item Description</th>
+                        <th style="text-align: center; width: 35px;">Qty</th>
+                        <th style="text-align: right; width: 45px;">Rate</th>
+                        <th style="text-align: right; width: 55px;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${itemsHtml}
+                </tbody>
+            </table>
+
+            <div style="border-bottom: 1px dashed #000; margin: 6px 0;"></div>
+
+            <div style="font-size: 10.5px;">
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Total Items / Qty:</span>
+                    <span><strong>${items.length} items (${items.reduce((s, i) => s + (Number(i.quantity) || 1), 0).toFixed(1)})</strong></span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Gross MRP Value:</span>
+                    <span>₹${grossMrp}</span>
+                </div>
+                ${Number(savings) > 0 ? `
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Special Store Discount:</span>
+                    <span><strong>-₹${savings}</strong></span>
+                </div>` : ''}
+                <div style="border-bottom: 1px dashed #000; margin: 4px 0;"></div>
+                <div style="display: flex; justify-content: space-between; font-size: 13.5px; font-weight: 900;">
+                    <span>NET PAYABLE:</span>
+                    <span>₹${netPayable.toLocaleString('en-IN')}</span>
+                </div>
+            </div>
+
+            <div style="border-bottom: 1px dashed #000; margin: 6px 0;"></div>
+
+            <!-- GST Tax Summary -->
+            <div style="font-size: 9.5px;">
+                <div style="font-weight: bold; margin-bottom: 2px; text-decoration: underline;">GST TAX SUMMARY:</div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Taxable Net Turnover:</span>
+                    <span>₹${Number(taxableTotal).toFixed(2)}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Central GST (CGST):</span>
+                    <span>₹${cgstTotal}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>State GST (SGST):</span>
+                    <span>₹${sgstTotal}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-weight: bold;">
+                    <span>Total GST Tax:</span>
+                    <span>₹${totalTax.toFixed(2)}</span>
+                </div>
+            </div>
+
+            <div style="border-bottom: 1px dashed #000; margin: 6px 0;"></div>
+
+            <!-- Payment Details -->
+            <div style="font-size: 10px;">
+                <div style="display: flex; justify-content: space-between;">
+                    <span>PAYMENT DETAILS:</span>
+                    <span><strong>[${bill?.paymentMethod || 'CASH'}]</strong></span>
+                </div>
+                ${bill?.paymentMethod === 'SPLIT' && bill?.splitBreakdown ? `
+                    <div style="padding-left: 8px; font-size: 9.5px;">
+                        ${bill.splitBreakdown.cashAmount > 0 ? `<div style="display: flex; justify-content: space-between;"><span>• Cash:</span><span>₹${bill.splitBreakdown.cashAmount}</span></div>` : ''}
+                        ${bill.splitBreakdown.upiAmount > 0 ? `<div style="display: flex; justify-content: space-between;"><span>• UPI:</span><span>₹${bill.splitBreakdown.upiAmount}</span></div>` : ''}
+                        ${bill.splitBreakdown.cardAmount > 0 ? `<div style="display: flex; justify-content: space-between;"><span>• Card:</span><span>₹${bill.splitBreakdown.cardAmount}</span></div>` : ''}
+                    </div>
+                ` : `
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>• Paid via ${bill?.paymentMethod || 'CASH'}:</span>
+                        <span>₹${netPayable}</span>
+                    </div>
+                `}
+                ${bill?.cashTendered > 0 && bill.cashTendered !== netPayable ? `
+                    <div style="display: flex; justify-content: space-between; font-size: 9px; color: #444;">
+                        <span>Cash Tendered: ₹${bill.cashTendered}</span>
+                        <span>Change Returned: ₹${bill.changeReturned || 0}</span>
+                    </div>
+                ` : ''}
+            </div>
+
+            ${Number(savings) > 0 ? `
+            <div style="border: 1px solid #166534; background: #f0fdf4; border-radius: 4px; padding: 6px; text-align: center; margin: 8px 0;">
+                <div style="font-size: 11px; font-weight: 800; color: #166534;">YOU SAVED ₹${savings} ON THIS BILL!</div>
+                <div style="font-size: 8px; color: #15803d;">SuperStore Promise: Guaranteed Everyday Lowest Prices</div>
+            </div>` : ''}
+
+            <div style="border-bottom: 2px solid #000; margin: 6px 0;"></div>
+
+            <div style="text-align: center; font-size: 9px;">
+                <div style="letter-spacing: 4px; font-weight: bold; font-size: 13px; margin-top: 4px;">|||| | ||||| || ||||||</div>
+                <div style="font-size: 11px; font-weight: bold; margin-top: 2px;">${cleanNumber}</div>
+                <div style="margin-top: 4px; font-weight: bold;">${tagline}</div>
+                <div style="color: #444; margin-top: 2px;">Goods once sold can be exchanged within 7 days with bill.</div>
+            </div>
+        </div>
+    `;
+}
 
 /**
  * Print Helper Utility for ShiftFlow SuperStore POS
@@ -91,252 +285,32 @@ export function printHtmlViaIframe(htmlContent, title = 'POS Print') {
 }
 
 /**
- * Print Thermal Slip / Tax Invoice (80mm / 58mm standard receipt)
+ * Print Thermal Slip / Tax Invoice (80mm standard receipt)
  */
 export function printThermalReceipt(bill, storeConfig = {}) {
     if (!bill) return;
-
-    const storeName = storeConfig?.storeName || bill.storeName || 'SUPERSTORE POS';
-    const storeType = storeConfig?.storeType || bill.storeType || 'Supermarket & Retail';
-    const storeAddress = storeConfig?.address || bill.storeAddress || '';
-    const storeContact = storeConfig?.contact || bill.storeContact || '';
-    const storeGstin = storeConfig?.gstin || bill.storeGstin || '';
-    const tagline = storeConfig?.receiptTagline || bill.storeTagline || 'Thank You For Shopping! Visit Again.';
-
-    const dateFormatted = new Date(bill.createdAt || Date.now()).toLocaleString('en-IN', {
-        dateStyle: 'medium',
-        timeStyle: 'short'
-    });
-
-    const items = bill.items || [];
-    const grossMrp = Number(bill.grossMrpTotal || (bill.netPayable + (bill.totalSavings || 0))).toFixed(2);
-    const savings = Number(bill.totalSavings || 0).toFixed(2);
-    const netPayable = Number(bill.netPayable || 0);
-
-    // Calculate GST breakdown if not present
-    let totalTax = Number(bill.taxAmount || 0);
-    let taxableTotal = Number(bill.taxableAmount || (netPayable - totalTax));
-    if (taxableTotal <= 0 || isNaN(taxableTotal)) taxableTotal = netPayable - totalTax;
-
-    const cgstTotal = (totalTax / 2).toFixed(2);
-    const sgstTotal = (totalTax / 2).toFixed(2);
-
-    const itemsHtml = items.map((it, idx) => {
-        const qty = it.quantity || 1;
-        const mrp = Number(it.mrp || it.sellingPrice || 0).toFixed(2);
-        const rate = Number(it.sellingPrice || 0).toFixed(2);
-        const total = Number(it.total || 0).toFixed(2);
-        const taxPct = it.taxPercent ? `${it.taxPercent}%` : '5%';
-
-        return `
-            <tr>
-                <td style="padding: 3px 0; text-align: left; vertical-align: top;">
-                    <div style="font-weight: bold; font-size: 11px;">${idx + 1}. ${it.name}</div>
-                    <div style="font-size: 9px; color: #444;">${it.barcode || ''} (${it.unit || 'pc'}) | GST:${taxPct}</div>
-                </td>
-                <td style="padding: 3px 2px; text-align: center; vertical-align: top; font-size: 10px;">${qty}</td>
-                <td style="padding: 3px 2px; text-align: right; vertical-align: top; font-size: 10px;">${rate}</td>
-                <td style="padding: 3px 0; text-align: right; vertical-align: top; font-weight: bold; font-size: 11px;">${total}</td>
-            </tr>
-        `;
-    }).join('');
+    const cleanNumber = cleanBillNumber(bill.billNumber);
+    const sanitizedBill = { ...bill, billNumber: cleanNumber };
 
     const html = `
         <!DOCTYPE html>
         <html>
         <head>
             <meta charset="utf-8">
-            <title>Receipt - ${bill.billNumber}</title>
+            <title>Receipt - ${cleanNumber}</title>
             <style>
-                @page {
-                    size: 80mm auto;
-                    margin: 0;
-                }
-                * {
-                    box-sizing: border-box;
-                    margin: 0;
-                    padding: 0;
-                    font-family: 'Courier New', Courier, monospace;
-                    color: #000;
-                    background: transparent;
-                }
-                body {
-                    width: 76mm;
-                    margin: 0 auto;
-                    padding: 5mm 3mm;
-                    font-size: 11px;
-                    line-height: 1.35;
-                }
-                .text-center { text-align: center; }
-                .text-start { text-align: left; }
-                .text-end { text-align: right; }
-                .fw-bold { font-weight: bold; }
-                .divider {
-                    border-bottom: 1px dashed #000;
-                    margin: 6px 0;
-                }
-                .double-divider {
-                    border-bottom: 2px solid #000;
-                    margin: 6px 0;
-                }
-                table {
-                    width: 100%;
-                    border-collapse: collapse;
-                }
-                .flex-between {
-                    display: flex;
-                    justify-content: space-between;
-                }
-                .savings-box {
-                    border: 1px solid #000;
-                    padding: 4px;
-                    text-align: center;
-                    margin: 6px 0;
-                    font-weight: bold;
-                    font-size: 10.5px;
-                }
-                .barcode-box {
-                    letter-spacing: 4px;
-                    font-weight: bold;
-                    font-size: 13px;
-                    margin-top: 4px;
-                }
+                @page { size: 80mm auto; margin: 0; }
+                * { box-sizing: border-box; margin: 0; padding: 0; }
+                body { width: 76mm; margin: 0 auto; background: #ffffff !important; color: #000000 !important; }
             </style>
         </head>
         <body>
-            <div class="text-center">
-                <div style="font-size: 16px; font-weight: 900; letter-spacing: 0.5px;">${storeName.toUpperCase()}</div>
-                ${storeType ? `<div style="font-size: 10px; font-weight: bold;">${storeType}</div>` : ''}
-                ${storeAddress ? `<div style="font-size: 9px;">${storeAddress}</div>` : ''}
-                ${storeGstin ? `<div style="font-size: 9.5px; font-weight: bold;">GSTIN: ${storeGstin}</div>` : ''}
-                ${storeContact ? `<div style="font-size: 9px;">Tel: ${storeContact}</div>` : ''}
-                <div style="font-size: 10.5px; font-weight: bold; margin-top: 2px;">*** TAX INVOICE / CASH MEMO ***</div>
-            </div>
-
-            <div class="divider"></div>
-
-            <div class="text-start" style="font-size: 10px;">
-                <div class="flex-between">
-                    <span><strong>Bill No:</strong> ${bill.billNumber}</span>
-                    <span>${dateFormatted}</span>
-                </div>
-                <div class="flex-between">
-                    <span><strong>Cashier:</strong> ${bill.cashierName || 'Cashier'}</span>
-                    <span><strong>Counter:</strong> ${bill.counterNo || 'Counter-01'}</span>
-                </div>
-                ${bill.customerPhone ? `
-                <div class="flex-between">
-                    <span><strong>Customer:</strong> ${bill.customerName || 'Walk-in'}</span>
-                    <span><strong>Mob:</strong> ${bill.customerPhone}</span>
-                </div>` : ''}
-            </div>
-
-            <div class="divider"></div>
-
-            <table>
-                <thead>
-                    <tr style="border-bottom: 1px solid #000; font-size: 10px;">
-                        <th style="text-align: left; padding: 2px 0;">Item Description</th>
-                        <th style="text-align: center; width: 35px;">Qty</th>
-                        <th style="text-align: right; width: 45px;">Rate</th>
-                        <th style="text-align: right; width: 55px;">Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${itemsHtml}
-                </tbody>
-            </table>
-
-            <div class="divider"></div>
-
-            <div style="font-size: 10.5px;">
-                <div class="flex-between">
-                    <span>Total Items / Qty:</span>
-                    <span><strong>${items.length} items (${items.reduce((s, i) => s + (Number(i.quantity) || 1), 0).toFixed(1)})</strong></span>
-                </div>
-                <div class="flex-between">
-                    <span>Total MRP:</span>
-                    <span>₹${grossMrp}</span>
-                </div>
-                <div class="flex-between">
-                    <span>Special Savings / Discount:</span>
-                    <span><strong>-₹${savings}</strong></span>
-                </div>
-                <div class="divider"></div>
-                <div class="flex-between" style="font-size: 13.5px; font-weight: 900;">
-                    <span>NET PAYABLE:</span>
-                    <span>₹${netPayable.toLocaleString('en-IN')}</span>
-                </div>
-            </div>
-
-            <div class="divider"></div>
-
-            <!-- GST Tax Breakdown -->
-            <div style="font-size: 9.5px;">
-                <div style="font-weight: bold; margin-bottom: 2px; text-decoration: underline;">GST TAX SUMMARY:</div>
-                <div class="flex-between">
-                    <span>Taxable Net Value:</span>
-                    <span>₹${Number(taxableTotal).toFixed(2)}</span>
-                </div>
-                <div class="flex-between">
-                    <span>CGST (Central Tax):</span>
-                    <span>₹${cgstTotal}</span>
-                </div>
-                <div class="flex-between">
-                    <span>SGST (State Tax):</span>
-                    <span>₹${sgstTotal}</span>
-                </div>
-                <div class="flex-between" style="font-weight: bold;">
-                    <span>Total GST Amount (CGST+SGST):</span>
-                    <span>₹${totalTax.toFixed(2)}</span>
-                </div>
-            </div>
-
-            <div class="divider"></div>
-
-            <!-- Payment Mode -->
-            <div style="font-size: 10px;">
-                <div class="flex-between">
-                    <span>Payment Method:</span>
-                    <span><strong>${bill.paymentMethod}</strong></span>
-                </div>
-                ${bill.paymentMethod === 'SPLIT' && bill.splitBreakdown ? `
-                    <div style="padding-left: 8px; font-size: 9.5px;">
-                        ${bill.splitBreakdown.cashAmount > 0 ? `<div class="flex-between"><span>• Cash:</span><span>₹${bill.splitBreakdown.cashAmount}</span></div>` : ''}
-                        ${bill.splitBreakdown.upiAmount > 0 ? `<div class="flex-between"><span>• UPI:</span><span>₹${bill.splitBreakdown.upiAmount}</span></div>` : ''}
-                        ${bill.splitBreakdown.cardAmount > 0 ? `<div class="flex-between"><span>• Card:</span><span>₹${bill.splitBreakdown.cardAmount}</span></div>` : ''}
-                    </div>
-                ` : ''}
-                ${bill.cashTendered > 0 ? `
-                    <div class="flex-between">
-                        <span>Cash Tendered:</span>
-                        <span>₹${bill.cashTendered}</span>
-                    </div>
-                    <div class="flex-between">
-                        <span>Change Returned:</span>
-                        <span>₹${bill.changeReturned || 0}</span>
-                    </div>
-                ` : ''}
-            </div>
-
-            ${Number(savings) > 0 ? `
-            <div class="savings-box">
-                YOU SAVED ₹${savings} ON THIS BILL!
-            </div>` : ''}
-
-            <div class="double-divider"></div>
-
-            <div class="text-center" style="font-size: 9px;">
-                <div class="barcode-box">|||| | ||||| || ||||||</div>
-                <div>${bill.billNumber}</div>
-                <div style="margin-top: 4px; font-weight: bold;">${tagline}</div>
-                <div style="color: #444; margin-top: 2px;">Goods once sold can be exchanged within 7 days with original invoice.</div>
-            </div>
+            ${buildThermalReceiptHtml(sanitizedBill, storeConfig)}
         </body>
         </html>
     `;
 
-    return printHtmlViaIframe(html, `Receipt_${bill.billNumber}`);
+    return printHtmlViaIframe(html, `Receipt_${cleanNumber}`);
 }
 
 /**
@@ -365,7 +339,7 @@ export function printSalesReport(bills = [], storeConfig = {}, filterInfo = {}) 
         return `
             <tr>
                 <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">${idx + 1}</td>
-                <td style="padding: 6px; border: 1px solid #cbd5e1; font-weight: bold;">${b.billNumber}<br><small style="font-weight: normal; color: #64748b;">${dateStr}</small></td>
+                <td style="padding: 6px; border: 1px solid #cbd5e1; font-weight: bold;">${cleanBillNumber(b.billNumber)}<br><small style="font-weight: normal; color: #64748b;">${dateStr}</small></td>
                 <td style="padding: 6px; border: 1px solid #cbd5e1;">${b.cashierName || 'Cashier'}<br><small style="color: #64748b;">${b.counterNo || 'C-01'}</small></td>
                 <td style="padding: 6px; border: 1px solid #cbd5e1;">${b.customerPhone ? `${b.customerName || 'Customer'} (${b.customerPhone})` : 'Walk-in'}</td>
                 <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">${b.items?.length || 0}</td>
@@ -545,230 +519,129 @@ export function printSalesReport(bills = [], storeConfig = {}, filterInfo = {}) 
 }
 
 /**
- * Share Bill directly to Customer's WhatsApp (Clean UTF-8 URI encoding - Zero Garbled Characters)
+ * Share Bill directly to Customer's WhatsApp
+ * Matches the thermal receipt layout point-by-point, with zero DM prefix
  */
 export function shareBillOnWhatsApp(bill, storeConfig = {}) {
     if (!bill) return;
+    const cleanNumber = cleanBillNumber(bill.billNumber);
     const phone = (bill.customerPhone || '').replace(/[^0-9]/g, '');
-    const storeName = storeConfig?.storeName || bill.storeName || 'SuperStore';
-
-    const itemsSummary = (bill.items || [])
-        .slice(0, 8)
-        .map((it, idx) => `${idx + 1}. ${it.name} x ${it.quantity} = Rs. ${it.total}`)
-        .join('\n');
-
-    const moreText = (bill.items || []).length > 8 ? `\n...+${bill.items.length - 8} more items` : '';
-
-    const lines = [
-        `*TAX INVOICE - ${storeName.toUpperCase()}*`,
-        '',
-        `*Invoice No:* ${bill.billNumber}`,
-        `*Date:* ${new Date(bill.createdAt || Date.now()).toLocaleDateString('en-IN')}`,
-        `*Customer:* ${bill.customerName || 'Valued Customer'}`,
-        '--------------------------------',
-        '*Items Purchased:*',
-        itemsSummary + moreText,
-        '--------------------------------',
-        `*Net Paid:* Rs. ${bill.netPayable} via ${bill.paymentMethod}`
-    ];
-
-    if (bill.totalSavings > 0) {
-        lines.push(`*You Saved:* Rs. ${bill.totalSavings}`);
-    }
-    if (storeConfig?.gstin || bill.storeGstin) {
-        lines.push(`*GSTIN:* ${storeConfig?.gstin || bill.storeGstin}`);
-    }
-
-    lines.push('');
-    lines.push('Thank you for shopping with us! Visit again.');
-
-    const fullMessage = lines.join('\n');
-    const encodedText = encodeURIComponent(fullMessage);
-    const url = phone ? `https://wa.me/91${phone}?text=${encodedText}` : `https://wa.me/?text=${encodedText}`;
-    window.open(url, '_blank');
-}
-
-/**
- * Download Clean Vector PDF for Thermal Slip / Tax Invoice
- * Zero blank pages, crisp, offline-ready
- */
-export function downloadBillPdf(bill, storeConfig = {}) {
-    if (!bill) return false;
-
-    const doc = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-    });
-
-    const storeName = (storeConfig?.storeName || bill.storeName || 'SUPERSTORE POS').toUpperCase();
-    const storeType = storeConfig?.storeType || bill.storeType || 'Supermarket & Retail';
+    const storeName = storeConfig?.storeName || bill.storeName || 'SUPERSTORE POS';
     const storeAddress = storeConfig?.address || bill.storeAddress || '';
     const storeGstin = storeConfig?.gstin || bill.storeGstin || '';
-    const storeContact = storeConfig?.contact || bill.storeContact || '';
-
-    // Header styling
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(18);
-    doc.setTextColor(2, 132, 199); // Nordic Azure
-    doc.text(storeName, 105, 18, { align: 'center' });
-
-    doc.setFontSize(9.5);
-    doc.setTextColor(71, 85, 105);
-    doc.setFont('helvetica', 'normal');
-    let y = 24;
-    if (storeType) {
-        doc.text(storeType, 105, y, { align: 'center' });
-        y += 5;
-    }
-    if (storeAddress) {
-        doc.text(storeAddress, 105, y, { align: 'center' });
-        y += 5;
-    }
-    const metaParts = [];
-    if (storeGstin) metaParts.push(`GSTIN: ${storeGstin}`);
-    if (storeContact) metaParts.push(`Tel: ${storeContact}`);
-    if (metaParts.length > 0) {
-        doc.text(metaParts.join('  |  '), 105, y, { align: 'center' });
-        y += 6;
-    }
-
-    doc.setDrawColor(2, 132, 199);
-    doc.setLineWidth(0.6);
-    doc.line(14, y, 196, y);
-    y += 7;
-
-    // Title banner
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-    doc.setTextColor(15, 23, 42);
-    doc.text('TAX INVOICE / CASH MEMO', 14, y);
-
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(100, 116, 139);
     const dateFormatted = new Date(bill.createdAt || Date.now()).toLocaleString('en-IN', {
         dateStyle: 'medium',
         timeStyle: 'short'
     });
-    doc.text(`Date & Time: ${dateFormatted}`, 196, y, { align: 'right' });
-    y += 6;
 
-    // Invoice Meta Grid
-    doc.setFillColor(248, 250, 252);
-    doc.rect(14, y, 182, 18, 'F');
-    doc.setDrawColor(226, 232, 240);
-    doc.setLineWidth(0.3);
-    doc.rect(14, y, 182, 18, 'D');
+    const items = bill.items || [];
+    const itemsText = items.map((it, idx) => {
+        const qty = it.quantity || 1;
+        const rate = Number(it.sellingPrice || 0).toFixed(2);
+        const total = Number(it.total || (qty * rate)).toFixed(2);
+        const mrp = Number(it.mrp || rate).toFixed(2);
+        return `${idx + 1}. *${it.name}*\n   ${qty} ${it.unit || ''} x ₹${rate} = *₹${total}* (MRP: ₹${mrp})`;
+    }).join('\n');
 
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(15, 23, 42);
-    doc.setFontSize(9);
-    doc.text(`Invoice No: ${bill.billNumber}`, 18, y + 6);
-    doc.text(`Cashier: ${bill.cashierName || 'Cashier'}`, 18, y + 13);
-
-    doc.text(`Counter: ${bill.counterNo || 'Counter-01'}`, 90, y + 6);
-    doc.text(`Payment: ${bill.paymentMethod || 'CASH'}`, 90, y + 13);
-
-    doc.text(`Customer: ${bill.customerName || 'Walk-in'}`, 145, y + 6);
-    if (bill.customerPhone) {
-        doc.text(`Mob: ${bill.customerPhone}`, 145, y + 13);
-    }
-    y += 24;
-
-    // Items Table Header
-    doc.setFillColor(2, 132, 199);
-    doc.rect(14, y, 182, 7, 'F');
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9);
-    doc.setTextColor(255, 255, 255);
-    doc.text('#', 17, y + 5);
-    doc.text('Item Description', 25, y + 5);
-    doc.text('Qty', 115, y + 5, { align: 'center' });
-    doc.text('MRP (Rs)', 140, y + 5, { align: 'right' });
-    doc.text('Rate (Rs)', 165, y + 5, { align: 'right' });
-    doc.text('Amount (Rs)', 192, y + 5, { align: 'right' });
-    y += 7;
-
-    // Items List
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8.5);
-    doc.setTextColor(15, 23, 42);
-
-    (bill.items || []).forEach((it, idx) => {
-        if (y > 260) {
-            doc.addPage();
-            y = 20;
-        }
-        if (idx % 2 === 1) {
-            doc.setFillColor(248, 250, 252);
-            doc.rect(14, y, 182, 6, 'F');
-        }
-        doc.setDrawColor(241, 245, 249);
-        doc.line(14, y + 6, 196, y + 6);
-
-        doc.text(String(idx + 1), 17, y + 4.5);
-        const name = (it.name || '').slice(0, 42);
-        doc.text(name, 25, y + 4.5);
-        doc.text(`${it.quantity} ${it.unit || ''}`, 115, y + 4.5, { align: 'center' });
-        doc.text(Number(it.mrp || it.sellingPrice).toFixed(2), 140, y + 4.5, { align: 'right' });
-        doc.text(Number(it.sellingPrice).toFixed(2), 165, y + 4.5, { align: 'right' });
-        doc.text(Number(it.total).toFixed(2), 192, y + 4.5, { align: 'right' });
-        y += 6.5;
-    });
-
-    y += 3;
-    doc.setDrawColor(2, 132, 199);
-    doc.setLineWidth(0.4);
-    doc.line(14, y, 196, y);
-    y += 5;
-
-    // Totals & GST Summary
+    const totalTax = Number(bill.taxAmount || 0);
     const net = Number(bill.netPayable || 0);
-    const tax = Number(bill.taxAmount || 0);
-    const taxable = (net - tax).toFixed(2);
-    const savings = Number(bill.totalSavings || 0).toFixed(2);
+    const taxable = (net - totalTax).toFixed(2);
+    const savings = Number(bill.totalSavings || 0);
 
-    doc.setFillColor(241, 245, 249);
-    doc.rect(110, y, 86, 36, 'F');
-    doc.setDrawColor(203, 213, 225);
-    doc.rect(110, y, 86, 36, 'D');
+    const lines = [
+        `*${storeName.toUpperCase()}*`,
+        storeConfig?.storeType || 'Supermarket & Retail Store',
+        storeAddress ? `${storeAddress}` : '',
+        storeGstin ? `GSTIN: ${storeGstin}` : '',
+        '--------------------------------',
+        `🧾 *TAX INVOICE / CASH MEMO*`,
+        `*Invoice No:* ${cleanNumber}`,
+        `*Date:* ${dateFormatted}`,
+        `*Cashier:* ${bill.cashierName || 'Cashier'} | *Counter:* ${bill.counterNo || 'Counter-01'}`,
+        bill.customerPhone ? `*Customer:* ${bill.customerName || 'Customer'} (${bill.customerPhone})` : '',
+        '--------------------------------',
+        '*ITEMS PURCHASED:*',
+        itemsText,
+        '--------------------------------',
+        `Total Items: ${items.length} items (${items.reduce((s, i) => s + (Number(i.quantity) || 1), 0).toFixed(1)})`,
+        bill.grossMrpTotal ? `Total MRP: ₹${Number(bill.grossMrpTotal).toFixed(2)}` : '',
+        savings > 0 ? `Special Discount: -₹${savings.toFixed(2)}` : '',
+        `*NET PAYABLE: ₹${net.toLocaleString('en-IN')}*`,
+        `Payment Mode: *${bill.paymentMethod}*`,
+        '--------------------------------',
+        `*GST TAX SUMMARY:*`,
+        `• Taxable Turnover: ₹${taxable}`,
+        `• CGST (Central Tax): ₹${(totalTax / 2).toFixed(2)}`,
+        `• SGST (State Tax): ₹${(totalTax / 2).toFixed(2)}`,
+        `• Total GST Included: ₹${totalTax.toFixed(2)}`,
+        '--------------------------------'
+    ];
 
-    doc.setFontSize(8.5);
-    doc.setTextColor(71, 85, 105);
-    doc.text('Taxable Turnover:', 114, y + 6);
-    doc.text(`Rs. ${taxable}`, 192, y + 6, { align: 'right' });
-
-    doc.text('Total GST (CGST+SGST):', 114, y + 12);
-    doc.text(`Rs. ${tax.toFixed(2)}`, 192, y + 12, { align: 'right' });
-
-    if (Number(savings) > 0) {
-        doc.setTextColor(5, 150, 105);
-        doc.text('Total Discount / Savings:', 114, y + 18);
-        doc.text(`-Rs. ${savings}`, 192, y + 18, { align: 'right' });
+    if (savings > 0) {
+        lines.push(`🎉 *YOU SAVED ₹${savings.toFixed(2)} ON THIS BILL!*`);
+        lines.push('--------------------------------');
     }
 
-    doc.setFillColor(2, 132, 199);
-    doc.rect(110, y + 23, 86, 13, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10.5);
-    doc.text('NET PAYABLE:', 114, y + 31);
-    doc.text(`Rs. ${net.toLocaleString('en-IN')}`, 192, y + 31, { align: 'right' });
+    lines.push(storeConfig?.receiptTagline || 'Thank you for shopping with us! Visit again.');
 
-    // Left Box: Terms & Signature
-    doc.setTextColor(100, 116, 139);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8);
-    doc.text('Terms & Conditions:', 14, y + 6);
-    doc.text('1. Goods once sold can be exchanged within 7 days with bill.', 14, y + 11);
-    doc.text('2. Computer-generated tax invoice. No physical seal required.', 14, y + 16);
-    doc.text(storeConfig?.receiptTagline || 'Thank You For Shopping With Us! Visit Again.', 14, y + 23);
+    const cleanMessage = lines.filter(l => l !== '').join('\n');
+    const encoded = encodeURIComponent(cleanMessage);
+    const url = phone ? `https://wa.me/91${phone}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
+    window.open(url, '_blank');
+}
 
-    doc.text('Authorized Signatory: _________________________', 14, y + 34);
+/**
+ * Download Exact 80mm Thermal Receipt Slip PDF
+ * 100% Identical to the printed thermal paper slip (Zero blank pages, crisp)
+ */
+export async function downloadBillPdf(bill, storeConfig = {}) {
+    if (!bill) return false;
+    const cleanNumber = cleanBillNumber(bill.billNumber);
+    const sanitizedBill = { ...bill, billNumber: cleanNumber };
 
-    doc.save(`Invoice_${bill.billNumber || Date.now()}.pdf`);
-    return true;
+    // Off-screen container styled exactly like the physical thermal roll slip
+    const container = document.createElement('div');
+    container.style.position = 'fixed';
+    container.style.left = '-9999px';
+    container.style.top = '0';
+    container.style.width = '330px';
+    container.style.background = '#ffffff';
+    container.style.color = '#000000';
+    container.style.padding = '0';
+    container.style.zIndex = '-9999';
+    container.innerHTML = buildThermalReceiptHtml(sanitizedBill, storeConfig);
+    document.body.appendChild(container);
+
+    try {
+        const canvas = await html2canvas(container, {
+            scale: 3,
+            useCORS: true,
+            backgroundColor: '#ffffff',
+            logging: false,
+            windowWidth: 350
+        });
+
+        const imgData = canvas.toDataURL('image/png');
+        const pdfWidth = 80; // 80mm standard receipt paper width
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+        const pdf = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: [pdfWidth, pdfHeight]
+        });
+
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save(`Receipt_${cleanNumber}.pdf`);
+        return true;
+    } catch (err) {
+        console.error('Failed to download thermal PDF:', err);
+        return false;
+    } finally {
+        if (container && container.parentNode) {
+            container.remove();
+        }
+    }
 }
 
 /**
@@ -810,7 +683,7 @@ export function exportCSVGstStatement(bills = [], storeConfig = {}, filterInfo =
             : b.paymentMethod;
 
         return [
-            `"${b.billNumber || ''}"`,
+            `"${cleanBillNumber(b.billNumber)}"`,
             `"${new Date(b.createdAt).toLocaleString('en-IN')}"`,
             `"${b.counterNo || ''}"`,
             `"${b.cashierName || ''}"`,

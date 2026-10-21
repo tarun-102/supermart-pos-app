@@ -404,16 +404,18 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
             });
 
             if (res.success && res.bill) {
+                const cleanNum = (res.bill.billNumber || '').replace(/^DM-/i, 'INV-');
+                const cleanBill = { ...res.bill, billNumber: cleanNum };
                 playSuccessChime();
-                setCompletedBill(res.bill);
+                setCompletedBill(cleanBill);
                 setIsPaymentOpen(false);
                 setIsReceiptOpen(true);
                 // Clear cart
                 setCart([]);
                 setCustomerName('');
                 setCustomerPhone('');
-                setScanMessage({ type: 'success', text: `Bill generated: ${res.bill.billNumber}` });
-                toast.success(`🎉 Bill generated: ${res.bill.billNumber}`);
+                setScanMessage({ type: 'success', text: `Bill generated: ${cleanNum}` });
+                toast.success(`🎉 Bill generated: ${cleanNum}`);
                 // Refresh shift metrics
                 if (refreshShifts) refreshShifts();
                 // Reload catalog to reflect deducted inventory stock

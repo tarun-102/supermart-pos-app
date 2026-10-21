@@ -5,19 +5,24 @@ import { toast } from 'react-toastify';
 export default function ReceiptModal({ isOpen, onClose, bill, storeConfig }) {
     if (!isOpen || !bill) return null;
 
+    const cleanInvoiceNo = (bill.billNumber || '').replace(/^DM-/i, 'INV-');
+    const sanitizedBill = { ...bill, billNumber: cleanInvoiceNo };
+
     const handlePrint = () => {
-        printThermalReceipt(bill, storeConfig);
+        printThermalReceipt(sanitizedBill, storeConfig);
         toast.info('🖨️ Opening Thermal Receipt print preview...');
     };
 
     const handleWhatsApp = () => {
-        shareBillOnWhatsApp(bill, storeConfig);
+        shareBillOnWhatsApp(sanitizedBill, storeConfig);
         toast.success('📱 Opening WhatsApp to share digital invoice...');
     };
 
-    const handleDownloadPdf = () => {
-        downloadBillPdf(bill, storeConfig);
-        toast.success(`📥 Invoice ${bill.billNumber} PDF downloaded successfully!`);
+    const handleDownloadPdf = async () => {
+        const ok = await downloadBillPdf(sanitizedBill, storeConfig);
+        if (ok) {
+            toast.success(`📥 Thermal Receipt ${cleanInvoiceNo} downloaded as PDF!`);
+        }
     };
 
     const dateFormatted = new Date(bill.createdAt || Date.now()).toLocaleString('en-IN', {
@@ -74,7 +79,7 @@ export default function ReceiptModal({ isOpen, onClose, bill, storeConfig }) {
                             {/* Bill Meta */}
                             <div className="text-start" style={{ fontSize: '10px' }}>
                                 <div className="d-flex justify-content-between">
-                                    <span><strong>Invoice No:</strong> {bill.billNumber}</span>
+                                    <span><strong>Invoice No:</strong> {cleanInvoiceNo}</span>
                                     <span>{dateFormatted}</span>
                                 </div>
                                 <div className="d-flex justify-content-between">
@@ -224,7 +229,7 @@ export default function ReceiptModal({ isOpen, onClose, bill, storeConfig }) {
 
                             {/* Barcode Graphic */}
                             <div className="thermal-receipt-barcode">
-                                {bill.billNumber}
+                                {cleanInvoiceNo}
                             </div>
                             <div style={{ fontSize: '8px', color: '#666', marginTop: '2px', fontWeight: 'bold' }}>
                                 {storeConfig?.receiptTagline || 'Thank You For Shopping With Us! Visit Again.'}
