@@ -246,7 +246,7 @@ export default function App() {
         )}
 
         {/* Universal React Toastify Notification Container */}
-        <ToastContainer position="top-right" autoClose={2500} theme="colored" />
+        <ToastContainer position="top-right" autoClose={2500} theme="dark" />
       </div>
     </ConfirmProvider>
   );

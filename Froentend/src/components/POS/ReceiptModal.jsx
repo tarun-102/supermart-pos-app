@@ -26,9 +26,9 @@ export default function ReceiptModal({ isOpen, onClose, bill, storeConfig }) {
     });
 
     return (
-        <div className="modal show d-block" style={{ backgroundColor: 'rgba(15, 23, 42, 0.75)', zIndex: 1060 }} tabIndex="-1">
+        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', zIndex: 1060 }} tabIndex="-1">
             <div className="modal-dialog modal-dialog-centered modal-md">
-                <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+                <div className="modal-content shadow-lg" style={{ borderRadius: '18px', overflow: 'hidden' }}>
                     {/* Modal Header */}
                     <div className="modal-header bg-white border-bottom text-dark py-2 px-3 no-print">
                         <div className="d-flex align-items-center gap-2">

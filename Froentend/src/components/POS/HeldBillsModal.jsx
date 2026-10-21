@@ -4,9 +4,9 @@ export default function HeldBillsModal({ isOpen, onClose, heldBills = [], onResu
     if (!isOpen) return null;
 
     return (
-        <div className="modal show d-block" style={{ backgroundColor: 'rgba(15, 23, 42, 0.7)', zIndex: 1055 }} tabIndex="-1">
+        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', zIndex: 1055 }} tabIndex="-1">
             <div className="modal-dialog modal-dialog-centered modal-lg">
-                <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+                <div className="modal-content shadow-lg" style={{ borderRadius: '18px', overflow: 'hidden' }}>
                     <div className="modal-header bg-warning text-dark py-3">
                         <div className="d-flex align-items-center gap-2">
                             <i className="bi bi-pause-circle-fill fs-5"></i>

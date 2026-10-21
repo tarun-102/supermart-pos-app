@@ -16,23 +16,23 @@ export default function ConfirmModal({
     const variantColors = {
         danger: {
             btn: 'btn-danger',
-            iconBg: '#fee2e2',
-            iconColor: '#ef4444'
+            iconBg: 'rgba(244, 63, 94, 0.18)',
+            iconColor: '#fb7185'
         },
         warning: {
             btn: 'btn-warning text-dark',
-            iconBg: '#fef3c7',
-            iconColor: '#f59e0b'
+            iconBg: 'rgba(245, 158, 11, 0.18)',
+            iconColor: '#fbbf24'
         },
         primary: {
             btn: 'btn-primary',
-            iconBg: '#e0e7ff',
-            iconColor: '#4f46e5'
+            iconBg: 'rgba(56, 189, 248, 0.18)',
+            iconColor: '#38bdf8'
         },
         success: {
             btn: 'btn-success',
-            iconBg: '#dcfce7',
-            iconColor: '#10b981'
+            iconBg: 'rgba(16, 185, 129, 0.18)',
+            iconColor: '#34d399'
         }
     };
 
@@ -42,8 +42,9 @@ export default function ConfirmModal({
         <div
             className="modal show d-block"
             style={{
-                backgroundColor: 'rgba(15, 23, 42, 0.7)',
-                backdropFilter: 'blur(6px)',
+                backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
                 zIndex: 1080
             }}
             tabIndex="-1"
@@ -55,11 +56,15 @@ export default function ConfirmModal({
                 onClick={(e) => e.stopPropagation()}
             >
                 <div
-                    className="modal-content border-0 shadow-lg"
+                    className="modal-content shadow-lg"
                     style={{
                         borderRadius: '20px',
                         overflow: 'hidden',
-                        background: '#ffffff'
+                        background: 'rgba(15, 23, 42, 0.94)',
+                        backdropFilter: 'blur(24px)',
+                        WebkitBackdropFilter: 'blur(24px)',
+                        border: '1px solid rgba(255, 255, 255, 0.12)',
+                        boxShadow: '0 25px 60px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
                     }}
                 >
                     <div className="p-4 text-center">

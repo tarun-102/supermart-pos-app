@@ -199,14 +199,14 @@ export default function LoginPage({ onLoginSuccess }) {
     };
 
     return (
-        <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light py-4 px-2">
-            <div className="card border-0 shadow-sm" style={{ maxWidth: '580px', width: '100%', borderRadius: '16px', overflow: 'hidden' }}>
+        <div className="min-vh-100 d-flex align-items-center justify-content-center py-4 px-2" style={{ background: 'transparent' }}>
+            <div className="card border-0 shadow-lg" style={{ maxWidth: '580px', width: '100%', borderRadius: '18px', overflow: 'hidden' }}>
                 {/* Header with Multi-Store Branding */}
-                <div className="text-white p-4 text-center" style={{ background: '#0f172a', borderBottom: '2px solid #2563eb' }}>
+                <div className="text-white p-4 text-center" style={{ background: 'rgba(15, 23, 42, 0.85)', borderBottom: '1px solid rgba(56, 189, 248, 0.3)' }}>
                     <div className="d-flex justify-content-center align-items-center gap-2 mb-2">
                         <span className="fs-1">🏬</span>
                         <div className="text-start">
-                            <h3 className="fw-bolder mb-0 tracking-wide">ShiftFlow POS</h3>
+                            <h3 className="fw-bolder mb-0 tracking-wide text-white">ShiftFlow POS</h3>
                             <span className="badge bg-primary text-white fw-bold text-uppercase" style={{ fontSize: '0.75rem' }}>
                                 Multi-Store Supermarket &amp; Retail Cloud ERP
                             </span>
@@ -218,7 +218,7 @@ export default function LoginPage({ onLoginSuccess }) {
                 </div>
 
                 {/* 3 Tabs: Login / Register Store / Staff Request */}
-                <div className="bg-white border-bottom">
+                <div className="border-bottom" style={{ background: 'rgba(15, 23, 42, 0.6)' }}>
                     <ul className="nav nav-tabs nav-fill border-0">
                         <li className="nav-item">
                             <button
@@ -247,7 +247,7 @@ export default function LoginPage({ onLoginSuccess }) {
                     </ul>
                 </div>
 
-                <div className="card-body p-4 bg-white">
+                <div className="card-body p-4">
                     {/* 1. SIGN IN (LOGIN) TAB */}
                     {activeTab === 'login' && (
                         <div>

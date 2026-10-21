@@ -1,32 +1,42 @@
 :root {
   /* =========================================================================
-     CLEAN NORDIC AZURE & POLAR SLATE DESIGN SYSTEM
-     Ultra-soothing, eye-friendly, anti-glare, high-contrast POS theme.
-     Zero eye fatigue, zero purple, zero harsh green, zero gloomy dark navy.
+     OBSIDIAN CYBER GLASS DESIGN SYSTEM (DARK THEME + GLASSMORPHISM)
+     Deep cosmic canvas, frosted glass surfaces, luminous cyan & azure accents.
+     Zero eye glare, luxury feel, smooth 60fps performance on all devices.
      ========================================================================= */
-  --brand-primary: #0284c7;        /* Clean Nordic Sky Azure (Square/Stripe caliber) */
-  --brand-primary-hover: #0369a1;  /* Deeper Ocean Azure */
-  --brand-primary-light: #f0f9ff;  /* Soft airy sky tint - restful on eyes */
-  --brand-primary-glow: rgba(2, 132, 199, 0.14);
-  --brand-primary-border: #bae6fd;
-  --brand-accent: #0ea5e9;
+  --brand-primary: #38bdf8;        /* Luminous Sky Cyan */
+  --brand-primary-hover: #0ea5e9;  /* Vibrant Ocean Cyan */
+  --brand-primary-light: rgba(56, 189, 248, 0.12); /* Translucent glow */
+  --brand-primary-glow: rgba(56, 189, 248, 0.28);
+  --brand-primary-border: rgba(56, 189, 248, 0.35);
+  --brand-accent: #0284c7;
 
-  --brand-dark: #0f172a;           /* Deep Charcoal Slate for high readability */
-  --brand-slate: #1e293b;
-  --brand-slate-light: #475569;
+  --brand-dark: #f8fafc;           /* Primary text is crisp soft white */
+  --brand-slate: #cbd5e1;          /* Secondary text */
+  --brand-slate-light: #94a3b8;    /* Muted text */
   --brand-muted: #64748b;
 
-  --brand-bg: #f8fafc;             /* Anti-glare Pearl White canvas */
-  --brand-card: #ffffff;
-  --brand-border: #e2e8f0;
-  --brand-border-subtle: #f1f5f9;
+  --brand-bg: #090d16;             /* Deep Obsidian Cosmos Canvas */
+  --brand-bg-elevated: #0f172a;    /* Elevated surface */
+  --brand-card: rgba(17, 24, 39, 0.72); /* Frosted Dark Glass */
+  --brand-card-hover: rgba(26, 35, 56, 0.82);
+  --brand-card-solid: #0f172a;
 
-  --brand-green: #059669;          /* Calm Emerald for In Stock / Savings */
-  --brand-green-light: #ecfdf5;
-  --brand-yellow: #d97706;         /* Warm Amber for Shortage / Warnings */
-  --brand-yellow-light: #fffbeb;
-  --brand-red: #e11d48;            /* Soft Crimson for Out of stock / Delete */
-  --brand-red-light: #fff1f2;
+  --brand-glass-border: rgba(255, 255, 255, 0.08); /* Crisp translucent edge */
+  --brand-glass-border-hover: rgba(56, 189, 248, 0.3);
+  --brand-glass-highlight: rgba(255, 255, 255, 0.04);
+  --glass-blur: blur(16px);
+  --glass-blur-heavy: blur(24px);
+
+  --brand-border: rgba(255, 255, 255, 0.08);
+  --brand-border-subtle: rgba(255, 255, 255, 0.04);
+
+  --brand-green: #34d399;          /* Luminous Emerald Glass */
+  --brand-green-light: rgba(16, 185, 129, 0.16);
+  --brand-yellow: #fbbf24;         /* Amber Glass */
+  --brand-yellow-light: rgba(245, 158, 11, 0.16);
+  --brand-red: #fb7185;            /* Rose Glass */
+  --brand-red-light: rgba(244, 63, 94, 0.16);
 
   --card-radius: 14px;
   --card-radius-sm: 10px;
@@ -47,9 +57,11 @@ html, body {
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
   background-color: var(--brand-bg);
+  background: radial-gradient(circle at 50% 0%, #151d30 0%, #090d16 65%, #05070c 100%) !important;
   color: var(--brand-dark);
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
 }
 
 #root {
@@ -59,6 +71,7 @@ html, body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: transparent;
 }
 
 .font-mono {
@@ -66,18 +79,71 @@ html, body {
   font-feature-settings: 'tnum';
 }
 
-/* Modern Top Navbar */
+/* =========================================================================
+   GLASSMORPHISM BASE CLASSES & OVERRIDES
+   ========================================================================= */
+
+/* Frosted Glass Cards */
+.card, .modern-card, .pos-table-card, .pos-summary-card {
+  background: rgba(17, 24, 39, 0.72) !important;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--brand-glass-border) !important;
+  color: var(--brand-dark) !important;
+  border-radius: var(--card-radius);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+/* Glass Surface Elements */
+.bg-white {
+  background: rgba(17, 24, 39, 0.75) !important;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  color: var(--brand-dark) !important;
+  border-color: var(--brand-glass-border) !important;
+}
+
+.bg-light {
+  background: rgba(11, 15, 25, 0.55) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--brand-slate) !important;
+  border-color: var(--brand-glass-border) !important;
+}
+
+/* Text Colors in Dark Mode */
+.text-dark {
+  color: #f8fafc !important;
+}
+
+.text-muted {
+  color: #94a3b8 !important;
+}
+
+.text-secondary {
+  color: #cbd5e1 !important;
+}
+
+/* Borders */
+.border, .border-top, .border-bottom, .border-start, .border-end {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Modern Top Navbar with Frosted Glass */
 .navbar-modern {
-  background: #ffffff;
+  background: rgba(11, 15, 25, 0.82) !important;
+  backdrop-filter: var(--glass-blur-heavy) !important;
+  -webkit-backdrop-filter: var(--glass-blur-heavy) !important;
   color: var(--brand-dark);
-  border-bottom: 1px solid var(--brand-border);
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45), inset 0 -1px 0 rgba(255, 255, 255, 0.04) !important;
 }
 
 .brand-badge {
-  background: var(--brand-primary-light);
-  color: var(--brand-primary);
-  border: 1px solid var(--brand-primary-border);
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.35);
   font-weight: 700;
   padding: 3px 8px;
   border-radius: 8px;
@@ -101,83 +167,123 @@ html, body {
   align-items: center;
   gap: 8px;
   font-size: 0.88rem;
-  border: 1px solid transparent;
-  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   transition: all 0.15s ease;
 }
 
 .nav-pills-pos .nav-link:hover {
-  background-color: var(--brand-border-subtle);
-  color: var(--brand-dark);
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.14);
 }
 
 .nav-pills-pos .nav-link.active {
-  background-color: var(--brand-primary);
-  color: #ffffff;
-  box-shadow: 0 4px 12px var(--brand-primary-glow);
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+  color: #ffffff !important;
+  border-color: rgba(56, 189, 248, 0.45) !important;
+  box-shadow: 0 4px 16px rgba(2, 132, 199, 0.4) !important;
 }
 
-/* Primary Button Styling - Nordic Azure */
+/* Primary Button Styling - Luminous Azure / Cyan */
 .btn-primary {
-  background-color: var(--brand-primary) !important;
-  border-color: var(--brand-primary) !important;
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+  border: 1px solid rgba(56, 189, 248, 0.4) !important;
   color: #ffffff !important;
   font-weight: 600;
   border-radius: 10px;
   transition: all 0.15s ease;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35) !important;
 }
 
 .btn-primary:hover, .btn-primary:focus {
-  background-color: var(--brand-primary-hover) !important;
-  border-color: var(--brand-primary-hover) !important;
+  background: linear-gradient(135deg, #0369a1 0%, #075985 100%) !important;
+  border-color: rgba(56, 189, 248, 0.6) !important;
   color: #ffffff !important;
-  box-shadow: 0 4px 14px var(--brand-primary-glow);
+  box-shadow: 0 6px 18px rgba(2, 132, 199, 0.5) !important;
 }
 
 .btn-outline-primary {
-  color: var(--brand-primary) !important;
-  border-color: var(--brand-primary-border) !important;
-  background-color: transparent !important;
+  color: #38bdf8 !important;
+  border-color: rgba(56, 189, 248, 0.4) !important;
+  background-color: rgba(56, 189, 248, 0.06) !important;
+  backdrop-filter: blur(8px);
   border-radius: 10px;
   font-weight: 600;
 }
 
 .btn-outline-primary:hover {
-  background-color: var(--brand-primary-light) !important;
-  color: var(--brand-primary-hover) !important;
-  border-color: var(--brand-primary) !important;
+  background-color: rgba(56, 189, 248, 0.18) !important;
+  color: #ffffff !important;
+  border-color: #38bdf8 !important;
+  box-shadow: 0 4px 14px rgba(56, 189, 248, 0.25);
+}
+
+.btn-outline-secondary {
+  color: #cbd5e1 !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  background-color: rgba(255, 255, 255, 0.03) !important;
+  backdrop-filter: blur(8px);
+}
+
+.btn-outline-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
 }
 
 .text-primary {
-  color: var(--brand-primary) !important;
+  color: #38bdf8 !important;
 }
 
 .bg-primary-subtle {
-  background-color: var(--brand-primary-light) !important;
-  color: var(--brand-primary) !important;
+  background-color: rgba(56, 189, 248, 0.15) !important;
+  color: #38bdf8 !important;
 }
 
-/* Modern Card Containers */
-.modern-card {
-  background: #ffffff;
-  border: 1px solid var(--brand-border);
-  border-radius: var(--card-radius);
-  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.03);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+/* Glass Input Boxes */
+.form-control, .form-select {
+  background-color: rgba(15, 23, 42, 0.72) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #f8fafc !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 10px;
+}
+
+.form-control:focus, .form-select:focus {
+  background-color: rgba(15, 23, 42, 0.9) !important;
+  border-color: #38bdf8 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25) !important;
+}
+
+.form-control::placeholder {
+  color: #64748b !important;
+}
+
+.input-group-text {
+  background-color: rgba(15, 23, 42, 0.82) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #94a3b8 !important;
 }
 
 /* Barcode Scan Input Box */
 .barcode-scan-box {
-  background: #ffffff;
-  border: 2px solid var(--brand-border);
+  background: rgba(15, 23, 42, 0.65) !important;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 2px solid rgba(255, 255, 255, 0.12) !important;
   border-radius: 12px;
-  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.03);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .barcode-scan-box:focus-within {
-  border-color: var(--brand-primary);
-  box-shadow: 0 0 0 3px var(--brand-primary-glow);
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25), 0 4px 20px rgba(0, 0, 0, 0.5) !important;
 }
 
 .scan-pulse {
@@ -185,33 +291,63 @@ html, body {
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background-color: var(--brand-primary);
+  background-color: #38bdf8;
+  box-shadow: 0 0 10px #38bdf8;
+}
+
+/* Tables in Dark Glass */
+.table {
+  --bs-table-bg: transparent !important;
+  --bs-table-color: #f1f5f9 !important;
+  --bs-table-border-color: rgba(255, 255, 255, 0.07) !important;
+  --bs-table-hover-bg: rgba(56, 189, 248, 0.06) !important;
+  --bs-table-hover-color: #ffffff !important;
+  color: #f1f5f9 !important;
+  border-color: rgba(255, 255, 255, 0.07) !important;
+}
+
+.table-light, thead.table-light th, thead th {
+  background: rgba(11, 15, 25, 0.85) !important;
+  color: #94a3b8 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.cart-item-row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.cart-item-row:hover {
+  background: rgba(56, 189, 248, 0.05) !important;
 }
 
 /* Mobile Product Card (Grid / List) */
 .product-touch-card {
-  background: #ffffff;
-  border: 1px solid var(--brand-border);
+  background: rgba(17, 24, 39, 0.72) !important;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
   border-radius: var(--card-radius-sm);
   padding: 12px;
   transition: all 0.15s ease;
   user-select: none;
   cursor: pointer;
-  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.03);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3) !important;
 }
 
 .product-touch-card:active {
   transform: scale(0.97);
-  background-color: var(--brand-primary-light);
-  border-color: var(--brand-primary-border);
+  background-color: rgba(56, 189, 248, 0.15) !important;
+  border-color: rgba(56, 189, 248, 0.4) !important;
 }
 
 /* Mobile Cart Card Item */
 .mobile-cart-card {
-  background: #ffffff;
+  background: rgba(17, 24, 39, 0.75) !important;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border-radius: var(--card-radius-sm);
-  border: 1px solid var(--brand-border);
-  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35) !important;
   transition: all 0.15s ease;
 }
 
@@ -225,31 +361,27 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f8fafc;
-  border: 1px solid var(--brand-border);
-  color: var(--brand-dark);
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #f8fafc !important;
 }
 
 .touch-stepper-btn:active {
-  background-color: var(--brand-primary);
-  color: #ffffff;
+  background-color: #0284c7 !important;
+  color: #ffffff !important;
   transform: scale(0.92);
 }
 
-/* POS Summary Card */
-.pos-summary-card {
-  background: #ffffff;
-  border: 1px solid var(--brand-border);
-  border-radius: var(--card-radius);
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
-}
-
+/* Grand Total Banner with Glass Aesthetic */
 .grand-total-banner {
-  background: linear-gradient(135deg, #0f172a 0%, #0369a1 100%);
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.22) 0%, rgba(2, 132, 199, 0.12) 100%) !important;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   color: #ffffff;
   border-radius: var(--card-radius-sm);
   padding: 16px;
-  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.2);
+  border: 1px solid rgba(56, 189, 248, 0.35) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
 }
 
 /* Camera Viewfinder Box for Distance Scanning */
@@ -259,13 +391,14 @@ html, body {
   height: 240px;
   min-height: 240px;
   max-height: 260px;
-  background-color: #090d16;
+  background-color: #050811;
   border-radius: 14px;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid var(--brand-border);
+  border: 2px solid rgba(56, 189, 248, 0.3) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
 .scanner-viewport-box video {
@@ -287,16 +420,16 @@ html, body {
   transform: translate(-50%, -50%);
   pointer-events: none;
   z-index: 12;
-  border: 2px dashed rgba(255, 255, 255, 0.65);
+  border: 2px dashed rgba(56, 189, 248, 0.7);
   border-radius: 10px;
-  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55);
 }
 
 .scanner-corner {
   position: absolute;
   width: 18px;
   height: 18px;
-  border-color: #0284c7;
+  border-color: #38bdf8;
   border-style: solid;
 }
 .scanner-corner.top-left {
@@ -326,8 +459,8 @@ html, body {
   left: 8%;
   right: 8%;
   height: 2px;
-  background: linear-gradient(90deg, rgba(2, 132, 199, 0) 0%, rgba(2, 132, 199, 1) 50%, rgba(2, 132, 199, 0) 100%);
-  box-shadow: 0 0 10px #0284c7;
+  background: linear-gradient(90deg, rgba(56, 189, 248, 0) 0%, rgba(56, 189, 248, 1) 50%, rgba(56, 189, 248, 0) 100%);
+  box-shadow: 0 0 12px #38bdf8;
   animation: laserSweepModern 1.8s ease-in-out infinite alternate;
   pointer-events: none;
   z-index: 10;
@@ -338,7 +471,7 @@ html, body {
   100% { transform: translateY(60px); opacity: 0.9; }
 }
 
-/* FIXED MOBILE BOTTOM NAVIGATION BAR (Mobile Native App Bar) */
+/* FIXED MOBILE BOTTOM NAVIGATION BAR with Dark Glass */
 .mobile-bottom-nav {
   position: fixed;
   bottom: 0;
@@ -347,16 +480,16 @@ html, body {
   width: 100%;
   max-width: 100vw;
   height: var(--bottom-nav-height);
-  background: rgba(255, 255, 255, 0.97);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-top: 1px solid var(--brand-border);
+  background: rgba(11, 15, 25, 0.88) !important;
+  backdrop-filter: var(--glass-blur-heavy) !important;
+  -webkit-backdrop-filter: var(--glass-blur-heavy) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
   display: flex;
   align-items: center;
   justify-content: space-around;
   z-index: 1030;
   padding-bottom: env(safe-area-inset-bottom, 0px);
-  box-shadow: 0 -4px 16px rgba(15, 23, 42, 0.05);
+  box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.6) !important;
 }
 
 .mobile-nav-item {
@@ -384,13 +517,13 @@ html, body {
 }
 
 .mobile-nav-item.active {
-  color: var(--brand-primary);
+  color: #38bdf8 !important;
   font-weight: 700;
 }
 
 .mobile-nav-item.active i {
   transform: translateY(-2px);
-  color: var(--brand-primary);
+  color: #38bdf8 !important;
 }
 
 .mobile-nav-item .nav-indicator-dot {
@@ -399,7 +532,8 @@ html, body {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background-color: var(--brand-primary);
+  background-color: #38bdf8;
+  box-shadow: 0 0 8px #38bdf8;
 }
 
 /* Floating Mobile Checkout Bar (Sits directly above bottom nav) */
@@ -408,9 +542,11 @@ html, body {
   bottom: calc(var(--bottom-nav-height) + 8px);
   left: 12px;
   right: 12px;
-  background: #ffffff;
-  border: 1px solid var(--brand-border);
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  background: rgba(15, 23, 42, 0.92) !important;
+  backdrop-filter: var(--glass-blur-heavy) !important;
+  -webkit-backdrop-filter: var(--glass-blur-heavy) !important;
+  border: 1px solid rgba(56, 189, 248, 0.35) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
   border-radius: 14px;
   padding: 10px 14px;
   z-index: 1025;
@@ -421,30 +557,104 @@ html, body {
 
 /* Status Badges */
 .badge-stock-in {
-  background-color: var(--brand-green-light);
-  color: var(--brand-green);
-  border: 1px solid rgba(5, 150, 105, 0.25);
+  background-color: rgba(16, 185, 129, 0.18) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
   font-weight: 700;
   border-radius: 8px;
   padding: 3px 8px;
 }
 
 .badge-stock-short {
-  background-color: var(--brand-yellow-light);
-  color: #b45309;
-  border: 1px solid rgba(217, 119, 6, 0.3);
+  background-color: rgba(245, 158, 11, 0.18) !important;
+  color: #fbbf24 !important;
+  border: 1px solid rgba(245, 158, 11, 0.35) !important;
   font-weight: 700;
   border-radius: 8px;
   padding: 3px 8px;
 }
 
 .badge-stock-out {
-  background-color: var(--brand-red-light);
-  color: var(--brand-red);
-  border: 1px solid rgba(225, 29, 72, 0.25);
+  background-color: rgba(244, 63, 94, 0.18) !important;
+  color: #fb7185 !important;
+  border: 1px solid rgba(244, 63, 94, 0.35) !important;
   font-weight: 700;
   border-radius: 8px;
   padding: 3px 8px;
+}
+
+.badge.bg-light {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #cbd5e1 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Alerts with Frosted Glass */
+.alert {
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  border-radius: 12px;
+}
+
+.alert-success {
+  background: rgba(16, 185, 129, 0.15) !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+  color: #6ee7b7 !important;
+}
+
+.alert-danger {
+  background: rgba(244, 63, 94, 0.15) !important;
+  border: 1px solid rgba(244, 63, 94, 0.35) !important;
+  color: #fda4af !important;
+}
+
+.alert-warning {
+  background: rgba(245, 158, 11, 0.15) !important;
+  border: 1px solid rgba(245, 158, 11, 0.35) !important;
+  color: #fcd34d !important;
+}
+
+.alert-info {
+  background: rgba(56, 189, 248, 0.15) !important;
+  border: 1px solid rgba(56, 189, 248, 0.35) !important;
+  color: #7dd3fc !important;
+}
+
+/* Glass Modals */
+.modal-content {
+  background: rgba(15, 23, 42, 0.92) !important;
+  backdrop-filter: var(--glass-blur-heavy) !important;
+  -webkit-backdrop-filter: var(--glass-blur-heavy) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  color: #f8fafc !important;
+  border-radius: 16px;
+}
+
+.modal-header, .modal-footer {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  background: transparent !important;
+}
+
+.btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Thermal Receipt in Modal - Realistic Pure White Paper for Exact Print Inspection */
+.thermal-receipt {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border-radius: 6px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+}
+
+.thermal-receipt * {
+  color: #000000 !important;
+}
+
+.thermal-receipt .badge {
+  background: #f1f5f9 !important;
+  color: #000000 !important;
 }
 
 /* =========================================================================
@@ -507,20 +717,40 @@ html, body {
   }
 }
 
-/* Modern React-Toastify Styling */
+/* Modern React-Toastify Dark Glass Styling */
 .Toastify__toast-container {
   z-index: 99999 !important;
 }
 
 .Toastify__toast {
+  background: rgba(15, 23, 42, 0.94) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #f8fafc !important;
   border-radius: 12px !important;
   font-family: inherit !important;
   font-size: 0.88rem !important;
   font-weight: 600 !important;
-  box-shadow: 0 8px 20px -4px rgba(15, 23, 42, 0.12) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
 }
 
-/* Print Styles preserved - Isolated & Never Blank */
+/* Keyboard Shortcut Badges */
+kbd {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #38bdf8 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Footer in App.jsx */
+footer.bg-white {
+  background: rgba(11, 15, 25, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Print Styles preserved - Isolated & Pure Black & White for Paper */
 @media print {
   @page {
     margin: 4mm;
