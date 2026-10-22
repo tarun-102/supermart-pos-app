@@ -789,8 +789,8 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
 
                                 <button
                                     type="button"
-                                    className="btn btn-primary btn-lg fw-bolder px-4 py-2 d-flex align-items-center gap-2 shadow-sm rounded-pill flex-grow-1 justify-content-center"
-                                    style={{ fontSize: '1.1rem', letterSpacing: '0.5px', background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)' }}
+                                    className="btn btn-success btn-lg fw-bolder px-4 py-2 d-flex align-items-center gap-2 shadow rounded-pill flex-grow-1 justify-content-center"
+                                    style={{ fontSize: '1.1rem', letterSpacing: '0.5px', background: 'var(--gradient-emerald)', boxShadow: '0 8px 24px -4px rgba(16, 185, 129, 0.5)' }}
                                     onClick={() => setIsPaymentOpen(true)}
                                 >
                                     <i className="bi bi-wallet2 fs-5"></i>
@@ -1402,7 +1402,7 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
                             <div className="d-flex gap-2 mb-2">
                                 <button
                                     type="button"
-                                    className="btn btn-outline-warning w-50 py-2 fw-bold text-dark"
+                                    className="btn btn-outline-warning w-50 py-2 fw-bold text-warning"
                                     onClick={handleHoldBill}
                                     disabled={cart.length === 0}
                                     title="Hold Bill (F7)"
@@ -1422,7 +1422,7 @@ export default function PosBilling({ currentUser, activeShift, refreshShifts, on
                             {/* Big Checkout Button */}
                             <button
                                 type="button"
-                                className="btn btn-primary btn-lg w-100 py-3 fw-bolder shadow-sm d-flex align-items-center justify-content-center gap-2"
+                                className="btn btn-success btn-lg w-100 py-3 fw-bolder shadow-sm d-flex align-items-center justify-content-center gap-2"
                                 style={{ fontSize: '1.25rem', letterSpacing: '0.5px' }}
                                 onClick={() => setIsPaymentOpen(true)}
                                 disabled={cart.length === 0}

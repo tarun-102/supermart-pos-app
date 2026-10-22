@@ -131,7 +131,7 @@ export default function App() {
 
   return (
     <ConfirmProvider>
-      <div className="min-vh-100 d-flex flex-column bg-light w-100" style={{ maxWidth: '100vw', overflowX: 'hidden' }}>
+      <div className="min-vh-100 d-flex flex-column w-100" style={{ maxWidth: '100vw', overflowX: 'hidden' }}>
         {/* Universal Store Navigation Bar */}
         <Navbar
           activeTab={activeTab}

@@ -32,20 +32,37 @@ export default function Navbar({
             <div className="container-fluid p-0">
                 <div className="d-flex align-items-center justify-content-between gap-1 gap-sm-2">
                     {/* Brand & Store Info */}
-                    <div className="d-flex align-items-center gap-2 text-truncate flex-shrink-1" style={{ maxWidth: '42%', minWidth: 0 }}>
-                        <div className="rounded-3 bg-primary-subtle text-primary p-1 d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: '34px', height: '34px' }}>
+                    <div className="d-flex align-items-center gap-2 text-truncate" style={{ maxWidth: '55%', minWidth: 0 }}>
+                        <div
+                            className="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm"
+                            style={{
+                                width: '36px',
+                                height: '36px',
+                                background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(56, 189, 248, 0.25) 100%)',
+                                border: '1px solid rgba(99, 102, 241, 0.45)',
+                                color: '#38bdf8'
+                            }}
+                        >
                             <i className="bi bi-shop-window fs-5"></i>
                         </div>
                         <div className="text-truncate">
                             <div className="d-flex align-items-center gap-1 text-truncate">
-                                <span className="fw-bolder fs-6 text-dark text-truncate">
-                                    {storeConfig?.storeName || 'SuperStore POS'}
+                                <span className="fw-bolder fs-6 text-white text-truncate" style={{ letterSpacing: '-0.2px' }}>
+                                    {storeConfig?.storeName || 'ShiftFlow POS'}
                                 </span>
                                 <span className="brand-badge text-uppercase d-none d-sm-inline">
-                                    {storeConfig?.storeType || 'POS System'}
+                                    {storeConfig?.storeType || 'Retail POS'}
                                 </span>
-                                <span className="badge bg-warning-subtle text-warning-emphasis border border-warning fw-bold px-1 py-0 d-inline-block d-md-none flex-shrink-0" style={{ fontSize: '0.65rem' }}>
-                                    {currentCounter ? currentCounter.split(' ')[0] : 'Counter-01'}
+                                <span
+                                    className="badge font-mono fw-bold px-1 py-0 d-inline-block d-md-none flex-shrink-0"
+                                    style={{
+                                        fontSize: '0.65rem',
+                                        background: 'rgba(56, 189, 248, 0.15)',
+                                        color: '#38bdf8',
+                                        border: '1px solid rgba(56, 189, 248, 0.35)'
+                                    }}
+                                >
+                                    {currentCounter ? currentCounter.split(' ')[0] : 'Desk-01'}
                                 </span>
                             </div>
                             <small className="text-muted d-none d-sm-block text-truncate" style={{ fontSize: '0.7rem', maxWidth: '280px' }}>
@@ -53,17 +70,24 @@ export default function Navbar({
                             </small>
                         </div>
 
-                        <div className="vr opacity-25 mx-1 d-none d-lg-block" style={{ height: '28px' }}></div>
+                        <div className="vr opacity-25 mx-2 d-none d-lg-block" style={{ height: '28px', backgroundColor: 'rgba(255, 255, 255, 0.2)' }}></div>
 
                         {/* Counter & Clock badge for Desktop */}
                         <div className="d-none d-lg-flex flex-column">
                             <div className="d-flex align-items-center gap-2">
-                                <span className="badge bg-primary-subtle text-primary border border-primary-subtle fw-bold px-2 py-1">
-                                    <i className="bi bi-display me-1"></i>
+                                <span
+                                    className="badge fw-bold px-2 py-1"
+                                    style={{
+                                        background: 'rgba(99, 102, 241, 0.15)',
+                                        color: '#a5b4fc',
+                                        border: '1px solid rgba(99, 102, 241, 0.35)'
+                                    }}
+                                >
+                                    <i className="bi bi-display me-1 text-info"></i>
                                     {currentCounter}
                                 </span>
-                                <span className="font-mono text-muted fw-semibold small">
-                                    <i className="bi bi-clock me-1"></i>{currentTime}
+                                <span className="font-mono text-muted fw-semibold small" style={{ fontSize: '0.78rem' }}>
+                                    <i className="bi bi-clock me-1 text-info"></i>{currentTime}
                                 </span>
                             </div>
                         </div>
@@ -119,12 +143,12 @@ export default function Navbar({
                     <div className="d-flex align-items-center gap-1 gap-sm-2 flex-shrink-0">
                         {isAdmin && (
                             <button
-                                className="btn btn-sm btn-outline-secondary fw-bold d-flex align-items-center gap-1 shadow-sm px-2 py-1"
+                                className="btn btn-sm btn-outline-secondary fw-bold d-none d-sm-flex align-items-center gap-1 shadow-sm px-2 py-1"
                                 onClick={onOpenStoreSettings}
                                 title="Setup Store Profile & Counters"
                                 style={{ fontSize: '0.75rem' }}
                             >
-                                <i className="bi bi-gear-fill text-primary"></i>
+                                <i className="bi bi-gear-fill text-info"></i>
                                 <span className="d-none d-xl-inline">Shop Setup</span>
                             </button>
                         )}
@@ -153,14 +177,21 @@ export default function Navbar({
                                 title="Register Drawer & Shift"
                                 style={{ fontSize: '0.75rem' }}
                             >
-                                <i className="bi bi-safe"></i>
+                                <i className="bi bi-safe2"></i>
                                 <span className="d-none d-xl-inline">Drawer</span>
                             </button>
                         )}
 
                         {/* User Pill */}
-                        <div className="d-flex align-items-center gap-1 bg-light px-2 py-1 rounded-3 text-dark border" style={{ fontSize: '0.75rem' }}>
-                            <i className="bi bi-person-circle text-primary"></i>
+                        <div
+                            className="d-flex align-items-center gap-1 px-2 py-1 rounded-3 text-white"
+                            style={{
+                                fontSize: '0.75rem',
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)'
+                            }}
+                        >
+                            <i className="bi bi-person-circle text-info"></i>
                             <span className="fw-bold d-none d-sm-inline text-truncate" style={{ maxWidth: '90px' }}>
                                 {currentUser.name}
                             </span>

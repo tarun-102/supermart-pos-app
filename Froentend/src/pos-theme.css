@@ -1,49 +1,70 @@
 :root {
   /* =========================================================================
-     OBSIDIAN CYBER GLASS DESIGN SYSTEM (DARK THEME + GLASSMORPHISM)
-     Deep cosmic canvas, frosted glass surfaces, luminous cyan & azure accents.
-     Zero eye glare, luxury feel, smooth 60fps performance on all devices.
+     SHIFTFLOW LUXURY CYBER-GLASS DESIGN SYSTEM (PREMIUM FINTECH GRADE)
+     Obsidian Onyx Canvas, Frosted Sapphire Glass, Electric Indigo & Neo-Teal Accents.
+     Anti-glare, eye-soothing, silky 60fps animations, 100% full responsiveness.
      ========================================================================= */
-  --brand-primary: #38bdf8;        /* Luminous Sky Cyan */
-  --brand-primary-hover: #0ea5e9;  /* Vibrant Ocean Cyan */
-  --brand-primary-light: rgba(56, 189, 248, 0.12); /* Translucent glow */
-  --brand-primary-glow: rgba(56, 189, 248, 0.28);
-  --brand-primary-border: rgba(56, 189, 248, 0.35);
-  --brand-accent: #0284c7;
 
-  --brand-dark: #f8fafc;           /* Primary text is crisp soft white */
-  --brand-slate: #cbd5e1;          /* Secondary text */
-  --brand-slate-light: #94a3b8;    /* Muted text */
+  /* Palette Accents */
+  --brand-indigo: #6366f1;
+  --brand-indigo-glow: rgba(99, 102, 241, 0.35);
+  --brand-cyan: #38bdf8;
+  --brand-cyan-glow: rgba(56, 189, 248, 0.35);
+  --brand-emerald: #10b981;
+  --brand-emerald-glow: rgba(16, 185, 129, 0.4);
+  --brand-amber: #f59e0b;
+  --brand-amber-glow: rgba(245, 158, 11, 0.35);
+  --brand-rose: #f43f5e;
+  --brand-rose-glow: rgba(244, 63, 94, 0.35);
+
+  /* Primary Theme Brand Variables */
+  --brand-primary: #6366f1;
+  --brand-primary-hover: #4f46e5;
+  --brand-primary-light: rgba(99, 102, 241, 0.14);
+  --brand-primary-glow: var(--brand-indigo-glow);
+  --brand-primary-border: rgba(99, 102, 241, 0.4);
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #6366f1 0%, #0284c7 100%);
+  --gradient-cyan: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
+  --gradient-emerald: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  --gradient-amber: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  --gradient-rose: linear-gradient(135deg, #f43f5e 0%, #dc2626 100%);
+  --gradient-card: linear-gradient(145deg, rgba(22, 30, 49, 0.75) 0%, rgba(15, 23, 42, 0.65) 100%);
+  --gradient-glass: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
+
+  /* Typography Text Hierarchy */
+  --brand-text-pure: #ffffff;
+  --brand-dark: #f8fafc;
+  --brand-slate: #cbd5e1;
+  --brand-slate-light: #94a3b8;
   --brand-muted: #64748b;
 
-  --brand-bg: #090d16;             /* Deep Obsidian Cosmos Canvas */
-  --brand-bg-elevated: #0f172a;    /* Elevated surface */
-  --brand-card: rgba(17, 24, 39, 0.72); /* Frosted Dark Glass */
-  --brand-card-hover: rgba(26, 35, 56, 0.82);
-  --brand-card-solid: #0f172a;
+  /* Canvas & Glassmorphic Surfaces */
+  --brand-bg: #07090e;
+  --brand-bg-elevated: #0f172a;
+  --brand-card: rgba(16, 22, 36, 0.72);
+  --brand-card-hover: rgba(24, 33, 54, 0.82);
+  --brand-card-solid: #0d1322;
 
-  --brand-glass-border: rgba(255, 255, 255, 0.08); /* Crisp translucent edge */
-  --brand-glass-border-hover: rgba(56, 189, 248, 0.3);
-  --brand-glass-highlight: rgba(255, 255, 255, 0.04);
-  --glass-blur: blur(16px);
-  --glass-blur-heavy: blur(24px);
+  --brand-glass-border: rgba(255, 255, 255, 0.08);
+  --brand-glass-border-hover: rgba(99, 102, 241, 0.4);
+  --brand-glass-highlight: rgba(255, 255, 255, 0.06);
 
-  --brand-border: rgba(255, 255, 255, 0.08);
-  --brand-border-subtle: rgba(255, 255, 255, 0.04);
+  --glass-blur: blur(18px);
+  --glass-blur-heavy: blur(28px);
 
-  --brand-green: #34d399;          /* Luminous Emerald Glass */
-  --brand-green-light: rgba(16, 185, 129, 0.16);
-  --brand-yellow: #fbbf24;         /* Amber Glass */
-  --brand-yellow-light: rgba(245, 158, 11, 0.16);
-  --brand-red: #fb7185;            /* Rose Glass */
-  --brand-red-light: rgba(244, 63, 94, 0.16);
-
-  --card-radius: 14px;
-  --card-radius-sm: 10px;
+  /* Radius & Layout */
+  --card-radius-lg: 20px;
+  --card-radius: 16px;
+  --card-radius-sm: 12px;
+  --card-radius-xs: 8px;
   --bottom-nav-height: 64px;
 }
 
-/* Fast 60 FPS Mobile & Desktop Baseline */
+/* =========================================================================
+   FAST 60 FPS ULTRA-PREMIUM CANVASES & BASE RESETS
+   ========================================================================= */
 *, *::before, *::after {
   box-sizing: border-box;
 }
@@ -57,10 +78,15 @@ html, body {
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
   background-color: var(--brand-bg);
-  background: radial-gradient(circle at 50% 0%, #151d30 0%, #090d16 65%, #05070c 100%) !important;
+  background:
+    radial-gradient(ellipse 90% 60% at 50% -15%, rgba(99, 102, 241, 0.16) 0%, transparent 60%),
+    radial-gradient(circle at 100% 25%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 0% 75%, rgba(16, 185, 129, 0.05) 0%, transparent 40%),
+    #07090e !important;
   color: var(--brand-dark);
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
 }
 
@@ -74,47 +100,82 @@ html, body {
   background: transparent;
 }
 
+/* Tabular JetBrains Numbers */
 .font-mono {
-  font-family: 'JetBrains Mono', monospace;
-  font-feature-settings: 'tnum';
+  font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace !important;
+  font-feature-settings: 'tnum' 1, 'zero' 1;
+}
+
+/* Custom Minimalist Dark Scrollbars */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(7, 9, 14, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.5);
 }
 
 /* =========================================================================
-   GLASSMORPHISM BASE CLASSES & OVERRIDES
+   GLASSMORPHISM CORE SYSTEM & CONTAINERS
    ========================================================================= */
 
-/* Frosted Glass Cards */
-.card, .modern-card, .pos-table-card, .pos-summary-card {
-  background: rgba(17, 24, 39, 0.72) !important;
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
+/* Luxury Dark Glass Panels */
+.card, .modern-card, .pos-table-card, .pos-summary-card, .mobile-bill-sheet {
+  background: var(--brand-card) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
   border: 1px solid var(--brand-glass-border) !important;
   color: var(--brand-dark) !important;
   border-radius: var(--card-radius);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  box-shadow:
+    0 16px 40px -10px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.09) !important;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Glass Surface Elements */
+.card:hover, .modern-card:hover {
+  border-color: rgba(99, 102, 241, 0.3) !important;
+}
+
+/* Internal Glass Panels Overrides */
 .bg-white {
-  background: rgba(17, 24, 39, 0.75) !important;
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
+  background: rgba(16, 22, 36, 0.7) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
   color: var(--brand-dark) !important;
   border-color: var(--brand-glass-border) !important;
 }
 
 .bg-light {
-  background: rgba(11, 15, 25, 0.55) !important;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(11, 15, 25, 0.6) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
   color: var(--brand-slate) !important;
   border-color: var(--brand-glass-border) !important;
 }
 
-/* Text Colors in Dark Mode */
+.bg-dark {
+  background: rgba(11, 15, 25, 0.85) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  color: #ffffff !important;
+}
+
+/* Text Overrides for Absolute Contrast & Eye-Comfort */
 .text-dark {
-  color: #f8fafc !important;
+  color: #ffffff !important;
 }
 
 .text-muted {
@@ -125,28 +186,51 @@ html, body {
   color: #cbd5e1 !important;
 }
 
+.text-primary {
+  color: #38bdf8 !important;
+}
+
+.text-success {
+  color: #34d399 !important;
+}
+
+.text-warning {
+  color: #fbbf24 !important;
+}
+
+.text-danger {
+  color: #fb7185 !important;
+}
+
+.text-info {
+  color: #38bdf8 !important;
+}
+
 /* Borders */
 .border, .border-top, .border-bottom, .border-start, .border-end {
   border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
-/* Modern Top Navbar with Frosted Glass */
+/* =========================================================================
+   TOP NAVBAR (STREAMLINED & ULTRA-PREMIUM)
+   ========================================================================= */
 .navbar-modern {
-  background: rgba(11, 15, 25, 0.82) !important;
+  background: rgba(9, 13, 22, 0.85) !important;
   backdrop-filter: var(--glass-blur-heavy) !important;
   -webkit-backdrop-filter: var(--glass-blur-heavy) !important;
   color: var(--brand-dark);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45), inset 0 -1px 0 rgba(255, 255, 255, 0.04) !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), inset 0 -1px 0 rgba(255, 255, 255, 0.04) !important;
+  z-index: 1040;
 }
 
 .brand-badge {
-  background: rgba(56, 189, 248, 0.15);
-  color: #38bdf8;
-  border: 1px solid rgba(56, 189, 248, 0.35);
+  background: rgba(99, 102, 241, 0.15);
+  color: #a5b4fc;
+  border: 1px solid rgba(99, 102, 241, 0.35);
   font-weight: 700;
   padding: 3px 8px;
-  border-radius: 8px;
+  border-radius: var(--card-radius-xs);
   font-size: 0.72rem;
   letter-spacing: 0.5px;
 }
@@ -154,15 +238,15 @@ html, body {
 /* Desktop Navigation Pills */
 .nav-pills-pos {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   padding: 2px 0;
 }
 
 .nav-pills-pos .nav-link {
   color: var(--brand-slate-light);
   font-weight: 600;
-  border-radius: 10px;
-  padding: 8px 14px;
+  border-radius: var(--card-radius-sm);
+  padding: 8px 16px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -171,93 +255,149 @@ html, body {
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  transition: all 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .nav-pills-pos .nav-link:hover {
   background-color: rgba(255, 255, 255, 0.08);
   color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.16);
+  transform: translateY(-1px);
 }
 
 .nav-pills-pos .nav-link.active {
-  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+  background: var(--gradient-primary) !important;
   color: #ffffff !important;
-  border-color: rgba(56, 189, 248, 0.45) !important;
-  box-shadow: 0 4px 16px rgba(2, 132, 199, 0.4) !important;
+  border-color: rgba(99, 102, 241, 0.5) !important;
+  box-shadow: 0 6px 20px -3px rgba(99, 102, 241, 0.5) !important;
 }
 
-/* Primary Button Styling - Luminous Azure / Cyan */
-.btn-primary {
-  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
-  border: 1px solid rgba(56, 189, 248, 0.4) !important;
-  color: #ffffff !important;
+/* =========================================================================
+   LUXURY BUTTON STYLING (TOUCH & DESKTOP)
+   ========================================================================= */
+.btn {
+  font-family: inherit;
   font-weight: 600;
-  border-radius: 10px;
-  transition: all 0.15s ease;
-  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35) !important;
+  border-radius: var(--card-radius-sm);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  letter-spacing: 0.2px;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-primary {
+  background: var(--gradient-primary) !important;
+  border: 1px solid rgba(99, 102, 241, 0.45) !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 24px -4px rgba(99, 102, 241, 0.45) !important;
 }
 
 .btn-primary:hover, .btn-primary:focus {
-  background: linear-gradient(135deg, #0369a1 0%, #075985 100%) !important;
-  border-color: rgba(56, 189, 248, 0.6) !important;
+  background: linear-gradient(135deg, #4f46e5 0%, #0369a1 100%) !important;
+  border-color: rgba(99, 102, 241, 0.7) !important;
+  box-shadow: 0 10px 28px -3px rgba(99, 102, 241, 0.6) !important;
+}
+
+.btn-success {
+  background: var(--gradient-emerald) !important;
+  border: 1px solid rgba(16, 185, 129, 0.45) !important;
   color: #ffffff !important;
-  box-shadow: 0 6px 18px rgba(2, 132, 199, 0.5) !important;
+  box-shadow: 0 8px 24px -4px rgba(16, 185, 129, 0.45) !important;
+}
+
+.btn-success:hover, .btn-success:focus {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+  box-shadow: 0 10px 28px -3px rgba(16, 185, 129, 0.6) !important;
+}
+
+.btn-warning {
+  background: var(--gradient-amber) !important;
+  border: 1px solid rgba(245, 158, 11, 0.45) !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 24px -4px rgba(245, 158, 11, 0.4) !important;
+}
+
+.btn-danger {
+  background: var(--gradient-rose) !important;
+  border: 1px solid rgba(244, 63, 94, 0.45) !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 24px -4px rgba(244, 63, 94, 0.4) !important;
 }
 
 .btn-outline-primary {
   color: #38bdf8 !important;
-  border-color: rgba(56, 189, 248, 0.4) !important;
-  background-color: rgba(56, 189, 248, 0.06) !important;
+  border-color: rgba(56, 189, 248, 0.35) !important;
+  background-color: rgba(56, 189, 248, 0.08) !important;
   backdrop-filter: blur(8px);
-  border-radius: 10px;
-  font-weight: 600;
 }
 
 .btn-outline-primary:hover {
-  background-color: rgba(56, 189, 248, 0.18) !important;
+  background-color: rgba(56, 189, 248, 0.22) !important;
   color: #ffffff !important;
   border-color: #38bdf8 !important;
-  box-shadow: 0 4px 14px rgba(56, 189, 248, 0.25);
+  box-shadow: 0 4px 18px rgba(56, 189, 248, 0.3);
 }
 
 .btn-outline-secondary {
   color: #cbd5e1 !important;
-  border-color: rgba(255, 255, 255, 0.14) !important;
-  background-color: rgba(255, 255, 255, 0.03) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  background-color: rgba(255, 255, 255, 0.04) !important;
   backdrop-filter: blur(8px);
 }
 
 .btn-outline-secondary:hover {
-  background-color: rgba(255, 255, 255, 0.1) !important;
+  background-color: rgba(255, 255, 255, 0.12) !important;
   color: #ffffff !important;
   border-color: rgba(255, 255, 255, 0.25) !important;
 }
 
-.text-primary {
-  color: #38bdf8 !important;
+.btn-outline-success {
+  color: #34d399 !important;
+  border-color: rgba(16, 185, 129, 0.35) !important;
+  background-color: rgba(16, 185, 129, 0.08) !important;
 }
 
-.bg-primary-subtle {
-  background-color: rgba(56, 189, 248, 0.15) !important;
-  color: #38bdf8 !important;
+.btn-outline-danger {
+  color: #fb7185 !important;
+  border-color: rgba(244, 63, 94, 0.35) !important;
+  background-color: rgba(244, 63, 94, 0.08) !important;
 }
 
-/* Glass Input Boxes */
+.btn-outline-warning {
+  color: #fbbf24 !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+  background-color: rgba(245, 158, 11, 0.08) !important;
+}
+
+/* Extra small buttons */
+.btn-xs {
+  padding: 3px 8px;
+  font-size: 0.72rem;
+  border-radius: var(--card-radius-xs);
+}
+
+/* =========================================================================
+   FORM CONTROLS & GLASS INPUTS
+   ========================================================================= */
 .form-control, .form-select {
-  background-color: rgba(15, 23, 42, 0.72) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  color: #f8fafc !important;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 10px;
+  background-color: rgba(15, 23, 42, 0.65) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: var(--card-radius-sm);
+  padding: 8px 12px;
+  transition: all 0.18s ease;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3) !important;
 }
 
 .form-control:focus, .form-select:focus {
   background-color: rgba(15, 23, 42, 0.9) !important;
-  border-color: #38bdf8 !important;
+  border-color: #6366f1 !important;
   color: #ffffff !important;
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25) !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25), inset 0 1px 2px rgba(0, 0, 0, 0.2) !important;
 }
 
 .form-control::placeholder {
@@ -265,213 +405,338 @@ html, body {
 }
 
 .input-group-text {
-  background-color: rgba(15, 23, 42, 0.82) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  background-color: rgba(15, 23, 42, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
   color: #94a3b8 !important;
+  border-radius: var(--card-radius-sm);
 }
 
-/* Barcode Scan Input Box */
+/* Barcode Scan Search Box */
 .barcode-scan-box {
-  background: rgba(15, 23, 42, 0.65) !important;
+  background: rgba(15, 23, 42, 0.7) !important;
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border: 2px solid rgba(255, 255, 255, 0.12) !important;
-  border-radius: 12px;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  border-radius: var(--card-radius);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .barcode-scan-box:focus-within {
-  border-color: #38bdf8 !important;
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25), 0 4px 20px rgba(0, 0, 0, 0.5) !important;
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.25), 0 8px 30px rgba(0, 0, 0, 0.6) !important;
 }
 
 .scan-pulse {
   display: inline-block;
-  width: 9px;
-  height: 9px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background-color: #38bdf8;
-  box-shadow: 0 0 10px #38bdf8;
+  box-shadow: 0 0 12px #38bdf8;
+  animation: pulseGlow 1.8s infinite;
 }
 
-/* Tables in Dark Glass */
+@keyframes pulseGlow {
+  0% { transform: scale(0.95); box-shadow: 0 0 4px #38bdf8; }
+  50% { transform: scale(1.2); box-shadow: 0 0 14px #38bdf8; }
+  100% { transform: scale(0.95); box-shadow: 0 0 4px #38bdf8; }
+}
+
+/* =========================================================================
+   TABLES IN CYBER DARK GLASS
+   ========================================================================= */
 .table {
   --bs-table-bg: transparent !important;
-  --bs-table-color: #f1f5f9 !important;
-  --bs-table-border-color: rgba(255, 255, 255, 0.07) !important;
-  --bs-table-hover-bg: rgba(56, 189, 248, 0.06) !important;
-  --bs-table-hover-color: #ffffff !important;
-  color: #f1f5f9 !important;
+  --bs-table-color: var(--brand-slate) !important;
+  --bs-table-striped-bg: rgba(255, 255, 255, 0.02) !important;
+  --bs-table-active-bg: rgba(255, 255, 255, 0.05) !important;
+  --bs-table-hover-bg: rgba(255, 255, 255, 0.04) !important;
+  color: var(--brand-slate) !important;
   border-color: rgba(255, 255, 255, 0.07) !important;
 }
 
-.table-light, thead.table-light th, thead th {
-  background: rgba(11, 15, 25, 0.85) !important;
+.table > :not(caption) > * > * {
+  background-color: transparent !important;
+  color: inherit !important;
+  border-bottom-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.table-light, thead.table-light, thead.table-light th, .table-light th {
+  background: rgba(9, 13, 22, 0.88) !important;
   color: #94a3b8 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.8px;
+}
+
+.table-danger, tr.table-danger, tr.table-danger > *, td.table-danger {
+  background-color: rgba(244, 63, 94, 0.15) !important;
+  color: #fca5a5 !important;
+}
+
+.table-warning, tr.table-warning, tr.table-warning > *, td.table-warning {
+  background-color: rgba(245, 158, 11, 0.15) !important;
+  color: #fde68a !important;
+}
+
+.table-success, tr.table-success, tr.table-success > *, td.table-success {
+  background-color: rgba(16, 185, 129, 0.15) !important;
+  color: #86efac !important;
+}
+
+.table-info, tr.table-info, tr.table-info > *, td.table-info {
+  background-color: rgba(56, 189, 248, 0.15) !important;
+  color: #7dd3fc !important;
+}
+
+.table-hover > tbody > tr:hover > * {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  color: #ffffff !important;
+}
+
+.pos-table thead th {
+  background: rgba(9, 13, 22, 0.8) !important;
+  color: #94a3b8;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.8px;
+  padding: 12px 14px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
-.cart-item-row {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+.pos-table tbody tr {
+  transition: background-color 0.15s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
 }
 
-.cart-item-row:hover {
-  background: rgba(56, 189, 248, 0.05) !important;
+.pos-table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.04) !important;
 }
 
-/* Mobile Product Card (Grid / List) */
-.product-touch-card {
-  background: rgba(17, 24, 39, 0.72) !important;
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  border-radius: var(--card-radius-sm);
-  padding: 12px;
-  transition: all 0.15s ease;
-  user-select: none;
-  cursor: pointer;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3) !important;
+.pos-table td {
+  padding: 12px 14px;
+  vertical-align: middle;
 }
 
-.product-touch-card:active {
-  transform: scale(0.97);
-  background-color: rgba(56, 189, 248, 0.15) !important;
-  border-color: rgba(56, 189, 248, 0.4) !important;
-}
-
-/* Mobile Cart Card Item */
-.mobile-cart-card {
-  background: rgba(17, 24, 39, 0.75) !important;
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border-radius: var(--card-radius-sm);
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35) !important;
-  transition: all 0.15s ease;
-}
-
-/* Stepper Buttons for Fingers */
-.touch-stepper-btn {
-  width: 38px;
-  height: 38px;
-  min-width: 38px;
-  border-radius: 10px !important;
+/* Pricing Badges & Pills */
+.savings-pill {
+  background: rgba(16, 185, 129, 0.18) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
   font-weight: 700;
-  display: flex;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 0.72rem;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  background-color: rgba(255, 255, 255, 0.06) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  color: #f8fafc !important;
 }
 
-.touch-stepper-btn:active {
-  background-color: #0284c7 !important;
-  color: #ffffff !important;
-  transform: scale(0.92);
+.price-strike {
+  color: #64748b;
+  text-decoration: line-through;
+  font-size: 0.82rem;
+  margin-right: 6px;
 }
 
-/* Grand Total Banner with Glass Aesthetic */
+.price-sp {
+  color: #38bdf8;
+  font-weight: 700;
+}
+
+/* Grand Total Banner (Desktop & Mobile) */
 .grand-total-banner {
-  background: linear-gradient(135deg, rgba(14, 165, 233, 0.22) 0%, rgba(2, 132, 199, 0.12) 100%) !important;
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  color: #ffffff;
-  border-radius: var(--card-radius-sm);
+  background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%) !important;
+  border: 1px solid rgba(99, 102, 241, 0.4) !important;
+  border-radius: var(--card-radius);
+  box-shadow: 0 10px 30px -5px rgba(99, 102, 241, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
   padding: 16px;
-  border: 1px solid rgba(56, 189, 248, 0.35) !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
 }
 
-/* Camera Viewfinder Box for Distance Scanning */
+/* =========================================================================
+   CAMERA SCANNER HUD (FUTURISTIC & COMPACT)
+   ========================================================================= */
 .scanner-viewport-box {
-  position: relative;
-  width: 100%;
-  height: 240px;
-  min-height: 240px;
-  max-height: 260px;
-  background-color: #050811;
-  border-radius: 14px;
+  background: #000000;
+  border-radius: var(--card-radius);
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid rgba(56, 189, 248, 0.3) !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  border: 2px solid rgba(56, 189, 248, 0.4) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
 }
 
 .scanner-viewport-box video {
   width: 100% !important;
-  height: 240px !important;
-  max-height: 260px !important;
+  height: 220px !important;
+  max-height: 240px !important;
   object-fit: cover !important;
-  border-radius: 12px;
+  border-radius: var(--card-radius-sm);
   display: block;
 }
 
 /* Reticle targeting overlay */
 .scanner-reticle-box {
   position: absolute;
-  width: 86%;
-  height: 72%;
+  width: 84%;
+  height: 70%;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   pointer-events: none;
   z-index: 12;
-  border: 2px dashed rgba(56, 189, 248, 0.7);
-  border-radius: 10px;
+  border: 2px dashed rgba(56, 189, 248, 0.65);
+  border-radius: 12px;
   box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55);
 }
 
 .scanner-corner {
   position: absolute;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border-color: #38bdf8;
   border-style: solid;
 }
+
 .scanner-corner.top-left {
   top: -2px; left: -2px;
-  border-width: 3.5px 0 0 3.5px;
+  border-width: 4px 0 0 4px;
   border-top-left-radius: 8px;
 }
+
 .scanner-corner.top-right {
   top: -2px; right: -2px;
-  border-width: 3.5px 3.5px 0 0;
+  border-width: 4px 4px 0 0;
   border-top-right-radius: 8px;
 }
+
 .scanner-corner.bottom-left {
   bottom: -2px; left: -2px;
-  border-width: 0 0 3.5px 3.5px;
+  border-width: 0 0 4px 4px;
   border-bottom-left-radius: 8px;
 }
+
 .scanner-corner.bottom-right {
   bottom: -2px; right: -2px;
-  border-width: 0 3.5px 3.5px 0;
+  border-width: 0 4px 4px 0;
   border-bottom-right-radius: 8px;
 }
 
 .scanner-laser-line {
   position: absolute;
   top: 50%;
-  left: 8%;
-  right: 8%;
-  height: 2px;
+  left: 6%;
+  right: 6%;
+  height: 2.5px;
   background: linear-gradient(90deg, rgba(56, 189, 248, 0) 0%, rgba(56, 189, 248, 1) 50%, rgba(56, 189, 248, 0) 100%);
-  box-shadow: 0 0 12px #38bdf8;
-  animation: laserSweepModern 1.8s ease-in-out infinite alternate;
+  box-shadow: 0 0 14px #38bdf8;
+  animation: laserSweepModern 1.7s ease-in-out infinite alternate;
   pointer-events: none;
   z-index: 10;
 }
 
 @keyframes laserSweepModern {
-  0% { transform: translateY(-60px); opacity: 0.9; }
-  100% { transform: translateY(60px); opacity: 0.9; }
+  0% { transform: translateY(-55px); opacity: 0.95; }
+  100% { transform: translateY(55px); opacity: 0.95; }
 }
 
-/* FIXED MOBILE BOTTOM NAVIGATION BAR with Dark Glass */
+/* =========================================================================
+   PURE MOBILE BILLING MODE & DOCKING BARS
+   ========================================================================= */
+.mobile-pos-container {
+  width: 100%;
+  max-width: 100vw;
+  padding-bottom: 24px;
+}
+
+.mobile-camera-wrapper {
+  position: relative;
+  z-index: 10;
+}
+
+.scanner-compact .scanner-viewport-box,
+.scanner-compact .scanner-viewport-box video,
+.scanner-compact div[id*="camera"] {
+  height: 195px !important;
+  max-height: 195px !important;
+}
+
+.mobile-scan-feedback {
+  animation: pulseScanFeedback 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: var(--card-radius-sm);
+}
+
+@keyframes pulseScanFeedback {
+  0% { transform: scale(0.96); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.mobile-bill-sheet {
+  background: rgba(14, 20, 34, 0.82) !important;
+  backdrop-filter: var(--glass-blur-heavy) !important;
+  -webkit-backdrop-filter: var(--glass-blur-heavy) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: var(--card-radius);
+  overflow: hidden;
+}
+
+.mobile-cart-card {
+  background: rgba(18, 26, 44, 0.78) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  border-radius: var(--card-radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4) !important;
+  transition: all 0.18s ease;
+}
+
+.mobile-cart-card:hover {
+  border-color: rgba(99, 102, 241, 0.3) !important;
+}
+
+.mobile-stepper-btn {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  color: #ffffff !important;
+  font-size: 1.15rem !important;
+  font-weight: 700 !important;
+  border-radius: var(--card-radius-xs) !important;
+  user-select: none;
+}
+
+.mobile-stepper-btn:active {
+  background-color: #6366f1 !important;
+  transform: scale(0.92);
+}
+
+/* Floating / Docked Mobile Sticky Pay Bar */
+.mobile-sticky-checkout-bar {
+  position: fixed;
+  bottom: var(--bottom-nav-height);
+  left: 0;
+  right: 0;
+  width: 100%;
+  background: rgba(9, 13, 22, 0.94);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-top: 1px solid rgba(99, 102, 241, 0.35);
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.75);
+  padding: 10px 14px;
+  z-index: 1025;
+}
+
+/* FIXED MOBILE BOTTOM NAVIGATION BAR with Deep Frosted Glass */
 .mobile-bottom-nav {
   position: fixed;
   bottom: 0;
@@ -480,7 +745,7 @@ html, body {
   width: 100%;
   max-width: 100vw;
   height: var(--bottom-nav-height);
-  background: rgba(11, 15, 25, 0.88) !important;
+  background: rgba(8, 11, 18, 0.92) !important;
   backdrop-filter: var(--glass-blur-heavy) !important;
   -webkit-backdrop-filter: var(--glass-blur-heavy) !important;
   border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
@@ -489,7 +754,7 @@ html, body {
   justify-content: space-around;
   z-index: 1030;
   padding-bottom: env(safe-area-inset-bottom, 0px);
-  box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.6) !important;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.7) !important;
 }
 
 .mobile-nav-item {
@@ -506,14 +771,14 @@ html, body {
   padding: 4px 0;
   font-size: 0.68rem;
   font-weight: 600;
-  transition: all 0.15s ease;
+  transition: all 0.18s ease;
   position: relative;
 }
 
 .mobile-nav-item i {
   font-size: 1.25rem;
   margin-bottom: 2px;
-  transition: transform 0.15s ease;
+  transition: transform 0.18s ease;
 }
 
 .mobile-nav-item.active {
@@ -536,26 +801,9 @@ html, body {
   box-shadow: 0 0 8px #38bdf8;
 }
 
-/* Floating Mobile Checkout Bar (Sits directly above bottom nav) */
-.mobile-floating-cart-bar {
-  position: fixed;
-  bottom: calc(var(--bottom-nav-height) + 8px);
-  left: 12px;
-  right: 12px;
-  background: rgba(15, 23, 42, 0.92) !important;
-  backdrop-filter: var(--glass-blur-heavy) !important;
-  -webkit-backdrop-filter: var(--glass-blur-heavy) !important;
-  border: 1px solid rgba(56, 189, 248, 0.35) !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
-  border-radius: 14px;
-  padding: 10px 14px;
-  z-index: 1025;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-/* Status Badges */
+/* =========================================================================
+   STATUS BADGES & ALERTS
+   ========================================================================= */
 .badge-stock-in {
   background-color: rgba(16, 185, 129, 0.18) !important;
   color: #34d399 !important;
@@ -589,112 +837,253 @@ html, body {
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
-/* Alerts with Frosted Glass */
+/* Alert Glassmorphic Style */
 .alert {
   backdrop-filter: var(--glass-blur) !important;
   -webkit-backdrop-filter: var(--glass-blur) !important;
-  border-radius: 12px;
+  border-radius: var(--card-radius-sm);
+  border: 1px solid transparent;
 }
 
 .alert-success {
   background: rgba(16, 185, 129, 0.15) !important;
-  border: 1px solid rgba(16, 185, 129, 0.35) !important;
-  color: #6ee7b7 !important;
+  color: #34d399 !important;
+  border-color: rgba(16, 185, 129, 0.35) !important;
 }
 
 .alert-danger {
   background: rgba(244, 63, 94, 0.15) !important;
-  border: 1px solid rgba(244, 63, 94, 0.35) !important;
-  color: #fda4af !important;
+  color: #fb7185 !important;
+  border-color: rgba(244, 63, 94, 0.35) !important;
 }
 
 .alert-warning {
   background: rgba(245, 158, 11, 0.15) !important;
-  border: 1px solid rgba(245, 158, 11, 0.35) !important;
-  color: #fcd34d !important;
+  color: #fbbf24 !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
 }
 
 .alert-info {
   background: rgba(56, 189, 248, 0.15) !important;
-  border: 1px solid rgba(56, 189, 248, 0.35) !important;
-  color: #7dd3fc !important;
+  color: #38bdf8 !important;
+  border-color: rgba(56, 189, 248, 0.35) !important;
 }
 
-/* Glass Modals */
-.modal-content {
-  background: rgba(15, 23, 42, 0.92) !important;
-  backdrop-filter: var(--glass-blur-heavy) !important;
-  -webkit-backdrop-filter: var(--glass-blur-heavy) !important;
+/* Subtle Backgrounds in Dark Glass */
+.bg-primary-subtle {
+  background-color: rgba(56, 189, 248, 0.16) !important;
+  color: #38bdf8 !important;
+}
+
+.bg-success-subtle {
+  background-color: rgba(52, 211, 153, 0.16) !important;
+  color: #34d399 !important;
+}
+
+.bg-danger-subtle {
+  background-color: rgba(251, 113, 133, 0.16) !important;
+  color: #fb7185 !important;
+}
+
+.bg-warning-subtle {
+  background-color: rgba(251, 191, 36, 0.16) !important;
+  color: #fbbf24 !important;
+}
+
+.bg-info-subtle {
+  background-color: rgba(56, 189, 248, 0.16) !important;
+  color: #38bdf8 !important;
+}
+
+.border-primary-subtle {
+  border-color: rgba(56, 189, 248, 0.3) !important;
+}
+
+.border-success-subtle {
+  border-color: rgba(52, 211, 153, 0.3) !important;
+}
+
+.border-danger-subtle {
+  border-color: rgba(251, 113, 133, 0.3) !important;
+}
+
+.border-warning-subtle {
+  border-color: rgba(251, 191, 36, 0.3) !important;
+}
+
+/* Dropdown & List Groups Dark Glass Overrides */
+.dropdown-menu {
+  background: rgba(15, 23, 42, 0.96) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
-  color: #f8fafc !important;
-  border-radius: 16px;
+  border-radius: var(--card-radius-sm) !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.75) !important;
 }
 
-.modal-header, .modal-footer {
+.dropdown-item {
+  color: #cbd5e1 !important;
+  transition: all 0.15s ease;
+}
+
+.dropdown-item:hover, .dropdown-item:focus {
+  background: rgba(99, 102, 241, 0.25) !important;
+  color: #ffffff !important;
+}
+
+.list-group-item {
+  background: rgba(16, 22, 36, 0.6) !important;
+  color: #cbd5e1 !important;
   border-color: rgba(255, 255, 255, 0.08) !important;
-  background: transparent !important;
 }
 
-.btn-close {
-  filter: invert(1) grayscale(100%) brightness(200%);
-}
-
-/* Thermal Receipt in Modal - Realistic Pure White Paper for Exact Print Inspection */
+/* =========================================================================
+   AUTHENTIC 80mm THERMAL RECEIPT SLIP STYLING
+   Must remain pure black-and-white on physical paper & downloaded PDF
+   ========================================================================= */
 .thermal-receipt {
-  background: #ffffff !important;
+  width: 100%;
+  max-width: 330px;
+  margin: 0 auto;
+  padding: 14px;
+  background-color: #ffffff !important;
   color: #000000 !important;
-  border-radius: 6px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 11px;
+  line-height: 1.35;
+  border-radius: 4px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5) !important;
 }
 
 .thermal-receipt * {
   color: #000000 !important;
 }
 
-.thermal-receipt .badge {
-  background: #f1f5f9 !important;
-  color: #000000 !important;
+.thermal-receipt-header {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.thermal-receipt-divider {
+  border-top: 1px dashed #000000;
+  margin: 6px 0;
+}
+
+.thermal-receipt-divider-double {
+  border-top: 2px dashed #000000;
+  margin: 6px 0;
+}
+
+.thermal-receipt-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 6px 0;
+  font-size: 11px;
+}
+
+.thermal-receipt-table th {
+  border-top: 1px dashed #000000;
+  border-bottom: 1px dashed #000000;
+  padding: 3px 0;
+  text-align: left;
+  font-size: 10px;
+}
+
+.thermal-receipt-table td {
+  padding: 3px 0;
+  vertical-align: top;
+}
+
+.thermal-receipt-total-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 0;
+  font-size: 11px;
+}
+
+.thermal-receipt-grand-total {
+  display: flex;
+  justify-content: space-between;
+  font-size: 15px;
+  font-weight: 900;
+  padding: 5px 0;
+  border-top: 1px dashed #000000;
+  border-bottom: 1px dashed #000000;
+  margin: 6px 0;
+}
+
+.thermal-receipt-barcode {
+  font-family: 'Libre Barcode 128', monospace;
+  font-size: 38px;
+  text-align: center;
+  line-height: 1;
+  margin-top: 6px;
+  user-select: none;
 }
 
 /* =========================================================================
-   LAPTOP ZOOM & HIGH-DPI DISPLAY SCALING RESILIENCE (100% - 175% SCALE)
-   Guarantees the UI never clips, overflows horizontally, or hides action buttons
+   MODAL DARK GLASS OVERLAYS
    ========================================================================= */
-
-@media screen and (min-width: 769px) {
-  .pos-table-card, .pos-summary-card {
-    min-height: unset !important;
-    height: auto !important;
-  }
-
-  /* Fluid scroll containers instead of fixed heights */
-  .cart-table-wrapper {
-    max-height: clamp(260px, 48vh, 560px) !important;
-    overflow-y: auto !important;
-    overflow-x: auto !important;
-  }
+.modal-backdrop {
+  background-color: rgba(5, 7, 12, 0.8) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
 }
 
-/* Tables scroll cleanly without page layout breaks */
-.table-responsive {
-  overflow-x: auto !important;
-  -webkit-overflow-scrolling: touch;
-  max-width: 100%;
+.modal-content {
+  background: rgba(15, 23, 42, 0.94) !important;
+  backdrop-filter: var(--glass-blur-heavy) !important;
+  -webkit-backdrop-filter: var(--glass-blur-heavy) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: var(--card-radius-lg) !important;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.85) !important;
+  color: #ffffff !important;
 }
 
-/* Modal sizing resilience under high browser zoom */
-@media screen and (max-height: 720px) {
-  .modal-dialog {
-    margin: 8px auto !important;
-  }
-  .modal-body {
-    max-height: 72vh !important;
-    overflow-y: auto !important;
-  }
+.modal-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
-/* Mobile-First Responsive Adjustments */
+.modal-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Keyboard Shortcut Badges */
+kbd {
+  background: rgba(255, 255, 255, 0.09) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  color: #38bdf8 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+  border-radius: 6px;
+  padding: 2px 6px;
+  font-size: 0.72rem;
+}
+
+/* Modern React-Toastify Dark Glass Styling */
+.Toastify__toast-container {
+  z-index: 99999 !important;
+}
+
+.Toastify__toast {
+  background: rgba(15, 23, 42, 0.95) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+  border: 1px solid rgba(99, 102, 241, 0.3) !important;
+  color: #f8fafc !important;
+  border-radius: var(--card-radius-sm) !important;
+  font-family: inherit !important;
+  font-size: 0.88rem !important;
+  font-weight: 600 !important;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* =========================================================================
+   RESPONSIVE ADJUSTMENTS & MEDIA QUERIES
+   ========================================================================= */
 @media (max-width: 768px) {
   body {
     padding-bottom: calc(var(--bottom-nav-height) + 85px) !important;
@@ -706,132 +1095,15 @@ html, body {
     padding-right: 8px !important;
   }
 
-  .modern-card {
-    border-radius: 12px;
-  }
-
-  /* Full screen touch modals */
   .modal-dialog {
     margin: 8px auto !important;
     max-width: 98% !important;
   }
 }
 
-/* Pure Mobile Billing Mode Styles */
-.mobile-pos-container {
-  width: 100%;
-  max-width: 100vw;
-  padding-bottom: 20px;
-}
-
-.mobile-camera-wrapper {
-  position: relative;
-  z-index: 10;
-}
-
-.scanner-compact .scanner-viewport-box,
-.scanner-compact .scanner-viewport-box video,
-.scanner-compact div[id*="camera"] {
-  height: 200px !important;
-  max-height: 200px !important;
-}
-
-.mobile-scan-feedback {
-  animation: pulseScanFeedback 0.35s ease-out;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-@keyframes pulseScanFeedback {
-  0% { transform: scale(0.96); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-.mobile-bill-sheet {
-  background: rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.mobile-cart-items-scroll::-webkit-scrollbar {
-  width: 4px;
-}
-.mobile-cart-items-scroll::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-}
-
-.mobile-sticky-checkout-bar {
-  position: fixed;
-  bottom: var(--bottom-nav-height);
-  left: 0;
-  right: 0;
-  width: 100%;
-  background: rgba(11, 15, 25, 0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(56, 189, 248, 0.3);
-  box-shadow: 0 -8px 25px rgba(0, 0, 0, 0.7);
-  padding: 10px 14px;
-  z-index: 1025;
-}
-
-.mobile-stepper-btn {
-  width: 34px !important;
-  height: 34px !important;
-  min-width: 34px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  background-color: rgba(255, 255, 255, 0.08) !important;
-  border-color: rgba(255, 255, 255, 0.15) !important;
-  color: #ffffff !important;
-  font-size: 1.1rem !important;
-  font-weight: 700 !important;
-  border-radius: 8px !important;
-  user-select: none;
-}
-
-.mobile-stepper-btn:active {
-  background-color: #0284c7 !important;
-  transform: scale(0.94);
-}
-
-/* Modern React-Toastify Dark Glass Styling */
-.Toastify__toast-container {
-  z-index: 99999 !important;
-}
-
-.Toastify__toast {
-  background: rgba(15, 23, 42, 0.94) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  color: #f8fafc !important;
-  border-radius: 12px !important;
-  font-family: inherit !important;
-  font-size: 0.88rem !important;
-  font-weight: 600 !important;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
-}
-
-/* Keyboard Shortcut Badges */
-kbd {
-  background: rgba(255, 255, 255, 0.1) !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
-  color: #38bdf8 !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
-}
-
-/* Footer in App.jsx */
-footer.bg-white {
-  background: rgba(11, 15, 25, 0.85) !important;
-  backdrop-filter: blur(16px) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
-}
-
-/* Print Styles preserved - Isolated & Pure Black & White for Paper */
+/* =========================================================================
+   ISOLATED BLACK & WHITE PRINT STYLES FOR THERMAL PAPER
+   ========================================================================= */
 @media print {
   @page {
     margin: 4mm;
@@ -885,6 +1157,7 @@ footer.bg-white {
   .navbar,
   .mobile-bottom-nav,
   .mobile-floating-cart-bar,
+  .mobile-sticky-checkout-bar,
   .modal-backdrop,
   .modal-header,
   .modal-footer,

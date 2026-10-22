@@ -460,7 +460,7 @@ export default function CameraScannerBox({
             />
 
             {/* Header Toolbar - Modern, Compact & Mobile-First */}
-            <div className={`card-header py-2 px-3 d-flex justify-content-between align-items-center transition-all ${justScanned ? 'bg-primary text-white' : 'bg-white border-bottom text-dark'}`}>
+            <div className={`card-header py-2 px-3 d-flex justify-content-between align-items-center transition-all ${justScanned ? 'bg-primary text-white' : 'bg-dark text-white border-bottom'}`}>
                 <div className="d-flex align-items-center gap-2 text-truncate me-2">
                     <span className="scan-pulse" style={{ width: '8px', height: '8px' }}></span>
                     <i className="bi bi-camera-fill text-primary"></i>
